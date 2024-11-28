@@ -4,8 +4,12 @@
   "tabWidth": 2,
   "useTabs": false,
   "trailingComma": "all",
-  "printWidth": 120,
+  "printWidth": 100,
   "bracketSpacing": true,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "endOfLine": "lf",
+  "jsxSingleQuote": true,
+  "proseWrap": "preserve",
+  "quoteProps": "consistent",
+  "embeddedLanguageFormatting": "auto"
 }

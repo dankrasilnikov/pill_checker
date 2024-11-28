@@ -1,9 +1,8 @@
 import { Dimensions, Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { AuthWidget } from '../widgets/AuthWidget/AuthWidget';
 
+import { SignIn } from '$features/auth/ui/SignIn';
 
 export const AuthPage = () => {
-
   return (
     <View style={styles.container}>
       <ScrollView>
@@ -11,12 +10,11 @@ export const AuthPage = () => {
           <Image style={styles.logo} source={require('../assets/logo.png')} />
         </View>
 
-        <AuthWidget/>
-
+        <SignIn />
       </ScrollView>
     </View>
   );
-}
+};
 
 const { height } = Dimensions.get('window');
 
@@ -41,12 +39,12 @@ const styles = StyleSheet.create({
   authOptionsLabel: {
     fontSize: 14,
     textAlign: 'center',
-    marginVertical: 10
+    marginVertical: 10,
   },
   authOptions: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  }
+  },
 });

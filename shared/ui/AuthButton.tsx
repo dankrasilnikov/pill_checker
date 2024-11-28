@@ -1,7 +1,7 @@
 import { Pressable, Text, StyleSheet } from 'react-native';
 
 interface Props {
-  pressedColor?: string; // Опциональные свойства
+  pressedColor?: string;
   backgroundColor?: string;
   color?: string;
   width?: string;
@@ -10,13 +10,13 @@ interface Props {
 }
 
 export const AuthButton = ({
-                             pressedColor = '#0493b3', // Дефолтные значения
-                             backgroundColor = '#0873bb',
-                             color = '#fff',
-                             onPress,
-                             label,
-                             width = '100%',
-                           }: Props) => {
+  pressedColor = '#0493b3',
+  backgroundColor = '#0873bb',
+  color = '#fff',
+  onPress,
+  label,
+  width = '100%',
+}: Props) => {
   return (
     <Pressable
       style={({ pressed }) => [

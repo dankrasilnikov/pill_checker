@@ -4,20 +4,21 @@ interface Props {
   label: string;
   placeholder: string;
   value: string;
+  // eslint-disable-next-line no-unused-vars
   onChange: (value: string) => void;
   type?: 'none' | 'password';
 }
 
 export const AuthInput = ({ label, placeholder, value, onChange, type = 'none' }: Props) => {
-
   return (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput onChangeText={onChange}
-                 placeholder={placeholder}
-                 style={styles.input}
-                 value={value}
-                 textContentType={type}
+      <TextInput
+        onChangeText={onChange}
+        placeholder={placeholder}
+        style={styles.input}
+        value={value}
+        textContentType={type}
       />
     </View>
   );

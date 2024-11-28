@@ -3,7 +3,6 @@ import { Alert } from 'react-native';
 import { supabase } from '$shared/api/supabase';
 
 export const signUpWithPassword = async (email: string, password: string) => {
-  console.log('signup');
   const {
     data: { session },
     error,

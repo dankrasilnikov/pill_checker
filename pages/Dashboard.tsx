@@ -1,14 +1,14 @@
 import { Camera, CameraView } from 'expo-camera';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
   Text,
   View,
-  StyleSheet,
-  Pressable,
-  Alert,
-  Modal,
-  ActivityIndicator,
 } from 'react-native';
 
 import { ScanButton } from '$features/scan/ui/ScanButton';
@@ -29,6 +29,8 @@ export const Dashboard = () => {
   const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const cameraRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -54,16 +56,24 @@ export const Dashboard = () => {
     setCameraVisible(false);
   };
 
-  const handleBarCodeScanned = async () => {
+  const handleMedsScanned = async () => {
+    if (!cameraRef.current) return;
+
     setLoading(true);
     try {
-      const response = await fetch('https://api.example.com/recognize', {
+      const photo = await cameraRef.current.takePictureAsync({
+        base64: true,
+      });
+
+
+      const response = await fetch('http://127.0.0.1:8000/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: 'scannedImagePlaceholder' }),
+        body: JSON.stringify({ image: photo.base64 }),
       });
-      const result = await response.json();
 
+      const result = await response.json();
+a
       if (result.success && result.item) {
         setRecognizedItem(result.item);
         setRecognitionModalVisible(true);
@@ -90,7 +100,7 @@ export const Dashboard = () => {
   if (permissionLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0873bb" />
+        <ActivityIndicator size='large' color='#0873bb' />
         <Text>Checking Permissions...</Text>
       </View>
     );
@@ -108,18 +118,18 @@ export const Dashboard = () => {
       />
 
       <ScanButton onPress={openCamera} />
-
+      {/*Split*/}
       {cameraVisible && (
         <Modal visible={cameraVisible} transparent={false}>
-          <CameraView style={styles.camera} facing={'back'}>
+          <CameraView style={styles.camera} facing={'back'} ref={cameraRef}>
             <Pressable style={styles.closeButton} onPress={closeCamera}>
               <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
-            <ScanButton onPress={handleBarCodeScanned} />
+            <ScanButton onPress={handleMedsScanned} />
           </CameraView>
         </Modal>
       )}
-
+      {/*Split*/}
       <Modal visible={recognitionModalVisible} transparent={true}>
         <View style={styles.modal}>
           <Text style={styles.modalTitle}>Is this what you're looking for?</Text>
@@ -145,7 +155,7 @@ export const Dashboard = () => {
           </View>
         </View>
       </Modal>
-
+      {/*Split*/}
       <Modal visible={errorModalVisible} transparent={true}>
         <View style={styles.modal}>
           <Text style={styles.modalTitle}>We can't understand...</Text>
@@ -163,7 +173,7 @@ export const Dashboard = () => {
 
       {loading && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#fff" />
+          <ActivityIndicator size='large' color='#fff' />
         </View>
       )}
     </View>

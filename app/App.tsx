@@ -4,6 +4,7 @@ import { Button, Text, View } from 'react-native';
 
 import { useUserStore } from '$entities/user';
 import { AuthPage } from '$pages/Auth';
+import { Dashboard } from '$pages/Dashboard';
 
 Sentry.init({
   dsn: 'https://941f2a103da866b176d8828482979dd4@o4508370469781504.ingest.de.sentry.io/4508370490884176',
@@ -14,11 +15,7 @@ Sentry.init({
 
 // eslint-disable-next-line import/no-default-export
 export default function App() {
-  const { user, isAuthenticated, fetchUser, signOut } = useUserStore();
-
-  const handleLogout = async () => {
-    await signOut();
-  };
+  const { isAuthenticated, fetchUser } = useUserStore();
 
   useEffect(() => {
     fetchUser();
@@ -28,10 +25,5 @@ export default function App() {
     return <AuthPage />;
   }
 
-  return (
-    <View>
-      <Text>Добро пожаловать, {user?.name || 'Пользователь'}!</Text>
-      <Button onPress={handleLogout} title={'Logout'} />
-    </View>
-  );
+  return <Dashboard/>;
 }

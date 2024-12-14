@@ -28,8 +28,8 @@
     "prebuild": "npm run format && npm run lint"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^2.1.0",
-    "@sentry/react-native": "^6.3.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "@sentry/react-native": "~6.1.0",
     "@supabase/supabase-js": "^2.46.2",
     "@tanstack/react-query": "^5.61.5",
     "expo": "~52.0.11",
@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-private-methods": "^7.25.9",
     "@eslint/js": "^9.15.0",
     "@react-native-community/cli": "latest",
     "@types/react": "~18.3.12",

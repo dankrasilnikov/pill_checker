@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { ItemModal } from '$features/recognition/ui/ItemModal';
 import { ScanButton } from '$features/scan/ui/ScanButton';
 
 const data = Array.from({ length: 1000 }, (_, index) => ({
@@ -29,6 +30,7 @@ export const Dashboard = () => {
   const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [itemData, setItemData] = useState(null);
 
   const cameraRef = useRef(null);
 
@@ -73,7 +75,7 @@ export const Dashboard = () => {
       });
 
       const result = await response.json();
-a
+
       if (result.success && result.item) {
         setRecognizedItem(result.item);
         setRecognitionModalVisible(true);
@@ -90,7 +92,7 @@ a
   };
 
   const renderItem = ({ item }) => (
-    <Pressable style={styles.item}>
+    <Pressable onPress={() => setItemData(item)} style={styles.item}>
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.description}>{item.description}</Text>
       <Text style={styles.price}>${item.price}</Text>
@@ -108,6 +110,7 @@ a
 
   return (
     <View style={styles.list}>
+      <ItemModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)}/>
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
@@ -115,6 +118,7 @@ a
         initialNumToRender={10}
         maxToRenderPerBatch={20}
         windowSize={5}
+
       />
 
       <ScanButton onPress={openCamera} />

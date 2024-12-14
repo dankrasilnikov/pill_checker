@@ -1,4 +1,15 @@
-import { FlatList, Text, View, StyleSheet } from 'react-native';
+import { Camera, CameraView } from 'expo-camera';
+import React, { useState, useEffect } from 'react';
+import {
+  FlatList,
+  Text,
+  View,
+  StyleSheet,
+  Pressable,
+  Alert,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
 
 import { ScanButton } from '$features/scan/ui/ScanButton';
 
@@ -6,19 +17,86 @@ const data = Array.from({ length: 1000 }, (_, index) => ({
   id: String(index),
   name: `Medication ${index + 1}`,
   description: `Description of Medication ${index + 1}`,
-  price: (Math.random() * 100).toFixed(2), // Цена от 0 до 100
+  price: (Math.random() * 100).toFixed(2),
+  image: 'https://via.placeholder.com/150', // Replace with real image URLs
 }));
 
-const renderItem = ({ item }) => (
-  <View style={styles.item}>
-    <Text style={styles.name}>{item.name}</Text>
-    <Text style={styles.description}>{item.description}</Text>
-    <Text style={styles.price}>${item.price}</Text>
-  </View>
-);
-
 export const Dashboard = () => {
-  const onScan = () => {};
+  const [hasPermission, setHasPermission] = useState(false);
+  const [permissionLoading, setPermissionLoading] = useState(true);
+  const [cameraVisible, setCameraVisible] = useState(false);
+  const [recognizedItem, setRecognizedItem] = useState(null);
+  const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+      setPermissionLoading(false);
+    })();
+  }, []);
+
+  const openCamera = async () => {
+    if (permissionLoading) {
+      Alert.alert('Permissions', 'Checking camera permissions. Please try again shortly.');
+      return;
+    }
+    if (!hasPermission) {
+      Alert.alert('Permission Denied', 'You need to grant camera permission to use this feature.');
+      return;
+    }
+    setCameraVisible(true);
+  };
+
+  const closeCamera = () => {
+    setCameraVisible(false);
+  };
+
+  const handleBarCodeScanned = async () => {
+    setLoading(true);
+    try {
+      // Mock API Request
+      const response = await fetch('https://api.example.com/recognize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: 'scannedImagePlaceholder' }),
+      });
+      const result = await response.json();
+
+      if (result.success && result.item) {
+        setRecognizedItem(result.item);
+        setRecognitionModalVisible(true);
+      } else {
+        setErrorModalVisible(true);
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorModalVisible(true);
+    } finally {
+      setLoading(false);
+      closeCamera();
+    }
+  };
+
+  const renderItem = ({ item }) => (
+    <Pressable style={styles.item}>
+      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.description}>{item.description}</Text>
+      <Text style={styles.price}>${item.price}</Text>
+    </Pressable>
+  );
+
+  if (permissionLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#0873bb" />
+        <Text>Checking Permissions...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.list}>
       <FlatList
@@ -29,7 +107,70 @@ export const Dashboard = () => {
         maxToRenderPerBatch={20}
         windowSize={5}
       />
-      <ScanButton onPress={onScan} />
+
+      <ScanButton onPress={openCamera} />
+
+      {/* Camera Modal */}
+      {cameraVisible && (
+        <Modal visible={cameraVisible} transparent={false}>
+          <CameraView style={styles.camera} facing={'back'}>
+            <Pressable style={styles.closeButton} onPress={closeCamera}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
+            <ScanButton onPress={handleBarCodeScanned} />
+          </CameraView>
+        </Modal>
+      )}
+
+      {/* Recognition Modal */}
+      <Modal visible={recognitionModalVisible} transparent={true}>
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>Is this what you're looking for?</Text>
+          <Text style={styles.modalText}>{recognizedItem?.name}</Text>
+          <View style={styles.modalButtons}>
+            <Pressable
+              style={styles.modalButton}
+              onPress={() => {
+                setRecognitionModalVisible(false);
+              }}
+            >
+              <Text>Try Again</Text>
+            </Pressable>
+            <Pressable
+              style={styles.modalButton}
+              onPress={() => {
+                setRecognitionModalVisible(false);
+                Alert.alert('Success', 'Item confirmed.');
+              }}
+            >
+              <Text>Yes</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal visible={errorModalVisible} transparent={true}>
+        <View style={styles.modal}>
+          <Text style={styles.modalTitle}>We can't understand...</Text>
+          <Text style={styles.modalText}>Try to take a better picture.</Text>
+          <Pressable
+            style={styles.modalButton}
+            onPress={() => {
+              setErrorModalVisible(false);
+            }}
+          >
+            <Text>OK</Text>
+          </Pressable>
+        </View>
+      </Modal>
+
+      {/* Loading Spinner */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
     </View>
   );
 };
@@ -57,5 +198,77 @@ const styles = StyleSheet.create({
   list: {
     position: 'relative',
     marginTop: 10,
+  },
+  camera: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#0873bb',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modal: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Полупрозрачный фон
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#ddd',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+  },
+  modalButton: {
+    backgroundColor: '#0873bb',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Темный полупрозрачный фон
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

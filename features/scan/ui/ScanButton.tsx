@@ -1,26 +1,56 @@
-import { Image, Pressable, StyleSheet, View, Text } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Image, Pressable, StyleSheet, Text } from 'react-native';
 
 type Props = {
-  onPress: () => void
-}
+  onPress: any;
+};
 
-export const ScanButton = ({onPress}: Props) => {
+export const ScanButton = ({ onPress }: Props) => {
+  const animation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const startJumpAnimation = () => {
+      Animated.sequence([
+        Animated.timing(animation, {
+          toValue: -10, // Jump up
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animation, {
+          toValue: 0, // Back to initial position
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animation, {
+          toValue: -10, // Second jump up
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animation, {
+          toValue: 0, // Back to initial position
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    };
+
+    startJumpAnimation();
+  }, [animation]);
 
   return (
-      <Pressable onPress={onPress} style={styles.buttonWrapper}>
-        <View style={styles.button}>
-          <Image style={styles.icon} source={require('../../../assets/scan.png')} />
-          <Text style={styles.label}>Scan</Text>
-        </View>
-      </Pressable>
+    <Pressable onPress={onPress} style={styles.buttonWrapper}>
+      <Animated.View style={[styles.button, { transform: [{ translateY: animation }] }]}>
+        <Image style={styles.icon} source={require('../../../assets/scan.png')} />
+        <Text style={styles.label}>Scan</Text>
+      </Animated.View>
+    </Pressable>
   );
-}
+};
 
 const styles = StyleSheet.create({
   button: {
     borderRadius: 8,
     backgroundColor: '#0873bb',
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -30,7 +60,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     position: 'absolute',
     bottom: 10,
-    right: 10
+    right: 10,
   },
   label: {
     fontSize: 24,
@@ -39,6 +69,5 @@ const styles = StyleSheet.create({
   icon: {
     width: 40,
     height: 40,
-  }
+  },
 });
-

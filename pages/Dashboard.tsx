@@ -18,7 +18,7 @@ const data = Array.from({ length: 1000 }, (_, index) => ({
   name: `Medication ${index + 1}`,
   description: `Description of Medication ${index + 1}`,
   price: (Math.random() * 100).toFixed(2),
-  image: 'https://via.placeholder.com/150', // Replace with real image URLs
+  image: 'https://via.placeholder.com/150',
 }));
 
 export const Dashboard = () => {
@@ -57,7 +57,6 @@ export const Dashboard = () => {
   const handleBarCodeScanned = async () => {
     setLoading(true);
     try {
-      // Mock API Request
       const response = await fetch('https://api.example.com/recognize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,7 +109,6 @@ export const Dashboard = () => {
 
       <ScanButton onPress={openCamera} />
 
-      {/* Camera Modal */}
       {cameraVisible && (
         <Modal visible={cameraVisible} transparent={false}>
           <CameraView style={styles.camera} facing={'back'}>
@@ -122,7 +120,6 @@ export const Dashboard = () => {
         </Modal>
       )}
 
-      {/* Recognition Modal */}
       <Modal visible={recognitionModalVisible} transparent={true}>
         <View style={styles.modal}>
           <Text style={styles.modalTitle}>Is this what you're looking for?</Text>
@@ -149,7 +146,6 @@ export const Dashboard = () => {
         </View>
       </Modal>
 
-      {/* Error Modal */}
       <Modal visible={errorModalVisible} transparent={true}>
         <View style={styles.modal}>
           <Text style={styles.modalTitle}>We can't understand...</Text>
@@ -165,7 +161,6 @@ export const Dashboard = () => {
         </View>
       </Modal>
 
-      {/* Loading Spinner */}
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#fff" />
@@ -227,7 +222,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Полупрозрачный фон
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 20,
   },
   modalTitle: {
@@ -267,7 +262,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Темный полупрозрачный фон
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },

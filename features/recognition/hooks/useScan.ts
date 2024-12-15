@@ -6,20 +6,22 @@ export const useScan = (onSuccess: (item: any) => void, onError: () => void) => 
   const [loading, setLoading] = useState(false);
 
   const handleMedsScanned = async () => {
-    console.log('test scan')
     if (!cameraRef.current) return;
-
-    console.log('scan')
 
     setLoading(true);
     try {
-      const photo = await cameraRef.current.takePictureAsync({ base64: true });
-      const result = await uploadImageForRecognition(photo.base64);
-
-      if (result.success && result.item) {
-        onSuccess(result.item);
+      const photo = await cameraRef.current.takePictureAsync();
+      const result = await uploadImageForRecognition(photo);
+      console.log('Recognized: ', result);
+      if (result?.success) {
+        const item = {
+          text: result?.text,
+          active_ingredients: result?.active_ingredients,
+        }
+        onSuccess(item);
       } else {
         onError();
+        console.log('Error:', result?.error);
       }
     } catch (error) {
       console.error(error);

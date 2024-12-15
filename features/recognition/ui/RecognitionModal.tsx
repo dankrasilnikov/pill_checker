@@ -6,7 +6,8 @@ export const RecognitionModal = ({visible, item, setModal}) => {
     <Modal visible={visible} transparent={true}>
       <View style={styles.modal}>
         <Text style={styles.modalTitle}>Is this what you&#39;re looking for?</Text>
-        <Text style={styles.modalText}>{item?.name}</Text>
+        <Text style={styles.modalText}>Description: {item?.text}</Text>
+        <Text style={styles.modalText}>Active ingredients: {item?.active_ingredients}</Text>
         <View style={styles.modalButtons}>
           <Pressable
             style={styles.modalButton}

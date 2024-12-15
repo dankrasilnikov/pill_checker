@@ -40,7 +40,7 @@ export const ScanButton = ({ onPress }: Props) => {
   return (
     <Pressable onPress={onPress} style={styles.buttonWrapper}>
       <Animated.View style={[styles.button, { transform: [{ translateY: animation }] }]}>
-        <Image style={styles.icon} source={require('../../../assets/scan.png')} />
+        <Image style={styles.icon} source={require('$assets/scan.png')} />
         <Text style={styles.label}>Scan</Text>
       </Animated.View>
     </Pressable>

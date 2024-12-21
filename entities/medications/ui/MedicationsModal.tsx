@@ -15,12 +15,7 @@ export const MedicationsModal = ({ visible, item, onClose }: ItemModalProps) => 
   const activeIngredients = item.active_ingredients.join(', ');
 
   return (
-    <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent={true} animationType='slide' onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Image source={{ uri: item.image }} style={styles.modalImage} />

@@ -18,7 +18,7 @@ export const useScan = (onSuccess: (item: any) => void, onError: () => void) => 
         const item = {
           text: result?.text,
           active_ingredients: result?.active_ingredients,
-        }
+        };
         onSuccess(item);
       } else {
         onError();

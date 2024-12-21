@@ -1,5 +1,4 @@
 export const uploadImageForRecognition = async (photo) => {
-
   const file = {
     uri: photo.uri,
     name: 'photo.jpg',
@@ -19,5 +18,4 @@ export const uploadImageForRecognition = async (photo) => {
   } catch (e) {
     console.error('Network error:', e.message);
   }
-
 };

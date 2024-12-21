@@ -3,11 +3,11 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import type { IMedication } from '$entities/medications/types';
 
 interface Props {
-  item: IMedication,
-  setItemData: (item: IMedication) => void,
+  item: IMedication;
+  setItemData: (item: IMedication) => void;
 }
 
-export const MedicationsListItem = ({item, setItemData}: Props) => {
+export const MedicationsListItem = ({ item, setItemData }: Props) => {
   const activeIngredients = item.active_ingredients.join(', ');
   return (
     <Pressable onPress={() => setItemData(item)} style={styles.item}>
@@ -15,7 +15,7 @@ export const MedicationsListItem = ({item, setItemData}: Props) => {
       <Text style={styles.description}>{item.description}</Text>
     </Pressable>
   );
-}
+};
 
 const styles = StyleSheet.create({
   item: {
@@ -36,5 +36,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1a8917',
     fontWeight: 'bold',
-  }
+  },
 });

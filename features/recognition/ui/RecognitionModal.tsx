@@ -1,4 +1,5 @@
 import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+
 import { useMedsStore } from '$entities/medications/model/medicationsStore';
 
 export const RecognitionModal = ({ visible, item, setModal, closeCamera }) => {

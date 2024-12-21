@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { IMedication } from '$entities/medications/types';
+
 import { getMedications, saveMedication } from '$entities/medications/api/medicationsApi';
+import type { IMedication } from '$entities/medications/types';
 
 interface IMedsState {
   medications: IMedication[] | null;

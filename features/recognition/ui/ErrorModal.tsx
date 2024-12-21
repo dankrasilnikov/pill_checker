@@ -1,9 +1,6 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-
-export const ErrorModal = ({visible, setModal}) => {
-
-
+export const ErrorModal = ({ visible, setModal }) => {
   return (
     <Modal visible={visible} transparent={true}>
       <View style={styles.modal}>
@@ -20,7 +17,7 @@ export const ErrorModal = ({visible, setModal}) => {
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   modal: {

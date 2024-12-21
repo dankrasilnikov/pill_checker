@@ -25,5 +25,5 @@ export default function App() {
     return <AuthPage />;
   }
 
-  return <Dashboard/>;
+  return <Dashboard />;
 }

@@ -39,17 +39,20 @@ Repository: [MedsRecognition-Frontend](https://github.com/SPerekrestova/MedsReco
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/SPerekrestova/MedsRecognition-Frontend.git
    cd MedsRecognition-Frontend
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development server:
+
    ```bash
    npm run start
    ```
@@ -74,19 +77,19 @@ Repository: [MedsRecognition-Frontend](https://github.com/SPerekrestova/MedsReco
 
 Here are the available npm scripts:
 
-| Script           | Description                                         |
-|-------------------|-----------------------------------------------------|
-| `start`          | Start the development server                        |
-| `android`        | Run the app on an Android emulator or device        |
-| `ios`            | Run the app on an iOS simulator or device           |
-| `web`            | Start the web version of the app                    |
-| `lint`           | Lint the project files using ESLint                 |
-| `format`         | Format the code using Prettier                      |
-| `test`           | Run tests using Jest                                |
-| `check-types`    | Check TypeScript types                              |
-| `validate`       | Run linting and type checking                       |
-| `prepare`        | Prepare husky for git hooks                         |
-| `prebuild`       | Format, lint, and prepare the app for production    |
+| Script        | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `start`       | Start the development server                     |
+| `android`     | Run the app on an Android emulator or device     |
+| `ios`         | Run the app on an iOS simulator or device        |
+| `web`         | Start the web version of the app                 |
+| `lint`        | Lint the project files using ESLint              |
+| `format`      | Format the code using Prettier                   |
+| `test`        | Run tests using Jest                             |
+| `check-types` | Check TypeScript types                           |
+| `validate`    | Run linting and type checking                    |
+| `prepare`     | Prepare husky for git hooks                      |
+| `prebuild`    | Format, lint, and prepare the app for production |
 
 ---
 

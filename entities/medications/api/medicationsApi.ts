@@ -2,7 +2,9 @@ import { IMedication } from '$entities/medications/types';
 import { supabase } from '$shared/api';
 
 export const getMedications = async (): Promise<IMedication[] | null> => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     throw new Error('User not authenticated');
@@ -19,7 +21,9 @@ export const getMedications = async (): Promise<IMedication[] | null> => {
 };
 
 export const saveMedication = async (medication: IMedication): Promise<IMedication | null> => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     throw new Error('User not authenticated');

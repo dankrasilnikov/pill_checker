@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 7,
     paddingVertical: 3,
-    zIndex: 1000
+    zIndex: 1000,
   },
   buttonWrapper: {
     position: 'absolute',

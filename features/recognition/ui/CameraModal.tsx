@@ -1,10 +1,10 @@
 import { CameraView } from 'expo-camera';
 import { Modal, Pressable, StyleSheet, Text } from 'react-native';
+
 import { ScanButton } from '$features/recognition/ui/ScanButton';
 import { LoadingOverlay } from '$shared/ui/LoadingOverlay';
 
-
-export const CameraModal = ({visible, cameraRef, loading, onClose, onScan}) => {
+export const CameraModal = ({ visible, cameraRef, loading, onClose, onScan }) => {
   return (
     <Modal visible={visible} transparent={false}>
       <CameraView style={styles.camera} facing={'back'} ref={cameraRef}>
@@ -16,7 +16,7 @@ export const CameraModal = ({visible, cameraRef, loading, onClose, onScan}) => {
       </CameraView>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   camera: {

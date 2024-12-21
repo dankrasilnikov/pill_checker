@@ -1,23 +1,15 @@
-import { Camera } from 'expo-camera';
 import React, { useEffect, useState } from 'react';
+import { Camera } from 'expo-camera';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
+import { useMedsStore } from '$entities/medications/model/medicationsStore';
+import { MedicationsListItem } from '$entities/medications/ui/MedicationsListItem';
+import { MedicationsModal } from '$entities/medications/ui/MedicationsModal';
 import { useScan } from '$features/recognition/hooks/useScan';
 import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
-import { ItemCard } from '$features/recognition/ui/ItemCard';
-import { ItemModal } from '$features/recognition/ui/ItemModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
 import { ScanButton } from '$features/recognition/ui/ScanButton';
-import { LoadingOverlay } from '$shared/ui/LoadingOverlay';
-
-const data = Array.from({ length: 1000 }, (_, index) => ({
-  id: String(index),
-  name: `Medication ${index + 1}`,
-  description: `Description of Medication ${index + 1}`,
-  price: (Math.random() * 100).toFixed(2),
-  image: 'https://via.placeholder.com/150',
-}));
 
 export const Dashboard = () => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -27,6 +19,8 @@ export const Dashboard = () => {
   const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [itemData, setItemData] = useState(null);
+
+  const { medications, getMedications, medicationsLoading } = useMedsStore();
 
   const { cameraRef, handleMedsScanned, loading } = useScan(
     (item) => {
@@ -41,10 +35,11 @@ export const Dashboard = () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
       setPermissionLoading(false);
+      await getMedications();
     })();
   }, []);
 
-  const openCamera = async () => {
+  const openCamera = () => {
     if (permissionLoading) {
       Alert.alert('Permissions', 'Checking camera permissions. Please try again shortly.');
       return;
@@ -53,6 +48,7 @@ export const Dashboard = () => {
       Alert.alert('Permission Denied', 'You need to grant camera permission to use this feature.');
       return;
     }
+
     setCameraVisible(true);
   };
 
@@ -60,32 +56,14 @@ export const Dashboard = () => {
     setCameraVisible(false);
   };
 
-  const renderItem = ({ item }) => <ItemCard item={item} setItemData={setItemData} />;
-
-  if (permissionLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size='large' color='#0873bb' />
-        <Text>Checking Permissions...</Text>
-      </View>
-    );
-  }
+  const renderItem = ({ item }: { item: any }) => (
+    <MedicationsListItem item={item} setItemData={setItemData} />
+  );
 
   return (
-    <View style={styles.list}>
-      <ItemModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)} />
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        initialNumToRender={10}
-        maxToRenderPerBatch={20}
-        windowSize={5}
-      />
-
-      <ScanButton onPress={openCamera} />
-
+    <View style={styles.wrapper}>
       <CameraModal
+        loading={loading}
         visible={cameraVisible}
         onClose={closeCamera}
         onScan={handleMedsScanned}
@@ -95,10 +73,36 @@ export const Dashboard = () => {
         visible={recognitionModalVisible}
         item={recognizedItem}
         setModal={setRecognitionModalVisible}
+        closeCamera={closeCamera}
       />
       <ErrorModal visible={errorModalVisible} setModal={setErrorModalVisible} />
-
-      {loading && <LoadingOverlay />}
+      <MedicationsModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)} />
+      {permissionLoading ? (
+        <View style={styles.state}>
+          <ActivityIndicator size='large' color='#0873bb' />
+          <Text style={styles.stateMessage}>Checking Permissions...</Text>
+        </View>
+      ) : medicationsLoading ? (
+        <View style={styles.state}>
+          <Text style={styles.stateMessage}>Loading...</Text>
+        </View>
+      ) : !medications || medications.length === 0 ? (
+        <View style={styles.state}>
+          <Text style={styles.stateMessage}>Nothing Found :(</Text>
+        </View>
+      ) : (
+        <View style={styles.list}>
+          <FlatList
+            data={medications}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            initialNumToRender={10}
+            maxToRenderPerBatch={20}
+            windowSize={5}
+          />
+        </View>
+      )}
+      <ScanButton onPress={openCamera} />
     </View>
   );
 };
@@ -108,9 +112,18 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginTop: 10,
   },
-  centered: {
+  wrapper: {
+    flex: 1,
+    position: 'relative',
+    backgroundColor: '#fff',
+    padding: 16,
+  },
+  state: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  stateMessage: {
+    textAlign: 'center',
   },
 });

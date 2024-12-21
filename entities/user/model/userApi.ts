@@ -1,4 +1,4 @@
-import { User } from '../types/userTypes';
+import { User } from '../types';
 
 import { supabase } from '$shared/api/supabase';
 

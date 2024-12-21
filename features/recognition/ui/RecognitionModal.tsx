@@ -1,7 +1,32 @@
 import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMedsStore } from '$entities/medications/model/medicationsStore';
 
+export const RecognitionModal = ({ visible, item, setModal, closeCamera }) => {
+  const { addMedication } = useMedsStore();
 
-export const RecognitionModal = ({visible, item, setModal}) => {
+  const saveMedication = async () => {
+    if (!item?.text) {
+      setModal(false);
+      return;
+    }
+
+    setModal(false);
+
+    const medication = {
+      title: item.text,
+      description: item.text,
+      active_ingredients: item.active_ingredients,
+    };
+
+    try {
+      await addMedication(medication);
+      await closeCamera();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save medication. Please try again.');
+      console.error('Error saving medication:', error);
+    }
+  };
+
   return (
     <Modal visible={visible} transparent={true}>
       <View style={styles.modal}>
@@ -9,19 +34,13 @@ export const RecognitionModal = ({visible, item, setModal}) => {
         <Text style={styles.modalText}>Description: {item?.text}</Text>
         <Text style={styles.modalText}>Active ingredients: {item?.active_ingredients}</Text>
         <View style={styles.modalButtons}>
-          <Pressable
-            style={styles.modalButton}
-            onPress={() => {
-              setModal(false);
-            }}
-          >
+          <Pressable style={styles.modalButton} onPress={() => setModal(false)}>
             <Text>Try Again</Text>
           </Pressable>
           <Pressable
             style={styles.modalButton}
-            onPress={() => {
-              setModal(false);
-              Alert.alert('Success', 'Item confirmed.');
+            onPress={async () => {
+              await saveMedication();
             }}
           >
             <Text>Yes</Text>
@@ -30,7 +49,7 @@ export const RecognitionModal = ({visible, item, setModal}) => {
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   modal: {

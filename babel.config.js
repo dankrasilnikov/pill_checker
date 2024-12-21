@@ -20,5 +20,6 @@ module.exports = {
     ['@babel/plugin-transform-class-properties', { loose: true }], // Добавляем параметр loose
     ['@babel/plugin-transform-private-methods', { loose: true }], // Добавляем параметр loose
     ['@babel/plugin-transform-private-property-in-object', { loose: true }], // Добавляем параметр loose
+    ['module:react-native-dotenv']
   ],
 };

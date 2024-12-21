@@ -1,19 +1,18 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, Image } from 'react-native';
 
+import type { IMedication } from '$entities/medications/types';
+
 type ItemModalProps = {
   visible: boolean;
-  item: {
-    name: string;
-    description: string;
-    price: string;
-    image: string;
-  } | null;
+  item: IMedication | null;
   onClose: () => void;
 };
 
-export const ItemModal = ({ visible, item, onClose }: ItemModalProps) => {
+export const MedicationsModal = ({ visible, item, onClose }: ItemModalProps) => {
   if (!item) return null;
+
+  const activeIngredients = item.active_ingredients.join(', ');
 
   return (
     <Modal
@@ -25,9 +24,8 @@ export const ItemModal = ({ visible, item, onClose }: ItemModalProps) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Image source={{ uri: item.image }} style={styles.modalImage} />
-          <Text style={styles.modalName}>{item.name}</Text>
+          <Text style={styles.modalName}>{activeIngredients}</Text>
           <Text style={styles.modalDescription}>{item.description}</Text>
-          <Text style={styles.modalPrice}>${item.price}</Text>
           <Pressable style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </Pressable>

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+
 import { uploadImageForRecognition } from '../api/recognizeImage';
 
 export const useScan = (onSuccess: (item: any) => void, onError: () => void) => {
@@ -7,8 +8,8 @@ export const useScan = (onSuccess: (item: any) => void, onError: () => void) => 
 
   const handleMedsScanned = async () => {
     if (!cameraRef.current) return;
-
     setLoading(true);
+
     try {
       const photo = await cameraRef.current.takePictureAsync();
       const result = await uploadImageForRecognition(photo);

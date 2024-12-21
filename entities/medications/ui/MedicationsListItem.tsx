@@ -1,12 +1,18 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
+import type { IMedication } from '$entities/medications/types';
 
-export const ItemCard = ({item, setItemData}) => {
+interface Props {
+  item: IMedication,
+  setItemData: (item: IMedication) => void,
+}
+
+export const MedicationsListItem = ({item, setItemData}: Props) => {
+  const activeIngredients = item.active_ingredients.join(', ');
   return (
     <Pressable onPress={() => setItemData(item)} style={styles.item}>
-      <Text style={styles.name}>{item.name}</Text>
+      <Text style={styles.name}>{activeIngredients}</Text>
       <Text style={styles.description}>{item.description}</Text>
-      <Text style={styles.price}>${item.price}</Text>
     </Pressable>
   );
 }

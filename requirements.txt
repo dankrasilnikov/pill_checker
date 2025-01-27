@@ -1,4 +1,6 @@
 fastapi
+httpx
+pytest
 scipy==1.10.1
 scispacy==0.5.4
 nmslib==2.1.1

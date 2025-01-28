@@ -18,18 +18,18 @@ def setup_model():
     and sets up necessary custom extensions for the Span object.
     """
     print("Loading model...")
-    nlp = spacy.load("en_ner_bc5cdr_md")
+    model = spacy.load("en_ner_bc5cdr_md")
 
     if not Language.has_factory("umls_linker"):
         raise ValueError("The 'umls_linker' factory is not registered properly.")
 
-    nlp.add_pipe("umls_linker", last=True)
+    model.add_pipe("umls_linker", last=True)
 
     if not Span.has_extension("umls_ents"):
         Span.set_extension("umls_ents", default=None)
 
     print("Model loaded!")
-    return nlp
+    return model
 
 
 # Initialize the app and load the model

@@ -71,3 +71,7 @@ def extract_entities(req: TextRequest):
         )
         results.append(ent_data)
     return {"entities": results}
+
+@app.get("/")
+def read_root():
+    return {"Healthy": "OK"}

@@ -1,9 +1,8 @@
 name: Build & Deploy BiomedNER service
 
 on:
-  push:
-    paths:
-      - 'BiomedNER/**'
+  pull_request:
+    types: [closed]
     branches:
       - master
 

@@ -120,7 +120,7 @@ The **NER Service** is a RESTful API designed for extracting **medical entities*
 ```
 curl -X POST \
      -H "Content-Type: application/json" \
-     -d '{"text": "This text contains ibuprofen and advil"}' \
+     -d '{"text": "This text contains ibuprofen and paracetamol"}' \
      http://138.68.73.241/extract_entities
 ```
 

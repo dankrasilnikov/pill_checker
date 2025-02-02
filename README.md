@@ -115,6 +115,15 @@ The **NER Service** is a RESTful API designed for extracting **medical entities*
 
 ## Usage
 
+### Example: Use the currently deployed service
+
+```
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"text": "This text contains ibuprofen and advil"}' \
+     http://138.68.73.241/extract_entities
+```
+
 ### Example: Python Client
 
 ```python

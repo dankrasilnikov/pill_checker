@@ -4,5 +4,5 @@ services:
   model_server:
     image: sperva/model_server_app:latest
     ports:
-      - "8000:8000"
+      - "8081:8081"
     restart: unless-stopped

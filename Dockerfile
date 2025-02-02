@@ -10,5 +10,5 @@ RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5
 WORKDIR /app
 COPY ner/model_server.py /app
 
-EXPOSE 8000
-CMD ["uvicorn", "model_server:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8081
+CMD ["uvicorn", "model_server:app", "--host", "0.0.0.0", "--port", "8081"]

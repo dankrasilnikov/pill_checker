@@ -25,8 +25,8 @@ jobs:
       - name: Build and Push BiomedNER Image
         uses: docker/build-push-action@v4
         with:
-          context: ./BiomedNER
-          file: ./BiomedNER/Dockerfile
+          context: .
+          file: Dockerfile
           push: true
           tags: sperva/model_server_app:latest
 

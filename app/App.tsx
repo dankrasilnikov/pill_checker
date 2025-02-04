@@ -1,10 +1,11 @@
 import * as Sentry from '@sentry/react-native';
-import { useEffect } from 'react';
-import { Button, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
 
 import { useUserStore } from '$entities/user';
 import { AuthPage } from '$pages/Auth';
 import { Dashboard } from '$pages/Dashboard';
+import { GreetingPage } from '$pages/Greeting';
+import { OnboardingPage } from '$pages/Onboarding';
 
 Sentry.init({
   dsn: 'https://941f2a103da866b176d8828482979dd4@o4508370469781504.ingest.de.sentry.io/4508370490884176',
@@ -16,10 +17,25 @@ Sentry.init({
 // eslint-disable-next-line import/no-default-export
 export default function App() {
   const { isAuthenticated, fetchUser } = useUserStore();
+  const [isLoading, setLoading] = useState(true);
+  const [isEducation, setEducation] = useState(true);
 
   useEffect(() => {
-    fetchUser();
+    setTimeout(() => setLoading(false), 2100);
   }, []);
+
+  useEffect(() => {
+    // fetchUser();
+  }, []);
+
+  if(isLoading) {
+    return <GreetingPage/>
+  }
+
+  if(isEducation) {
+    return <OnboardingPage/>
+  }
+
 
   if (!isAuthenticated) {
     return <AuthPage />;

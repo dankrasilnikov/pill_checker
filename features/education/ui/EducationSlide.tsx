@@ -2,11 +2,6 @@ import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-interface Props {
-  title: string;
-  description: string;
-  imageSrc: string;
-}
 
 export default function EducationSlide({ item }) {
   return (

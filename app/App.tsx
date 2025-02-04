@@ -20,6 +20,11 @@ export default function App() {
   const [isLoading, setLoading] = useState(true);
   const [isEducation, setEducation] = useState(true);
 
+
+  const onDone = () => {
+    setEducation(false);
+  }
+
   useEffect(() => {
     setTimeout(() => setLoading(false), 2100);
   }, []);
@@ -33,9 +38,8 @@ export default function App() {
   }
 
   if(isEducation) {
-    return <OnboardingPage/>
+    return <OnboardingPage onDone={onDone}/>
   }
-
 
   if (!isAuthenticated) {
     return <AuthPage />;

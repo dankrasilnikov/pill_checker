@@ -49,6 +49,7 @@ export default function EducationSlider({ onDone }) {
 
   const skip = () => {
     onDone && onDone();
+    console.log('skip')
   };
 
   const renderItem = ({ item }) => <EducationSlide item={item} />;

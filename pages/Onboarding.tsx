@@ -4,7 +4,7 @@ import Slider from '@react-native-community/slider';
 import EducationCarousel from '$features/education/ui/EducationSlider';
 import EducationSlider from '$features/education/ui/EducationSlider';
 
-export const OnboardingPage = () => {
+export const OnboardingPage = ({onDone}) => {
   const [progress, setProgress] = useState(0);
   const [value, setValue] = useState(50);
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -29,7 +29,7 @@ export const OnboardingPage = () => {
 
   return (
     <View style={styles.container}>
-      <EducationSlider/>
+      <EducationSlider onDone={onDone}/>
     </View>
   );
 };

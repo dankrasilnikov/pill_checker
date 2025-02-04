@@ -1,96 +1,26 @@
+# FastAPI NER & UMLS Linking Service
 
-# NER Service with UMLS Integration
+This service provides named entity recognition (NER) and UMLS entity linking for biomedical text using spaCy with a scispaCy model. It exposes a REST API built with FastAPI to process text and return entities along with their UMLS details.
 
 ## Overview
 
-The **NER Service** is a RESTful API designed for extracting **medical entities** from text and linking them to the **Unified Medical Language System (UMLS)**. The service uses a pre-trained **SciSpacy biomedical NER model** and supports UMLS concept mapping for recognized entities.
-
----
-
-## Features
-
-- **Named Entity Recognition (NER):**
-  Extracts entities like chemicals, drugs, diseases, and other biomedical terms.
-- **UMLS Concept Linking:**
-  Maps recognized entities to UMLS concepts with **Concept Unique Identifiers (CUIs)**, canonical names, and aliases.
-- **RESTful API:**
-  Provides a simple interface to process text input and return structured entity data.
-
----
+- **Input:** JSON payload with a text field.
+- **Processing:** Loads the `en_ner_bc5cdr_md` scispaCy model and attaches the UMLS linker during startup. When a request is received, the model extracts entities and looks up additional UMLS details.
+- **Output:** JSON response listing the entities with UMLS linking details (e.g., CUI, score, canonical name, and aliases).
 
 ## Architecture
 
-1. **Model Pipeline:**
-   - `en_ner_bc5cdr_md`: Pre-trained biomedical NER model.
-   - `UmlsEntityLinker`: Links recognized entities to UMLS concepts.
-2. **REST API:** Built using [FastAPI](https://fastapi.tiangolo.com/).
-3. **Containerization:** Dockerfile provided for easy deployment.
+- **FastAPI:** Provides the REST API endpoints.
+- **spaCy & scispaCy:** Performs NER and UMLS linking.
+- **Lifespan Manager:** Uses FastAPI’s lifespan context manager (via `asynccontextmanager`) to load the model once at startup and release resources on shutdown.
+- **Dependency Injection:** The spaCy model is attached to the application state and injected into endpoints as needed.
+- **Health Check Endpoint:** A dedicated `/health` endpoint is provided to verify the application’s readiness.
 
----
+## Features
 
-## API Endpoints
-
-### 1. `POST /extract_entities`
-
-**Description:** Extract medical entities from input text and link them to UMLS concepts.
-
-**Request:**
-```json
-{
-  "text": "The patient took advil."
-}
-```
-
-**Response:**
-```json
-{
-  "entities": [
-    {
-      "text": "advil",
-      "label": "CHEMICAL",
-      "umls_entities": [
-        {
-          "cui": "C0000870",
-          "score": 0.95,
-          "canonical_name": "Ibuprofen",
-          "aliases": ["Advil", "Motrin", "Brufen"]
-        }
-      ]
-    }
-  ]
-}
-```
-
----
-
-## Installation
-
-### Prerequisites
-- Python 3.9+
-- Docker (optional for containerized deployment)
-
-### Local Setup
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/ner-service.git
-   cd ner-service
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Download the pre-trained SciSpacy model:
-   ```bash
-   pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
-   ```
-
-4. Run the service:
-   ```bash
-   uvicorn model_server:app --host 0.0.0.0 --port 8000
-   ```
+- **/health Endpoint:** Returns a simple JSON indicating the service status.
+- **/extract_entities Endpoint:** Accepts a JSON payload with a text field, performs NER and UMLS linking, and returns the extracted entities with additional UMLS details.
+- **Swagger Documentation:** Interactive API documentation is available at `/docs` (Swagger UI) and `/redoc` (ReDoc).
 
 ---
 
@@ -108,21 +38,15 @@ The **NER Service** is a RESTful API designed for extracting **medical entities*
 
 3. Test the service:
    ```bash
-   curl -X POST -H "Content-Type: application/json"         -d '{"text": "The patient took advil."}'         http://localhost:8000/extract_entities
+   curl -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"text": "This text contains ibuprofen and paracetamol"}' \
+     http://localhost:8000/extract_entities
    ```
 
 ---
 
 ## Usage
-
-### Example: Use the currently deployed service
-
-```
-curl -X POST \
-     -H "Content-Type: application/json" \
-     -d '{"text": "This text contains ibuprofen and paracetamol"}' \
-     http://138.68.73.241/extract_entities
-```
 
 ### Example: Python Client
 
@@ -141,19 +65,15 @@ else:
 
 ---
 
-## Development
+## API Documentation
 
-### Run Unit Tests
-Run tests locally to validate functionality:
-```bash
-pytest tests/
-```
+Once the application is running, visit http://localhost:8000/docs for the Swagger UI or http://localhost:8000/redoc for the ReDoc documentation.
 
-### Run Integration Tests
-Ensure the API integrates correctly with client applications:
-```bash
-pytest tests/integration/
-```
+---
+
+## Model Notes
+
+The application uses the `en_ner_bc5cdr_md` model from scispaCy along with the UMLS linker. Make sure that any required model data is accessible at runtime. If not available locally, the model package can be installed via pip (refer to scispaCy’s documentation for details).
 
 ---
 

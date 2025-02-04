@@ -19,6 +19,7 @@ jobs:
       run: |
         pip install --no-cache-dir -r requirements.txt
         pip install pytest
+        pip install httpx
 
     - name: Run tests
       run: |

@@ -12,6 +12,7 @@ export const AuthPage = () => {
         <Text style={styles.h1}>MediScan AI</Text>
         <Text style={styles.p}>Your AI-powered medication assistant</Text>
         <SignIn />
+        <Text style={styles.securityMessage}>Your data is kept private and secure</Text>
       </ScrollView>
     </View>
   );
@@ -57,4 +58,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  securityMessage: {
+    fontSize: 12,
+    color: '#737D8B',
+    marginVertical: 16,
+    textAlign: 'center',
+  }
 });

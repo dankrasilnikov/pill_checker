@@ -3,7 +3,8 @@ from typing import Any, Dict, List
 from contextlib import asynccontextmanager
 
 import spacy
-import scispacy.linking
+from scispacy.abbreviation import AbbreviationDetector  # type: ignore
+from scispacy.linking import EntityLinker  # type: ignore
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 from spacy.language import Language
@@ -25,7 +26,7 @@ async def lifespan(app: FastAPI):
     try:
         nlp = spacy.load("en_ner_bc5cdr_md")
         # Add the UMLS linker to run after the NER component.
-        nlp.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "threshold": 0.7}, last=True)
+        nlp.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "threshold": 0.7, "linker_name": "umls"}, last=True)
         app.state.nlp = nlp
         logger.info("Model and UMLS linker loaded successfully.")
     except Exception as e:

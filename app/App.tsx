@@ -9,9 +9,6 @@ import { OnboardingPage } from '$pages/Onboarding';
 
 Sentry.init({
   dsn: 'https://941f2a103da866b176d8828482979dd4@o4508370469781504.ingest.de.sentry.io/4508370490884176',
-
-  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // enableSpotlight: __DEV__,
 });
 
 // eslint-disable-next-line import/no-default-export

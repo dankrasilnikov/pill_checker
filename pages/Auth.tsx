@@ -1,5 +1,5 @@
-import { Dimensions, Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
-
+import { Dimensions, Image, Platform, ScrollView, StyleSheet, View, Text } from 'react-native';
+import Pills from '../assets/pills.svg';
 import { SignIn } from '$features/auth/ui/SignIn';
 
 export const AuthPage = () => {
@@ -7,9 +7,10 @@ export const AuthPage = () => {
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.logoContainer}>
-          <Image style={styles.logo} source={require('../assets/logo.png')} />
+          <Pills style={styles.logo} width={50} height={50} />
         </View>
-
+        <Text style={styles.h1}>MediScan AI</Text>
+        <Text style={styles.p}>Your AI-powered medication assistant</Text>
         <SignIn />
       </ScrollView>
     </View>
@@ -23,17 +24,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: Platform.OS === 'ios' ? 20 : 20,
   },
   logoContainer: {
-    paddingVertical: height * 0.07,
+    marginVertical: height * 0.08,
+    padding: 12,
+    backgroundColor: '#3B82F6',
+    marginHorizontal: 'auto',
+    marginBottom: 0,
+    borderRadius: 12
   },
   logo: {
-    height: Platform.OS === 'ios' ? height * 0.14 : height * 0.16,
     aspectRatio: '1/1',
-    margin: 'auto',
   },
   h1: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     marginVertical: 10,
+    textAlign: 'center',
+  },
+  p: {
+    color: '#737D8B',
+    fontSize: 16,
+    textAlign: 'center',
   },
   authContainer: {},
   authOptionsLabel: {

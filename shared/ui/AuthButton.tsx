@@ -11,8 +11,9 @@ interface Props {
 
 export const AuthButton = ({
   pressedColor = '#0493b3',
-  backgroundColor = '#0873bb',
+  backgroundColor = '#2563EB',
   color = '#fff',
+  borderColor = '',
   onPress,
   label,
   width = '100%',
@@ -21,7 +22,7 @@ export const AuthButton = ({
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: pressed ? pressedColor : backgroundColor, width },
+        { backgroundColor: pressed ? pressedColor : backgroundColor, width, borderColor, borderWidth: borderColor ? 1 : 0 },
       ]}
       onPress={onPress}
     >
@@ -32,9 +33,9 @@ export const AuthButton = ({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 15,
+    paddingVertical: 16,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 12,
   },
   buttonText: {
     fontSize: 16,

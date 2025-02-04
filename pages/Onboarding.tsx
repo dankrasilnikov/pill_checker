@@ -1,10 +1,8 @@
 import { Animated, Dimensions, Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
-import Slider from '@react-native-community/slider';
-import EducationCarousel from '$features/education/ui/EducationSlider';
 import EducationSlider from '$features/education/ui/EducationSlider';
 
-export const OnboardingPage = ({onDone}) => {
+export const OnboardingPage = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
   const [value, setValue] = useState(50);
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -29,7 +27,7 @@ export const OnboardingPage = ({onDone}) => {
 
   return (
     <View style={styles.container}>
-      <EducationSlider onDone={onDone}/>
+      <EducationSlider onDone={onDone} />
     </View>
   );
 };

@@ -29,13 +29,15 @@ const { height } = Dimensions.get('window');
 const styles = {
   inputContainer: {},
   label: {
-    fontSize: 18,
-    marginBottom: height * 0.02,
+    fontSize: 12,
+    marginBottom: height * 0.01,
     marginLeft: 7,
+    color: '#1F2937'
   },
   input: {
     borderWidth: 1,
-    borderColor: '#000',
+    bacgroundColor: '#fff',
+    borderColor: '#E0E0E0',
     borderRadius: 5,
     marginBottom: height * 0.02,
   },

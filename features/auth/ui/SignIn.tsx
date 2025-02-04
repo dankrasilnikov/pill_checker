@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dimensions, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { useUserStore } from '$entities/user';
 import { signUpWithPassword } from '$features/auth/api/authApi';
@@ -28,48 +28,58 @@ export const SignIn = () => {
   const handleForgotPassword = () => {};
 
   return (
-    <View>
-      <Text style={styles.h1}>{type}</Text>
+    <View style={styles.container}>
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
+          <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>Sign In</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]} onPress={() => setType('Sign Up')}>
+          <Text style={[styles.select]}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.authContainer}>
         <AuthInput
           value={email}
           onChange={onChangeEmail}
           label={'Email'}
-          placeholder={'email@example.com'}
+          placeholder={'Enter your email'}
         />
         <AuthInput
           type={'password'}
           value={password}
           onChange={onChangePassword}
           label={'Password'}
-          placeholder={'password...'}
+          placeholder={'Enter your password'}
         />
-        <AuthButton label={type} onPress={onPasswordAuth} />
-
-        <Text style={styles.authOptionsLabel}>or use one of your social profiles</Text>
-
-        <View style={styles.authOptions}>
-          <AuthButton
-            label={'Twitter'}
-            onPress={onSimpleSignIn}
-            backgroundColor={'#2d9bf0'}
-            width={'47%'}
-          />
-          <AuthButton
-            label={'Facebook'}
-            onPress={onSimpleSignIn}
-            backgroundColor={'#414bb2'}
-            width={'47%'}
-          />
-        </View>
 
         <View style={styles.problemsSection}>
           <Pressable onPress={handleForgotPassword}>
             <Text style={styles.forgotPassword}>Forgot Password?</Text>
           </Pressable>
-          <Pressable onPress={switchForm}>
-            <Text style={styles.signUp}>{type === 'Sign Up' ? 'Sign In' : 'Sign Up'}</Text>
-          </Pressable>
+        </View>
+
+        <AuthButton label={type} onPress={onPasswordAuth} />
+
+        <Text style={styles.authOptionsLabel}>Or continue with</Text>
+
+        <View style={styles.authOptions}>
+          <AuthButton
+            label={'Google'}
+            onPress={onSimpleSignIn}
+            backgroundColor={'#F9FAFB'}
+            color={'#1F2937'}
+            width={'47%'}
+            borderColor={'#EBEDF0'}
+          />
+          <AuthButton
+            label={'Apple'}
+            onPress={onSimpleSignIn}
+            backgroundColor={'#F9FAFB'}
+            color={'#1F2937'}
+            width={'47%'}
+            borderColor={'#EBEDF0'}
+          />
         </View>
       </View>
     </View>
@@ -80,7 +90,28 @@ const { height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Platform.OS === 'ios' ? 20 : 20,
+    marginTop: height * 0.03,
+  },
+  select: {
+    fontSize: 20,
+    color: '#1F2937',
+    textAlign: 'center',
+    width: '100%',
+    padding: 16,
+  },
+  button: {
+    width: '50%'
+  },
+  activeSelect: {
+    color: '#2563EB',
+    borderBottomWidth: 3,
+    borderBottomColor: '#2563EB'
+  },
+  buttonsContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    marginBottom: 16
   },
   logoContainer: {
     paddingVertical: height * 0.07,
@@ -99,7 +130,7 @@ const styles = StyleSheet.create({
   authOptionsLabel: {
     fontSize: 14,
     textAlign: 'center',
-    marginVertical: 10,
+    marginVertical: 20,
   },
   authOptions: {
     display: 'flex',
@@ -109,12 +140,12 @@ const styles = StyleSheet.create({
   },
   problemsSection: {
     display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   forgotPassword: {
-    paddingVertical: 5,
-    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingTop: 8,
+    paddingHorizontal: 5,
   },
   signUp: {
     fontWeight: 'bold',

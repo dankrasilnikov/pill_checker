@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 from contextlib import asynccontextmanager
 
 import spacy
+import scispacy.linking
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 from spacy.language import Language

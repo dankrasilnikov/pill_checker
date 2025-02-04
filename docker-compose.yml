@@ -1,8 +1,24 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  model_server:
+  model_server_app:
     image: sperva/model_server_app:latest
     ports:
       - "8081:8081"
-    restart: unless-stopped
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  meds_recognition_app:
+    image: sperva/meds_recognition_app:latest
+    ports:
+      - "80:8000"
+    restart: always
+    depends_on:
+      - model_server_app
+
+networks:
+  default:
+    driver: bridge

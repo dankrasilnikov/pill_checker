@@ -8,6 +8,8 @@ from scispacy.linking import EntityLinker  # type: ignore
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 from spacy.language import Language
+import warnings
+warnings.filterwarnings("ignore", message="Possible set union at position")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +26,14 @@ async def lifespan(app: FastAPI):
     This function loads the spaCy model and attaches it to app.state during startup.
     """
     try:
-        nlp = spacy.load("en_ner_bc5cdr_md")
+
+        try:
+            nlp = spacy.load("en_ner_bc5cdr_md")
+            logger.info("Successfully loaded model en_ner_bc5cdr_md")
+        except Exception as e:
+            logger.exception("Error loading model en_ner_bc5cdr_md: %s", e)
+            raise e
+
         # Add the UMLS linker to run after the NER component.
         nlp.add_pipe("scispacy_linker", config={"resolve_abbreviations": True, "threshold": 0.7, "linker_name": "umls"}, last=True)
         app.state.nlp = nlp
@@ -90,4 +99,6 @@ def health_check(nlp: Language = Depends(get_nlp)) -> Dict[str, str]:
     Health check endpoint to verify that the application is running and the model is loaded.
     If the model is accessible, returns a simple JSON status.
     """
+    if nlp is None:
+        raise HTTPException(status_code=503, detail="Model not loaded yet")
     return {"status": "ok", "message": "Service is healthy"}

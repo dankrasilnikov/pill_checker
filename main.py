@@ -1,5 +1,3 @@
-import logging
-import warnings
 from typing import Any, Dict, List
 
 import spacy
@@ -7,41 +5,30 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from scispacy.abbreviation import AbbreviationDetector  # type: ignore
 from scispacy.linking import EntityLinker  # type: ignore
-from spacy.language import Language
 
-warnings.filterwarnings("ignore", message="Possible set union at position")
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+def setup_model():
+    """
+    Loads the Spacy model, registers the UMLS linker component,
+    and sets up necessary custom extensions for the Span object.
+    """
+    print("Loading model...")
+    model = spacy.load("en_ner_bc5cdr_md")
+    model.add_pipe("abbreviation_detector")
+    model.add_pipe("scispacy_linker", config={"linker_name": "umls"})
+
+    print("Model loaded!")
+    return model
+
+
+app = FastAPI()
+root_nlp = setup_model()
 
 class TextRequest(BaseModel):
     text: str
 
 
-def get_nlp() -> Language:
-    try:
-        try:
-            nlp = spacy.load("en_ner_bc5cdr_md")
-            logger.info("Successfully loaded model en_ner_bc5cdr_md")
-        except Exception as e:
-            logger.exception("Error loading model en_ner_bc5cdr_md: %s", e)
-            raise e
-
-        nlp.add_pipe("abbreviation_detector")
-        nlp.add_pipe("scispacy_linker", config={"linker_name": "umls"})
-        logger.info("Model and UMLS linker loaded successfully.")
-    except Exception as e:
-        logger.exception("Failed to load the spaCy model: %s", e)
-        raise e
-
-    return nlp
-
-
-big_app = FastAPI()
-root_nlp = get_nlp()
-
-
-@big_app.post("/extract_entities", response_model=Dict[str, List[Dict[str, Any]]])
+@app.post("/extract_entities", response_model=Dict[str, List[Dict[str, Any]]])
 def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
     """
     Process the input text and return recognized entities along with their UMLS details.
@@ -72,7 +59,7 @@ def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
 
     return {"entities": entities}
 
-@big_app.get("/health")
+@app.get("/health")
 def health_check() -> Dict[str, str]:
     """
     Health check endpoint to verify that the application is running and the model is loaded.

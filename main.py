@@ -46,9 +46,9 @@ def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
             print(entity_detail)
             if entity_detail:
                 umls_entities.append({
-                    "cui": entity_detail.cui,
-                    "score": entity_detail.score,
-                    "canonical_name": entity_detail.canonical_name,
+                    "cui": entity_detail.CUI,
+                    "canonical_name": entity_detail.name,
+                    "definition": entity_detail.definition,
                     "aliases": entity_detail.aliases,
                 })
 

@@ -15,7 +15,7 @@ def setup_model():
     print("Loading model...")
     model = spacy.load("en_ner_bc5cdr_md")
     model.add_pipe("abbreviation_detector")
-    model.add_pipe("scispacy_linker", config={"linker_name": "umls"})
+    model.add_pipe("scispacy_linker", config={"linker_name": "rxnorm"})
 
     print("Model loaded!")
     return model

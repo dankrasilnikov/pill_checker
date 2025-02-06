@@ -43,6 +43,7 @@ def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
         umls_entities = []
         for umls_ent in ent._.kb_ents:
             entity_detail = linker.kb.cui_to_entity[umls_ent[0]]
+            print(entity_detail)
             if entity_detail:
                 umls_entities.append({
                     "cui": entity_detail.cui,

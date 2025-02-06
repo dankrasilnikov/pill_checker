@@ -9,13 +9,26 @@ from scispacy.linking import EntityLinker  # type: ignore
 
 def setup_model():
     """
-    Loads the Spacy model, registers the UMLS linker component,
-    and sets up necessary custom extensions for the Span object.
+    - **UMLS**: Links to the Unified Medical Language System, levels 0, 1, 2, and 9.
+      This has approximately 3 million concepts.
+    - **MeSH**: Links to the Medical Subject Headings. This contains a smaller set of higher-quality entities,
+      which are used for indexing in PubMed. MeSH contains ~30k entities.
+      **Note**: The MeSH knowledge base (KB) is derived directly from MeSH itself and, as such, uses different
+      unique identifiers than the other KBs.
+    - **RxNorm**: Links to the RxNorm ontology. RxNorm contains ~100k concepts focused on normalized names
+      for clinical drugs. It includes several other drug vocabularies commonly used in pharmacy management
+      and drug interaction, such as First Databank, Micromedex, and the Gold Standard Drug Database.
+    - **GO**: Links to the Gene Ontology. The Gene Ontology contains ~67k concepts focused on the biological
+      functions of genes.
+    - **HPO**: Links to the Human Phenotype Ontology. The Human Phenotype Ontology contains ~16k concepts
+      focused on phenotypic abnormalities encountered in human diseases.
     """
+
     print("Loading model...")
     model = spacy.load("en_ner_bc5cdr_md")
     model.add_pipe("abbreviation_detector")
-    model.add_pipe("scispacy_linker", config={"linker_name": "rxnorm"})
+    model.add_pipe("scispacy_linker",
+                   config={"resolve_abbreviations": True, "linker_name": "rxnorm"})
 
     print("Model loaded!")
     return model
@@ -46,7 +59,7 @@ def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
             print(entity_detail)
             if entity_detail:
                 umls_entities.append({
-                    "cui": entity_detail.concept_id,
+                    # "cui": entity_detail.concept_id,
                     "canonical_name": entity_detail.canonical_name,
                     "definition": entity_detail.definition,
                     "aliases": entity_detail.aliases,
@@ -54,7 +67,7 @@ def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
 
         entities.append({
             "text": ent.text,
-            "label": ent.label_,
+            # "label": ent.label_,
             "umls_entities": umls_entities,
         })
 

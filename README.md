@@ -13,8 +13,8 @@ This service provides named entity recognition (NER) and entity linking for biom
 ## Architecture
 
 - **FastAPI:** Provides the REST API endpoints.
-- **spaCy & scispaCy:** Performs NER and linking. https://github.com/allenai/scispacy
-- **RxNorm:** Linking pipeline which contains ~100k concepts focused on normalized names for clinical drugs. https://www.nlm.nih.gov/research/umls/rxnorm/index.html 
+- **spaCy & scispaCy:** Performs NER and linking. [ScispaCy Repo](https://github.com/allenai/scispacy)
+- **RxNorm:** Linking pipeline which contains ~100k concepts focused on normalized names for clinical drugs. [RxNorm website](https://www.nlm.nih.gov/research/umls/rxnorm/index.html)
 - **Health Check Endpoint:** A dedicated `/health` endpoint is provided to verify the application’s readiness.
 
 ## Features
@@ -88,7 +88,7 @@ else:
 
 ## Model Notes
 
-The application uses the `en_ner_bc5cdr_md` model from https://github.com/allenai/scispacy along with the RxNorm linker. Make sure that any required model data is accessible at runtime. If not available locally, the model package can be installed via pip (refer to scispaCy’s documentation for details).
+The application uses the `en_ner_bc5cdr_md` model from [Scispacy](https://github.com/allenai/scispacy) along with the [RxNorm](https://www.nlm.nih.gov/research/umls/rxnorm/index.html) linker. Make sure that any required model data is accessible at runtime. If not available locally, the model package can be installed via pip (refer to scispaCy’s documentation for details).
 
 ---
 

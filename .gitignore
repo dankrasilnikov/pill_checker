@@ -8,14 +8,6 @@ __pycache__/
 venv/
 .venv/
 
-# Git version control files and directories
-.git
-.gitignore
-
-# Test directories (adjust these names as needed)
-tests/
-test/
-
 # Environment variable files
 .env
 *.env

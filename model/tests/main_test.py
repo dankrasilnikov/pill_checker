@@ -5,6 +5,7 @@ from main import app, setup_model
 
 # --- Dummy Classes for Mocking spaCy and scispaCy Behavior --- #
 
+
 class DummyEntity:
     def __init__(self, text, label, umls_ents):
         self.text = text
@@ -13,9 +14,11 @@ class DummyEntity:
         self._ = type("DummyExtension", (), {})()
         self._.umls_ents = umls_ents
 
+
 class DummyDoc:
     def __init__(self, ents):
         self.ents = ents
+
 
 class DummyLinker:
     def __init__(self, cui_to_entity):
@@ -23,15 +26,19 @@ class DummyLinker:
         self.umls = type("DummyUMLS", (), {})()
         self.umls.cui_to_entity = cui_to_entity
 
+
 class DummyNLP:
     def __init__(self):
         # Initialize a dummy linker with one entity detail.
-        self.linker = DummyLinker({
-            "C0000870": type("EntityDetail", (), {
-                "canonical_name": "Ibuprofen",
-                "aliases": ["Advil", "Motrin", "Brufen"]
-            })()
-        })
+        self.linker = DummyLinker(
+            {
+                "C0000870": type(
+                    "EntityDetail",
+                    (),
+                    {"canonical_name": "Ibuprofen", "aliases": ["Advil", "Motrin", "Brufen"]},
+                )()
+            }
+        )
 
     def __call__(self, text):
         # Simulate the extraction of a single entity.
@@ -43,26 +50,30 @@ class DummyNLP:
             return self.linker
         raise ValueError("Pipe not found")
 
+
 # --- Pytest Fixtures and Tests --- #
+
 
 @pytest.fixture
 def client():
     # Override the dependency to return the dummy NLP model.
     app.dependency_overrides[setup_model] = lambda: DummyNLP()
-    client = TestClient(app)
-    yield client
+    test_client = TestClient(app)
+    yield test_client
     app.dependency_overrides.clear()
 
-def test_health(client):
-    response = client.get("/health")
+
+def test_health(http_client):
+    response = http_client.get("/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
     assert "Service is healthy" in data["message"]
 
-def test_process_text(client):
+
+def test_process_text(http_client):
     payload = {"text": "The patient took advil."}
-    response = client.post("/extract_entities", json=payload)
+    response = http_client.post("/extract_entities", json=payload)
     assert response.status_code == 200
 
     data = response.json()

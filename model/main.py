@@ -3,8 +3,8 @@ from typing import Any, Dict, List
 import spacy
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from scispacy.abbreviation import AbbreviationDetector  # type: ignore
-from scispacy.linking import EntityLinker  # type: ignore
+from scispacy.abbreviation import AbbreviationDetector  # noqa: F401
+from scispacy.linking import EntityLinker  # noqa: F401
 
 
 def setup_model():
@@ -27,8 +27,9 @@ def setup_model():
     print("Loading model...")
     model = spacy.load("en_ner_bc5cdr_md")
     model.add_pipe("abbreviation_detector")
-    model.add_pipe("scispacy_linker",
-                   config={"resolve_abbreviations": True, "linker_name": "rxnorm"})
+    model.add_pipe(
+        "scispacy_linker", config={"resolve_abbreviations": True, "linker_name": "rxnorm"}
+    )
 
     print("Model loaded!")
     return model
@@ -36,6 +37,7 @@ def setup_model():
 
 app = FastAPI()
 root_nlp = setup_model()
+
 
 class TextRequest(BaseModel):
     text: str
@@ -58,20 +60,25 @@ def extract_entities(req: TextRequest) -> Dict[str, List[Dict[str, Any]]]:
             entity_detail = linker.kb.cui_to_entity[umls_ent[0]]
             print(entity_detail)
             if entity_detail:
-                umls_entities.append({
-                    # "cui": entity_detail.concept_id,
-                    "canonical_name": entity_detail.canonical_name,
-                    "definition": entity_detail.definition,
-                    "aliases": entity_detail.aliases,
-                })
+                umls_entities.append(
+                    {
+                        # "cui": entity_detail.concept_id,
+                        "canonical_name": entity_detail.canonical_name,
+                        "definition": entity_detail.definition,
+                        "aliases": entity_detail.aliases,
+                    }
+                )
 
-        entities.append({
-            "text": ent.text,
-            # "label": ent.label_,
-            "umls_entities": umls_entities,
-        })
+        entities.append(
+            {
+                "text": ent.text,
+                # "label": ent.label_,
+                "umls_entities": umls_entities,
+            }
+        )
 
     return {"entities": entities}
+
 
 @app.get("/health")
 def health_check() -> Dict[str, str]:

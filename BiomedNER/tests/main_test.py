@@ -58,22 +58,22 @@ class DummyNLP:
 def client():
     # Override the dependency to return the dummy NLP model.
     app.dependency_overrides[setup_model] = lambda: DummyNLP()
-    client = TestClient(app)
-    yield client
+    test_client = TestClient(app)
+    yield test_client
     app.dependency_overrides.clear()
 
 
-def test_health(client):
-    response = client.get("/health")
+def test_health(http_client):
+    response = http_client.get("/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
     assert "Service is healthy" in data["message"]
 
 
-def test_process_text(client):
+def test_process_text(http_client):
     payload = {"text": "The patient took advil."}
-    response = client.post("/extract_entities", json=payload)
+    response = http_client.post("/extract_entities", json=payload)
     assert response.status_code == 200
 
     data = response.json()

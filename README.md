@@ -24,7 +24,7 @@ The concept behind MedsRecognition is straightforward. Imagine you need a painki
 
 ## Frontend UI
 
-The user interface is a vital part of MedsRecognition. The UI project is maintained in a separate folder: [MedsRecognition-Frontend](https://github.com/SPerekrestova/MedsRecognition-Frontend). This sleek, user-friendly interface is crafted by [Dan K.](https://github.com/dankrasilnikov).
+The user interface is a vital part of MedsRecognition. The UI project is maintained in a separate repository: [MedsRecognition-Frontend](https://github.com/SPerekrestova/MedsRecognition-Frontend). This sleek, user-friendly interface is crafted by [Dan K.](https://github.com/dankrasilnikov).
 
 ## Challenges & Learnings
 
@@ -45,10 +45,10 @@ There’s plenty more on the horizon! Here’s what I’m planning next:
 
 ## Links & References
 
-Check out the project folders and learn more about the tools I used:
-- [MedsRecognition](https://github.com/SPerekrestova/MedsRecognition/tree/master/MedsRecognition)
-- [BiomedNER](https://github.com/SPerekrestova/MedsRecognition/tree/master/BiomedNER)
-- [UI Repository](https://github.com/SPerekrestova/MedsRecognition-Frontend)
+Check out the project repositories and learn more about the tools I used:
+- [MedsRecognition project](https://github.com/SPerekrestova/PillChecker/tree/master/MedsRecognition)
+- [BiomedNER project](https://github.com/SPerekrestova/PillChecker/tree/master/BiomedNER)
+- [UI project](https://github.com/SPerekrestova/PillChecker/tree/master/Frontend)
 
 Other useful resources:
 - [SciSpacy (en_ner_bc5cdr_md model)](https://github.com/allenai/scispacy)
@@ -57,6 +57,6 @@ Other useful resources:
 
 ## Conclusion
 
-MedsRecognition reflects my passion for healthcare and tech. It’s a hands-on example of how quickly you can learn a new tech stack and build something that truly makes a difference. 
+MedsRecognition reflects my passion for both healthcare and tech. It’s a hands-on example of how quickly you can learn a new tech stack and build something that truly makes a difference.
 
 &copy; 2025 Svetlana Perekrestova. All Rights Reserved.

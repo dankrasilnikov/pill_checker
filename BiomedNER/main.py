@@ -3,6 +3,8 @@ from typing import Any, Dict, List
 import spacy
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from scispacy.abbreviation import AbbreviationDetector  # noqa: F401
+from scispacy.linking import EntityLinker  # noqa: F401
 
 
 def setup_model():

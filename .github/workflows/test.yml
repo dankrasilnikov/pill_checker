@@ -10,9 +10,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Change directory
-        run: cd BiomedNER
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -20,12 +17,14 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd BiomedNER
           pip install --no-cache-dir -r requirements.txt
           pip install pytest
           pip install httpx
 
       - name: Run tests
         run: |
+          cd BiomedNER
           python -m unittest tests/test_main.py
 
 
@@ -36,9 +35,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Change directory
-        run: cd MedsRecognition
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -46,13 +42,16 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd MedsRecognition
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Load environment variables
         run: |
+          cd MedsRecognition
           echo "DJANGO_SETTINGS_MODULE=MedsRecognition.settings" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
+          cd MedsRecognition
           python manage.py test

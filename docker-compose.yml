@@ -12,7 +12,7 @@ services:
   meds_recognition_app:
     image: sperva/meds_recognition_app:latest
     env_file:
-      - MedsRecognition/MedsRecognition/.env
+      - core/MedsRecognition/.env
     ports:
       - "8000:8000"
     environment:

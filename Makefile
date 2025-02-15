@@ -1,20 +1,20 @@
 # Test targets
 .PHONY: test
-test: test_model test_service
+test: test_model test_core
 
 .PHONY: pip_deps
 pip_deps:
 	python -m pip install --upgrade pip && \
-	pip install -r BiomedNER/requirements.txt && \
-	pip install -r MedsRecognition/requirements.txt
+	pip install -r model/requirements.txt && \
+	pip install -r core/requirements.txt
 
 .PHONY: test_model
 test_model: pip_deps
-	cd BiomedNER && \
+	cd model && \
 	python -m unittest tests/main_test.py
 
-.PHONY: test_service
+.PHONY: test_core
 test_service: pip_deps
 	export DJANGO_SETTINGS_MODULE=MedsRecognition.settings && \
-	cd MedsRecognition && \
+	cd core && \
 	python manage.py test

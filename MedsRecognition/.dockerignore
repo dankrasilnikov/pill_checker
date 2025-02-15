@@ -11,7 +11,7 @@ venv/
 # Git version control files and directories
 .git
 .gitignore
-.github/
+../.github/
 
 # Test directories (adjust these names as needed)
 tests/
@@ -32,6 +32,6 @@ test/
 # Log files
 *.log
 
-.pylintrc
-.pre-commit-config.yaml
-ruff.toml
+../.pylintrc
+../.pre-commit-config.yaml
+../ruff.toml

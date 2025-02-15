@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedsRecognition: Medication Intersection Project</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Base styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    /* Header styling */
+    header {
+      background: #4a90e2;
+      color: #fff;
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    header p {
+      margin: 0.5rem 0 0;
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+
+    /* Main container */
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      background: #fff;
+      padding: 2rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+
+    /* Section headings */
+    h2 {
+      color: #4a90e2;
+      border-bottom: 2px solid #4a90e2;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    h3 {
+      color: #333;
+      margin-top: 1.5rem;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    /* Paragraphs */
+    p {
+      margin: 1rem 0;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    /* Lists */
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 1rem 0;
+    }
+    li {
+      margin: 0.5rem 0;
+      padding-left: 1.2rem;
+      position: relative;
+      font-size: 1rem;
+    }
+    li:before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #4a90e2;
+      font-size: 1.2rem;
+      line-height: 1.2rem;
+    }
+
+    /* Links */
+    a {
+      color: #4a90e2;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #357ab8;
+      text-decoration: underline;
+    }
+
+    /* Button style (if needed) */
+    .btn {
+      display: inline-block;
+      background-color: #4a90e2;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #357ab8;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 1rem 0;
+      background: #4a90e2;
+      color: #fff;
+      font-size: 0.9rem;
+      border-top: 1px solid #357ab8;
+      margin-top: 2rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem;
+      }
+      header h1 {
+        font-size: 2rem;
+      }
+      header p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MedsRecognition</h1>
+    <p>Medication Intersection Project</p>
+  </header>
+
+  <div class="container">
+    <!-- Project Overview -->
+    <section id="overview">
+      <h2>Project Overview</h2>
+      <p>
+        Welcome to MedsRecognition – a project born out of my love for coding and healthcare. This is my playground for learning new tech, experimenting with AI, and solving real-world challenges in the healthcare domain. Whether you're a developer or just curious about how tech can make medicine safer, you'll find plenty to explore here.
+      </p>
+    </section>
+
+    <!-- Idea & Purpose -->
+    <section id="idea">
+      <h2>Idea & Purpose</h2>
+      <p>
+        The concept behind MedsRecognition is straightforward. Imagine you need a painkiller but are already taking other medications. Instead of rummaging through endless instructions or searching online, you snap a quick picture of the medicine pack. The app then extracts key details like the trademark, dosage, and active ingredients and checks them against trusted medical info to ensure there's no risk of dangerous interactions.
+      </p>
+      <p>
+        This project is not just a tech challenge – it's a passion project that shows how software can directly improve healthcare safety.
+      </p>
+    </section>
+
+    <!-- Tech Stack & Tools -->
+    <section id="tech-stack">
+      <h2>Tech Stack & Tools</h2>
+      <ul>
+        <li><strong>Language:</strong> Python</li>
+        <li>
+          <strong>Web Frameworks:</strong>
+          <a href="https://www.djangoproject.com" target="_blank">Django</a>,
+          <a href="https://flask.palletsprojects.com" target="_blank">Flask</a>,
+          <a href="https://fastapi.tiangolo.com" target="_blank">FastAPI</a>
+        </li>
+        <li>
+          <strong>Containerization:</strong>
+          <a href="https://www.docker.com" target="_blank">Docker</a>
+        </li>
+        <li>
+          <strong>Cloud Hosting:</strong> Started with AWS, then switched to <a href="https://www.digitalocean.com" target="_blank">DigitalOcean</a> for cost-effectiveness.
+        </li>
+        <li>
+          <strong>Database & Auth:</strong> Using <a href="https://supabase.com" target="_blank">Supabase</a> for a real-time database and user authentication.
+        </li>
+        <li>
+          <strong>AI & NLP:</strong> Leveraging large language models along with pipelines for image text extraction. I use the
+          <a href="https://github.com/allenai/scispacy" target="_blank">en_ner_bc5cdr_md model from SciSpacy</a>
+          paired with the
+          <a href="https://www.nlm.nih.gov/research/umls/rxnorm/index.html" target="_blank">RxNorm linker</a> to parse and understand medical texts.
+        </li>
+      </ul>
+    </section>
+
+    <!-- Frontend UI -->
+    <section id="frontend">
+      <h2>Frontend UI</h2>
+      <p>
+        The user interface is a vital part of MedsRecognition. The UI project is maintained in a separate repository:
+        <a href="https://github.com/SPerekrestova/MedsRecognition-Frontend" target="_blank">MedsRecognition-Frontend</a>.
+        This sleek, user-friendly interface is crafted by <a href="https://github.com/dankrasilnikov" target="_blank">Dan K.</a> and makes it easy for users to scan their medications and instantly view safety insights.
+      </p>
+    </section>
+
+    <!-- Challenges & Learnings -->
+    <section id="challenges">
+      <h2>Challenges & Learnings</h2>
+      <p>
+        Building MedsRecognition was a journey full of learning and experimentation. Here are some hurdles I overcame:
+      </p>
+      <ul>
+        <li>
+          Switching between different Python frameworks (Django, Flask, FastAPI) to build a full-featured web app and API.
+        </li>
+        <li>
+          Integrating image processing and text extraction to reliably scan medicine packs.
+        </li>
+        <li>
+          Optimizing performance while managing the heavy memory needs of large language models and smart pipelines.
+        </li>
+        <li>
+          Experimenting with cloud deployment and containerization, which led to the move from AWS to DigitalOcean.
+        </li>
+        <li>
+          Implementing a real-time database and authentication system using Supabase.
+        </li>
+      </ul>
+    </section>
+
+    <!-- Future Enhancements -->
+    <section id="future">
+      <h2>Future Enhancements</h2>
+      <p>
+        There’s plenty more on the horizon! Here’s what I’m planning next:
+      </p>
+      <ul>
+        <li>
+          <strong>Interaction Analysis:</strong> Rolling out real-time checks for drug interactions with even more detailed trademark resolution.
+        </li>
+        <li>
+          <strong>Resource Optimization:</strong> Fine-tuning the deployment to handle memory and processing demands even better.
+        </li>
+        <li>
+          <strong>Feature Expansion:</strong> Adding personalized medication recommendations and smarter alerts by integrating additional health databases.
+        </li>
+        <li>
+          <strong>Advanced AI Techniques:</strong> Exploring improved OCR and NLP methods to speed up and refine text extraction.
+        </li>
+      </ul>
+    </section>
+
+    <!-- External Links & Repositories -->
+    <section id="links">
+      <h2>Links & References</h2>
+      <p>Check out the project repositories and learn more about the tools I used:</p>
+      <ul>
+        <li>
+          <a href="https://github.com/SPerekrestova/PillChecker/tree/master/MedsRecognition" target="_blank">MedsRecognition project</a>
+        </li>
+        <li>
+          <a href="https://github.com/SPerekrestova/PillChecker/tree/master/BiomedNER" target="_blank">BiomedNER project</a>
+        </li>
+        <li>
+          <a href="https://github.com/SPerekrestova/PillChecker/tree/master/Frontend" target="_blank">UI project</a>
+        </li>
+      </ul>
+      <p>Other useful resources:</p>
+      <ul>
+        <li>
+          <a href="https://github.com/allenai/scispacy" target="_blank">SciSpacy (en_ner_bc5cdr_md model)</a>
+        </li>
+        <li>
+          <a href="https://www.nlm.nih.gov/research/umls/rxnorm/index.html" target="_blank">RxNorm Linker</a>
+        </li>
+        <li>
+          <a href="https://www.who.int" target="_blank">World Health Organization</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Conclusion -->
+    <section id="conclusion">
+      <h2>Conclusion</h2>
+      <p>
+        MedsRecognition is a project that reflects my passion for both healthcare and tech. It’s a hands-on example of how quickly you can learn a new tech stack and build something that truly makes a difference. I hope this project inspires others to explore innovative ways to bridge the gap between technology and healthcare.
+      </p>
+    </section>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Svetlana Perekrestova. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

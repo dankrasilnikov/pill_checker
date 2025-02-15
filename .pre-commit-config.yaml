@@ -33,3 +33,11 @@ repos:
     rev: v3.3.4
     hooks:
       - id: pylint
+
+  - repo: local
+    hooks:
+    - id: make-test
+      name: make-test
+      entry: sh -c "make test"
+      language: system
+      require_serial: true

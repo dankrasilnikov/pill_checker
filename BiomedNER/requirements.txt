@@ -1,5 +1,6 @@
 fastapi==0.112.2
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
+httpx==0.28.1
 pydantic==2.10.5
 
 pytest==7.4.0

@@ -11,8 +11,6 @@ venv/
 # Git version control files and directories
 .git
 .gitignore
-.github/
-
 
 # Test directories (adjust these names as needed)
 tests/

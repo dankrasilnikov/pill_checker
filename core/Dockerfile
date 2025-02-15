@@ -11,8 +11,7 @@ RUN apt-get update && \
 
 COPY requirements.txt /app/
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install gevent
+    pip install --no-cache-dir -r requirements.txt
 
 COPY ./MedsRecognition /app/MedsRecognition
 COPY manage.py /app/

@@ -1,10 +1,9 @@
 FROM python:3.9-slim
 
-# Install dependencies
-RUN pip install --no-cache-dir spacy==3.7.5 scispacy==0.5.4 scipy==1.10.1 scikit-learn==1.1.2 uvicorn fastapi
+COPY requirements.txt /app/requirements.txt
 
-# Install the SciSpacy model
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_ner_bc5cdr_md-0.5.4.tar.gz
+# Install dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 WORKDIR /app
 COPY main.py /app

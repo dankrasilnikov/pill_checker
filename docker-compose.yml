@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   model_server_app:
     image: sperva/model_server_app:latest
@@ -11,25 +9,18 @@ services:
     networks:
       - private_network
 
-
   meds_recognition_app:
     image: sperva/meds_recognition_app:latest
     env_file:
       - MedsRecognition/MedsRecognition/.env
     ports:
-      - "127.0.0.1:8000:8000"
+      - "8000:8000"
     environment:
       BIOMED_HOST: "model_server_app:8081"
     restart: always
-    depends_on:
-      - model_server_app
     networks:
-      - default
       - private_network
-
 
 networks:
   private_network:
-    driver: bridge
-  default:
     driver: bridge

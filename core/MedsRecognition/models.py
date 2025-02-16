@@ -9,11 +9,7 @@ Base = declarative_base()
 class UploadedImage(Base):
     __tablename__ = "uploaded_images"
 
-    # If you had an auto-increment primary key in Django, define it similarly here.
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-
-    # In Django, ImageField stores references/file paths. Typically, you'd
-    # store the path in a text/string column.
     image = Column(String(length=255), nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     file_path = Column(Text, nullable=True)
@@ -42,7 +38,6 @@ class Medication(Base):
     __tablename__ = "medication"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    # ForeignKey references the 'id' column of the Profile table
     profile_id = Column(BigInteger, ForeignKey("profiles.id"), nullable=False)
     title = Column(String(length=255), nullable=True)
     scan_date = Column(DateTime, default=datetime.utcnow)
@@ -51,7 +46,6 @@ class Medication(Base):
     dosage = Column(String(length=255), nullable=True)
     prescription_details = Column(JSON, nullable=True)
 
-    # Relationship to maintain a bidirectional link with Profile
     profile = relationship("Profile", back_populates="medications")
 
     def __repr__(self):

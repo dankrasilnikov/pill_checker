@@ -1,3 +1,4 @@
+alembic
 #Django==4.2.16
 #djangorestframework==3.15.2
 easyocr==1.7.2
@@ -5,9 +6,9 @@ gevent==24.11.1
 gunicorn==22.0.0
 #Pillow==11.1.0
 psycopg2-binary==2.9.10
+pydantic
+python-dotenv
 #python-decouple==3.8
 Requests==2.32.3
-supabase==2.11.0
-python-dotenv
 sqlalchemy
-alembic
+supabase==2.11.0

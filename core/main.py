@@ -1,6 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.templating import Jinja2Templates
+
 import os
 
 # Load environment variables from .env
@@ -28,3 +31,7 @@ try:
         print("Connection successful!")
 except Exception as e:
     print(f"Failed to connect: {e}")
+
+templates = Jinja2Templates(directory="templates")
+
+app = FastAPI()

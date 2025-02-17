@@ -1,86 +1,48 @@
-#name: Build & Deploy MedsRecognition service
-#
-#on:
-#  pull_request:
-#    types: [opened, synchronize]
-#
-#jobs:
-#  build_and_push_model:
-#    runs-on: ubuntu-24.04
-#    steps:
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#
-#      - name: Change directory
-#        run: cd BiomedNER
-#
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v2
-#
-#      - name: Log in to Docker Hub
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-#
-#      - name: Build and Push BiomedNER Image
-#        uses: docker/build-push-action@v4
-#        with:
-#          context: .
-#          file: Dockerfile
-#          push: true
-#          tags: sperva/model_server_app:latest
-#
-#  build_and_push_service:
-#    needs: build_and_push_model
-#    runs-on: ubuntu-24.04
-#    steps:
-#      - name: Checkout Code
-#        uses: actions/checkout@v3
-#
-#      - name: Change directory
-#        run: cd MedsRecognition
-#
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v2
-#
-#      - name: Log in to Docker Hub
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-#
-#      - name: Build and Push MedsRecognition Image
-#        uses: docker/build-push-action@v4
-#        with:
-#          context: .
-#          file: Dockerfile
-#          push: true
-#          tags: sperva/meds_recognition_app:latest
-#
-#  deploy:
-#    needs: build_and_push_service
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Deploy MedsRecognition via SSH
-#        uses: appleboy/ssh-action@v0.1.8
-#        with:
-#          host: ${{ secrets.DEPLOY_HOST }}
-#          username: ${{ secrets.DEPLOY_USER }}
-#          key: ${{ secrets.DEPLOY_KEY }}
-#          script: |
-#            cd ~/meds_recognition
-#            # Write a .env file with secrets to be used by docker-compose (this file should be excluded from source control)
-#            cat <<EOF > .env
-#            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-#            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
-#            SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}
-#            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-#            DATABASE_USER=${{ secrets.DATABASE_USER }}
-#            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-#            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-#            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-#            DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}
-#            EOF
-#            docker-compose pull
-#            docker-compose up -d
+name: Build & Deploy MedsRecognition service
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  make_image:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: docker/setup-buildx-action@v3.9.0
+      - uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: make_image
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Deploy MedsRecognition via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            # Write a .env file with secrets to be used by docker-compose (this file should be excluded from source control)
+            cat <<EOF > core/MedsRecognition/.env
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+            SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USER=${{ secrets.DATABASE_USER }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            DATABASE_HOST=${{ secrets.DATABASE_HOST }}
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}
+            EOF
+            docker-compose pull
+            docker-compose up -d

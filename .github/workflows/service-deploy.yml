@@ -33,6 +33,7 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           script: |
             # Write a .env file with secrets to be used by docker-compose (this file should be excluded from source control)
+            cd pill_checker/
             cat <<EOF > core.env
             SUPABASE_URL=${{ secrets.SUPABASE_URL }}
             SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}

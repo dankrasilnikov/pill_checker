@@ -12,7 +12,7 @@ services:
   core:
     image: ghcr.io/sperekrestova/pill-checker-core:latest
     env_file:
-      - core/MedsRecognition/.env
+      - core.env
     ports:
       - "8000:8000"
     environment:

@@ -1,6 +1,6 @@
 .venv
 .idea
-MedsRecognition/.env
+../.env
 *.json
 tests/*.json
 .env

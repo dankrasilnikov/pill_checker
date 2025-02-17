@@ -34,17 +34,20 @@ MODEL_IMAGE_TAG = $(IMAGE_REGISTRY)/$(IMAGE_REPOSITORY)/$(MODEL_IMAGE_NAME):$(IM
 CORE_IMAGE_TAG = $(IMAGE_REGISTRY)/$(IMAGE_REPOSITORY)/$(CORE_IMAGE_NAME):$(IMAGE_VERSION)
 UI_IMAGE_TAG = $(IMAGE_REGISTRY)/$(IMAGE_REPOSITORY)/$(UI_IMAGE_NAME):$(IMAGE_VERSION)
 
+# If the environment variable PUSH is non-empty, include the --push flag.
+PUSH_PARAMS = $(if $(PUSH),--push,)
+
 .PHONY: image-model
 image-model:
-	docker buildx build -t $(MODEL_IMAGE_TAG) -f model/Dockerfile model
+	docker buildx build -t $(MODEL_IMAGE_TAG) $(PUSH_PARAMS) -f model/Dockerfile model
 
 .PHONY: image-core
 image-core:
-	docker buildx build -t $(CORE_IMAGE_TAG) -f core/Dockerfile core
+	docker buildx build -t $(CORE_IMAGE_TAG) $(PUSH_PARAMS) -f core/Dockerfile core
 
 .PHONY: image-ui
 image-ui:
-	docker buildx build -t $(UI_IMAGE_TAG) -f ui/Dockerfile ui
+	docker buildx build -t $(UI_IMAGE_TAG) $(PUSH_PARAMS) -f ui/Dockerfile ui
 
 .PHONY: image
 image: image-model image-core image-ui

@@ -2,6 +2,7 @@ alembic
 easyocr==1.7.2
 gevent==24.11.1
 gunicorn==22.0.0
+itsdangerous
 psycopg2-binary==2.9.10
 pydantic
 python-dotenv
@@ -9,4 +10,3 @@ python-multipart
 Requests==2.32.3
 sqlalchemy
 supabase==2.11.0
-itsdangerous

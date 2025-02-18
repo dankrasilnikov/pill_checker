@@ -1,8 +1,8 @@
 import os
 
-import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
+from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from core.auth_views import SupabaseAuthRoutes
@@ -13,10 +13,10 @@ class AppEntry:
 
     def __init__(self, app: FastAPI):
         self.templates = Jinja2Templates(directory="templates")
+        self.static_dir = "static"
+        app.mount("/static", StaticFiles(directory=self.static_dir), name="static")
         self.app = app
-        self.static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
         self._register_routes()
-
 
     def _register_routes(self):
         BasicRoutes(self.app, self.templates, self.static_dir)
@@ -33,4 +33,4 @@ class BasicRoutes:
 
         @app.get("/favicon.ico")
         async def favicon(request: Request):
-            return FileResponse(static_dir+"/favicon.ico", media_type="image/x-icon")
+            return FileResponse(os.path.join(static_dir, "favicon.ico"), media_type="image/x-icon")

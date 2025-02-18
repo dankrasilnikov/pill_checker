@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status, Request
-from models import Profile
+from postgrest import APIError
+
+from supabase_client import get_supabase_client
 
 
 def supabase_login_required(request: Request):
@@ -12,10 +14,26 @@ def supabase_login_required(request: Request):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
     try:
-        auth_user = Profile.objects.get(user_id=supabase_user)
-    except Profile.DoesNotExist:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Profile not found")
+        # Query the profile from Supabase
+        # TODO fixme
+        profile = (
+            get_supabase_client()
+            .from_("profiles")
+            .select("*")
+            .eq("user_id", supabase_user)
+            .single()
+            .execute()
+        )
 
-    request.state.auth_user = auth_user
+        if not profile.data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Profile not found"
+            )
 
-    return auth_user
+        request.state.auth_user = profile.data
+        return profile.data
+
+    except APIError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {str(e)}"
+        )

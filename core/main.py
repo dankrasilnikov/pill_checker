@@ -25,11 +25,10 @@ def load_db():
 
     # Test the connection
     try:
-        with engine.connect() as connection:
+        with engine.connect():
             print("DB connection established successfully!")
     except Exception as e:
         print(f"Failed to connect to DB: {e}")
-    pass
 
 
 app = FastAPI()
@@ -38,7 +37,7 @@ app.add_middleware(
     secret_key="very-secret-key",
     max_age=86400,  # 1 day
     https_only=True,
-    same_site="lax"
+    same_site="lax",
 )
 load_db()
 entry_point = AppEntry(app=app)

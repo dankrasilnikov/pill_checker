@@ -1,35 +1,36 @@
 import logging
 
 from fastapi import Request, Depends, Form, status, FastAPI
-from fastapi.openapi.models import Response
 from fastapi.responses import HTMLResponse, RedirectResponse
-import os
-
+from postgrest import APIError
 from starlette.templating import Jinja2Templates
 
 from auth_service import sign_up_user, sign_in_user
+from core.supabase_client import get_supabase_client
 from decorators import supabase_login_required
 from forms import ProfileUpdateForm
-from models import Profile
 
 
 class SupabaseAuthRoutes:
     def __init__(self, app: FastAPI, templates: Jinja2Templates):
-        STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
         logger = logging.getLogger(__name__)
 
         @app.post("/signup", name="signup", response_class=HTMLResponse)
         def supabase_signup_view(request):
             email = request.POST.get("email")
             password = request.POST.get("password")
-            request.POST.get("username", email)
+            username = request.POST.get("username", email)
             try:
                 result = sign_up_user(email, password)
                 if result and hasattr(result, "user"):
                     request.session["supabase_user"] = result.user.id
                     request.user = result.user
 
-                    Profile.objects.create(user_id=result.user.id, defaults={"display_name": email})
+                    # Create profile using Supabase
+                    get_supabase_client().from_("profiles").insert(
+                        {"user_id": result.user.id, "display_name": username}
+                    ).execute()
+
                     logger.success(request, "Signed up successfully. Please log in.")
                     return RedirectResponse(url="/login", status_code=status.HTTP_200_OK)
                 else:
@@ -38,10 +39,17 @@ class SupabaseAuthRoutes:
                         url="/signup?error=Sign-up failed. Check your email/password.",
                         status_code=status.HTTP_400_BAD_REQUEST,
                     )
-            except Exception as e:
-                logger.error(request, f"Sign-up error: {e}")
+            except APIError as e:
+                logger.error(request, f"Database error: {str(e)}")
                 return RedirectResponse(
-                    url="/signup?error=Sign-up error: {e}", status_code=status.HTTP_400_BAD_REQUEST
+                    url="/signup?error=Database error occurred",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            except Exception as e:
+                logger.error(request, f"Sign-up error: {str(e)}")
+                return RedirectResponse(
+                    url="/signup?error=Sign-up error occurred",
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
 
         @app.get("/signup", name="signup", response_class=HTMLResponse)
@@ -49,39 +57,38 @@ class SupabaseAuthRoutes:
             return RedirectResponse(url="/signup", status_code=status.HTTP_200_OK)
 
         @app.post("/login", name="login", response_class=HTMLResponse)
-        def supabase_login_view(
+        async def supabase_login_view(
             request: Request,
             email: str = Form(...),
             password: str = Form(...),
         ):
+            logger.info(f"Login attempt for user: {email}")
             try:
                 result = sign_in_user(email, password)
                 if result and hasattr(result, "user"):
                     request.session["supabase_user"] = result.user.id
-                    request.user = result.user
-
-                    # Ensure the profile exists
-                    Profile.objects.get_or_create(
-                        user_id=result.user.id, defaults={"display_name": email}
+                    logger.info(f"User {email} logged in successfully, redirecting to dashboard")
+                    response = RedirectResponse(
+                        url="/dashboard",
+                        status_code=status.HTTP_303_SEE_OTHER,  # Changed to 303 for POST-to-GET redirect
                     )
-
-                    logger.success(request, "Successfully logged in!")
-                    return RedirectResponse(url="/dashboard", status_code=status.HTTP_200_OK)
+                    response.headers["Location"] = "/dashboard"
+                    return response
                 else:
-                    logger.error(request, "Invalid credentials or login failed.")
-                    return Response(description="Invalid credentials or login failed")
-            except Profile.DoesNotExist:
-                logger.error("Profile does not exist for user: %s", email)
-                return RedirectResponse(
-                    url="/login?error=Profile does not exist.",
-                    status_code=status.HTTP_404_NOT_FOUND,
-                )
+                    logger.error("Invalid credentials or login failed.")
+                    response = RedirectResponse(
+                        url="/login?error=Invalid credentials",
+                        status_code=status.HTTP_303_SEE_OTHER,
+                    )
+                    response.headers["Location"] = "/login?error=Invalid credentials"
+                    return response
             except Exception:
-                logger.exception("Supabase login error for user: %s", email)
-                return RedirectResponse(
-                    url="/login?error=Supabase login error for user",
-                    status_code=status.HTTP_403_FORBIDDEN,
+                logger.exception(f"Login error for user {email}")
+                response = RedirectResponse(
+                    url="/login?error=Login error occurred", status_code=status.HTTP_303_SEE_OTHER
                 )
+                response.headers["Location"] = "/login?error=Login error occurred"
+                return response
 
         @app.get("/login", name="login", response_class=HTMLResponse)
         def get_supabase_login_view(request: Request):
@@ -101,20 +108,35 @@ class SupabaseAuthRoutes:
             profile_updates: ProfileUpdateForm, user=Depends(supabase_login_required)
         ):
             try:
-                profile = Profile.objects.get(user_id=user.id)
-            except Profile.DoesNotExist:
-                return RedirectResponse(
-                    url="/profile/update?error=Profile does not exist.",
-                    status_code=status.HTTP_404_NOT_FOUND,
+                # Check if profile exists
+                profile = (
+                    get_supabase_client()
+                    .from_("profiles")
+                    .select("*")
+                    .eq("user_id", user.id)
+                    .single()
                 )
-            try:
-                profile.display_name = profile_updates.display_name
-                profile.bio = profile_updates.bio
-                profile.save()
-            except Exception as e:
+                if not profile:
+                    return RedirectResponse(
+                        url="/profile/update?error=Profile does not exist.",
+                        status_code=status.HTTP_404_NOT_FOUND,
+                    )
+
+                # Update profile using Supabase
+                get_supabase_client().from_("profiles").update(
+                    {"display_name": profile_updates.display_name, "bio": profile_updates.bio}
+                ).eq("user_id", user.id).execute()
+
+            except APIError as e:
+                logger.error(f"Database error: {str(e)}")
+                return RedirectResponse(
+                    url="/profile/update?error=Database error occurred",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+            except Exception:
                 logger.exception("Profile update error:")
                 return RedirectResponse(
-                    url=f"/profile/update?error=Profile update error: {e}",
+                    url="/profile/update?error=Profile update error occurred",
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
 

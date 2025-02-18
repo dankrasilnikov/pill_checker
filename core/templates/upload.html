@@ -105,8 +105,12 @@
     <div class="container">
         <h2>Upload Medication</h2>
         <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
+            {% for field in form %}
+            <div>
+                <label for="{{ field.id }}">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
             <button type="submit">Upload</button>
         </form>
 
@@ -116,7 +120,7 @@
             {% endfor %}
         </div>
 
-        <p><a href="{{ request.url_for('dashboard') }}">Back to Dashboard</a></p>
+        <p><a href="{{ url_for('dashboard') }}">Back to Dashboard</a></p>
     </div>
 </body>
 </html>

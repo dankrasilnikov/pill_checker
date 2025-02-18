@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { useMedsStore } from '$entities/medications/model/medicationsStore';
+import { IMedication } from '$entities/medications/types';
 import { MedicationsListItem } from '$entities/medications/ui/MedicationsListItem';
 import { MedicationsModal } from '$entities/medications/ui/MedicationsModal';
 import { useScan } from '$features/recognition/hooks/useScan';
@@ -10,6 +11,7 @@ import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
 import { ScanButton } from '$features/recognition/ui/ScanButton';
+import { Layout } from '$pages/ui/Layout';
 
 export const Dashboard = () => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -56,12 +58,12 @@ export const Dashboard = () => {
     setCameraVisible(false);
   };
 
-  const renderItem = ({ item }: { item: any }) => (
+  const renderItem = ({ item }: { item: IMedication }) => (
     <MedicationsListItem item={item} setItemData={setItemData} />
   );
 
   return (
-    <View style={styles.wrapper}>
+    <Layout>
       <CameraModal
         loading={loading}
         visible={cameraVisible}
@@ -103,7 +105,7 @@ export const Dashboard = () => {
         </View>
       )}
       <ScanButton onPress={openCamera} />
-    </View>
+    </Layout>
   );
 };
 

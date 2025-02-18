@@ -1,7 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 import { useEffect, useState } from 'react';
 
-import { useUserStore } from '$entities/user';
 import { AuthPage } from '$pages/Auth';
 import { Dashboard } from '$pages/Dashboard';
 import { GreetingPage } from '$pages/Greeting';
@@ -13,7 +12,7 @@ Sentry.init({
 
 // eslint-disable-next-line import/no-default-export
 export default function App() {
-  const { isAuthenticated, fetchUser } = useUserStore();
+  // const { isAuthenticated, fetchUser } = useUserStore();
   const [isLoading, setLoading] = useState(true);
   const [isEducation, setEducation] = useState(true);
 
@@ -29,6 +28,8 @@ export default function App() {
   useEffect(() => {
     // fetchUser();
   }, []);
+
+  return <Dashboard />;
 
   if(isLoading) {
     return <GreetingPage/>

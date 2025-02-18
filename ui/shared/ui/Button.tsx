@@ -1,32 +1,38 @@
-import { Pressable, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 
-interface Props {
+type Props = {
   pressedColor?: string;
   backgroundColor?: string;
+  borderColor?: string;
   color?: string;
   width?: string;
   onPress: () => void;
-  label: string;
-}
+  children?: React.ReactNode;
+};
 
-export const AuthButton = ({
+export const Button = ({
   pressedColor = '#0493b3',
   backgroundColor = '#2563EB',
-  color = '#fff',
   borderColor = '',
   onPress,
-  label,
   width = '100%',
+  children,
 }: Props) => {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: pressed ? pressedColor : backgroundColor, width, borderColor, borderWidth: borderColor ? 1 : 0 },
+        {
+          backgroundColor: pressed ? pressedColor : backgroundColor,
+          width,
+          borderColor,
+          borderWidth: borderColor ? 1 : 0,
+        },
       ]}
       onPress={onPress}
     >
-      <Text style={[styles.buttonText, { color }]}>{label}</Text>
+      {children}
     </Pressable>
   );
 };

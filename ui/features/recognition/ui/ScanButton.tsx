@@ -21,8 +21,8 @@ export const ScanButton = ({ onPress }: Props) => {
 const styles = StyleSheet.create({
   buttonWrapper: {
     position: 'absolute',
-    bottom: 10,
-    right: 10,
+    bottom: 0,
+    right: 0,
   },
   label: {
     fontSize: 24,

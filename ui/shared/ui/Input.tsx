@@ -1,4 +1,4 @@
-import { Dimensions, Text, TextInput, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface Props {
   label: string;
@@ -9,7 +9,7 @@ interface Props {
   type?: 'none' | 'password';
 }
 
-export const AuthInput = ({ label, placeholder, value, onChange, type = 'none' }: Props) => {
+export const Input = ({ label, placeholder, value, onChange, type = 'none' }: Props) => {
   return (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{label}</Text>
@@ -26,19 +26,21 @@ export const AuthInput = ({ label, placeholder, value, onChange, type = 'none' }
 
 const { height } = Dimensions.get('window');
 
-const styles = {
+const styles = StyleSheet.create({
   inputContainer: {},
   label: {
     fontSize: 12,
     marginBottom: height * 0.01,
     marginLeft: 7,
-    color: '#1F2937'
+    color: '#1F2937',
+    fontWeight: 'bold',
+    textAlign: 'left',
   },
   input: {
     borderWidth: 1,
-    bacgroundColor: '#fff',
+    backgroundColor: '#fff',
     borderColor: '#E0E0E0',
     borderRadius: 5,
     marginBottom: height * 0.02,
   },
-};
+});

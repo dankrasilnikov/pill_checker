@@ -4,7 +4,7 @@ import { Dimensions, Platform, Pressable, StyleSheet, Text, TouchableOpacity, Vi
 import { useUserStore } from '$entities/user';
 import { signUpWithPassword } from '$features/auth/api/authApi';
 import { AuthButton } from '$shared/ui/AuthButton';
-import { AuthInput } from '$shared/ui/Authinput';
+import { Input } from '$shared/ui/Input';
 
 export const SignIn = () => {
   const [email, onChangeEmail] = useState<string>('');
@@ -39,13 +39,13 @@ export const SignIn = () => {
       </View>
 
       <View style={styles.authContainer}>
-        <AuthInput
+        <Input
           value={email}
           onChange={onChangeEmail}
           label={'Email'}
           placeholder={'Enter your email'}
         />
-        <AuthInput
+        <Input
           type={'password'}
           value={password}
           onChange={onChangePassword}

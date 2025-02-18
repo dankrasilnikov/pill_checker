@@ -19,16 +19,6 @@ export const ScanButton = ({ onPress }: Props) => {
 };
 
 const styles = StyleSheet.create({
-  button: {
-    borderRadius: 8,
-    backgroundColor: '#0873bb',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    zIndex: 1000,
-  },
   buttonWrapper: {
     position: 'absolute',
     bottom: 10,
@@ -37,10 +27,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 24,
     color: '#ffffff',
-  },
-  icon: {
-    width: 40,
-    height: 40,
   },
   buttonContentWrapper: {
     display: 'flex',

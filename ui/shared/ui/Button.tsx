@@ -39,7 +39,7 @@ export const Button = ({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
   },

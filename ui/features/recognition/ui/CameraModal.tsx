@@ -2,7 +2,7 @@ import { CameraView } from 'expo-camera';
 import { Modal, Pressable, StyleSheet, Text } from 'react-native';
 
 import { ScanButton } from '$features/recognition/ui/ScanButton';
-import { LoadingOverlay } from '$shared/ui/LoadingOverlay';
+import { Loading } from '$shared/ui/Loading';
 
 export const CameraModal = ({ visible, cameraRef, loading, onClose, onScan }) => {
   return (
@@ -12,7 +12,7 @@ export const CameraModal = ({ visible, cameraRef, loading, onClose, onScan }) =>
           <Text style={styles.closeButtonText}>Close</Text>
         </Pressable>
         <ScanButton onPress={onScan} />
-        {loading && <LoadingOverlay />}
+        {loading && <Loading />}
       </CameraView>
     </Modal>
   );

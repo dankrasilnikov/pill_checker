@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-export const LoadingOverlay = () => (
+export const Loading = () => (
   <View style={styles.overlay}>
     <ActivityIndicator size='large' color='#0873bb' />
     <Text style={styles.text}>Processing...</Text>

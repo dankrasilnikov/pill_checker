@@ -18,7 +18,7 @@ class SupabaseAuthRoutes:
         STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
         logger = logging.getLogger(__name__)
 
-        @app.post("/signup", response_class=HTMLResponse)
+        @app.post("/signup", name="signup", response_class=HTMLResponse)
         def supabase_signup_view(request):
             email = request.POST.get("email")
             password = request.POST.get("password")
@@ -44,11 +44,11 @@ class SupabaseAuthRoutes:
                     url="/signup?error=Sign-up error: {e}", status_code=status.HTTP_400_BAD_REQUEST
                 )
 
-        @app.get("/signup", response_class=HTMLResponse)
+        @app.get("/signup", name="signup", response_class=HTMLResponse)
         def supabase_signup_view():
             return RedirectResponse(url="/signup", status_code=status.HTTP_200_OK)
 
-        @app.post("/login", response_class=HTMLResponse)
+        @app.post("/login", name="login", response_class=HTMLResponse)
         def supabase_login_view(
             request: Request,
             email: str = Form(...),
@@ -83,16 +83,20 @@ class SupabaseAuthRoutes:
                     status_code=status.HTTP_403_FORBIDDEN,
                 )
 
-        @app.post("/logout", response_class=HTMLResponse)
-        def supabase_logout_view(request):
+        @app.get("/login", name="login", response_class=HTMLResponse)
+        def get_supabase_login_view(request: Request):
+            return templates.TemplateResponse("login.html", {"request": request})
+
+        @app.post("/logout", name="logout", response_class=HTMLResponse)
+        def supabase_logout_view(request: Request):
             # TODO Implement logging out from supabase
-            return RedirectResponse(url="/login", status_code=status.HTTP_200_OK)
+            return RedirectResponse(url="/logout", status_code=status.HTTP_200_OK)
 
-        @app.get("/logout", response_class=HTMLResponse)
-        def supabase_logout_view():
-            return templates.TemplateResponse("logout.html")
+        @app.get("/logout", name="logout", response_class=HTMLResponse)
+        def supabase_logout_view(request: Request):
+            return templates.TemplateResponse("logout.html", {"request": request})
 
-        @app.post("/profile/update", response_class=HTMLResponse)
+        @app.post("/profile/update", name="update_profile", response_class=HTMLResponse)
         async def update_profile(
             profile_updates: ProfileUpdateForm, user=Depends(supabase_login_required)
         ):

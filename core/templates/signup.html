@@ -117,7 +117,7 @@
             <button class="button" type="submit">Sign Up</button>
         </form>
 
-        <p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+        <p>Already have an account? <a href="{{ request.url_for('login') }}">Log in</a></p>
 
         <div class="messages">
             {% for message in messages %}

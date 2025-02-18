@@ -116,7 +116,7 @@
             {% endfor %}
         </div>
 
-        <p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
+        <p><a href="{{ request.url_for('dashboard') }}">Back to Dashboard</a></p>
     </div>
 </body>
 </html>

@@ -96,7 +96,7 @@
             {% csrf_token %}
             <button type="submit">Log Out</button>
         </form>
-        <p><a href="{% url 'dashboard' %}">Cancel</a></p>
+        <p><a href="{{ request.url_for('dashboard') }}">Cancel</a></p>
     </div>
 </body>
 </html>

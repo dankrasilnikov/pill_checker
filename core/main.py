@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
+from starlette.middleware.sessions import SessionMiddleware
 
 from app_entry import AppEntry
 
@@ -32,5 +33,12 @@ def load_db():
 
 
 app = FastAPI()
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="very-secret-key",
+    max_age=86400,  # 1 day
+    https_only=True,
+    same_site="lax"
+)
 load_db()
 entry_point = AppEntry(app=app)

@@ -27,12 +27,12 @@ class MedicationRoutes:
             request.session["active_ingredients"] = active_ingredients
             return RedirectResponse(url="/result", status_code=status.HTTP_200_OK)
 
-        @app.get("/dashboard", response_class=HTMLResponse)
+        @app.get("/dashboard", name="dashboard", response_class=HTMLResponse)
         async def user_dashboard(request: Request, user=Depends(supabase_login_required)):
             medications = Medication.objects.filter(profile=user).order_by(F("scan_date").desc())
-            return templates.TemplateResponse("dashboard.html", {"medications": medications})
+            return templates.TemplateResponse("dashboard.html", {"request": request, "medications": medications})
 
-        @app.get("/result", response_class=HTMLResponse)
+        @app.get("/result", name="result", response_class=HTMLResponse)
         async def show_result(request: Request):
             ingredients = request.session.get("active_ingredients", [])
             return templates.TemplateResponse(

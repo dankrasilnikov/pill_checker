@@ -165,7 +165,7 @@
         <!-- Header or top section -->
         <div class="header">
             <h1>Welcome, {{ request.auth_user.display_name }}!</h1>
-            <a href="{% url 'logout' %}">Log Out</a>
+            <a href="{{ request.url_for('logout') }}" class="button">Log Out</a>
         </div>
 
         <hr style="margin-bottom: var(--spacing-md);">
@@ -188,12 +188,12 @@
             </ul>
         {% else %}
             <div class="no-medications">
-                <p>You have no scanned medications yet. <a href="{% url 'upload' %}">Scan one now!</a></p>
+                <p>You have no scanned medications yet. <a href="{{ request.url_for('upload') }}">Scan one now!</a></p>
             </div>
         {% endif %}
 
-        <a href="{% url 'upload' %}" class="button">Scan More Medications</a>
-        <a href="{% url 'update_profile' %}" class="button">Update Profile</a>
+        <a href="{{ request.url_for('upload') }}" class="button">Scan More Medications</a>
+        <a href="{{ request.url_for('update_profile') }}" class="button">Update Profile</a>
     </div>
 </body>
 </html>

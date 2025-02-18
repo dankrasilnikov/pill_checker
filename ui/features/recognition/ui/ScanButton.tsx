@@ -1,49 +1,20 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Image, Pressable, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+import PlusIcon from '$assets/plusIcon.svg';
+import { Button } from '$shared/ui/Button';
 
 type Props = {
-  onPress: any;
+  onPress: () => void;
 };
 
 export const ScanButton = ({ onPress }: Props) => {
-  const animation = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const startJumpAnimation = () => {
-      Animated.sequence([
-        Animated.timing(animation, {
-          toValue: -10, // Jump up
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 0, // Back to initial position
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: -10, // Second jump up
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation, {
-          toValue: 0, // Back to initial position
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    };
-
-    startJumpAnimation();
-  }, [animation]);
-
   return (
-    <Pressable onPress={onPress} style={styles.buttonWrapper}>
-      <Animated.View style={[styles.button, { transform: [{ translateY: animation }] }]}>
-        <Image style={styles.icon} source={require('$assets/scan.png')} />
-        <Text style={styles.label}>Scan</Text>
-      </Animated.View>
-    </Pressable>
+    <Button onPress={onPress}>
+      <View style={styles.buttonContentWrapper}>
+        <PlusIcon width={30} height={30} />
+        <Text style={styles.label}>Add medication</Text>
+      </View>
+    </Button>
   );
 };
 
@@ -70,5 +41,13 @@ const styles = StyleSheet.create({
   icon: {
     width: 40,
     height: 40,
+  },
+  buttonContentWrapper: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    flexDirection: 'row',
+    gap: 7,
   },
 });

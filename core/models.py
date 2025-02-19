@@ -41,7 +41,7 @@ class Medication(Base):
     profile_id = Column(BigInteger, ForeignKey("profiles.id"), nullable=False)
     title = Column(String(length=255), nullable=True)
     scan_date = Column(DateTime, default=datetime.utcnow)
-    active_ingredients = Column(JSON, nullable=True)
+    active_ingredients = Column(Text, nullable=True)
     scanned_text = Column(Text, nullable=True)
     dosage = Column(String(length=255), nullable=True)
     prescription_details = Column(JSON, nullable=True)

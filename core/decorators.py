@@ -1,39 +1,33 @@
 from fastapi import HTTPException, status, Request
 from postgrest import APIError
+import logging
 
 from supabase_client import get_supabase_client
+
+logger = logging.getLogger(__name__)
 
 
 def supabase_login_required(request: Request):
     """
-    Checks if a supabase_user is in the session. If not, raises an HTTPException.
-    Otherwise, retrieves the corresponding user Profile and returns it.
+    Checks if a user is in the session and returns the user data
     """
-    supabase_user = request.session.get("supabase_user")
-    if not supabase_user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    try:
-        # Query the profile from Supabase
-        # TODO fixme
-        profile = (
-            get_supabase_client()
-            .from_("profiles")
-            .select("*")
-            .eq("user_id", supabase_user)
-            .single()
-            .execute()
+    user_id = request.session.get("supabase_user")
+    if not user_id:
+        logger.warning("No user_id found in session")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
         )
 
-        if not profile.data:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Profile not found"
-            )
+    try:
+        profile = get_supabase_client().auth.get_user()
 
-        request.state.auth_user = profile.data
-        return profile.data
+        if not profile.user.aud:
+            logger.error(f"No profile found for user_id: {user_id}")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
+        return profile.user
 
     except APIError as e:
+        logger.error(f"Database error in auth check: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error"
         )

@@ -5,8 +5,10 @@ from fastapi import FastAPI
 from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from app_entry import AppEntry
+from logging_config import setup_logging
 
 
 def load_db():
@@ -31,13 +33,26 @@ def load_db():
         print(f"Failed to connect to DB: {e}")
 
 
+# Setup logging at the start of your application
+logger = setup_logging()
+
 app = FastAPI()
 app.add_middleware(
     SessionMiddleware,
     secret_key="very-secret-key",
+    session_cookie="session",
     max_age=86400,  # 1 day
     https_only=True,
     same_site="lax",
+)
+
+# Add CORS middleware if needed
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 load_db()
 entry_point = AppEntry(app=app)

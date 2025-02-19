@@ -104,14 +104,16 @@
 <body>
     <div class="container">
         <h2>Upload Medication</h2>
-        <form method="POST" enctype="multipart/form-data">
-            {% for field in form %}
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('upload') }}">
             <div>
-                <label for="{{ field.id }}">{{ field.label }}</label>
-                {{ field }}
+                <label for="image">Upload Medication Image:</label>
+                <input type="file"
+                       id="image"
+                       name="image"
+                       accept="image/*"
+                       required>
             </div>
-            {% endfor %}
-            <button type="submit">Upload</button>
+            <button type="submit" class="button">Upload</button>
         </form>
 
         <div class="messages">

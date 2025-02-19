@@ -66,12 +66,18 @@ class SupabaseAuthRoutes:
             try:
                 result = sign_in_user(email, password)
                 if result and hasattr(result, "user"):
+                    # Set session data
                     request.session["supabase_user"] = result.user.id
+                    request.session["user"] = {
+                        "id": result.user.id,
+                        "email": result.user.email,
+                    }
+
                     logger.info(f"User {email} logged in successfully, redirecting to dashboard")
                     response = RedirectResponse(
-                        url="/dashboard",
-                        status_code=status.HTTP_303_SEE_OTHER,  # Changed to 303 for POST-to-GET redirect
+                        url="/dashboard", status_code=status.HTTP_303_SEE_OTHER
                     )
+                    # The session middleware will automatically handle saving the session
                     response.headers["Location"] = "/dashboard"
                     return response
                 else:
@@ -96,7 +102,7 @@ class SupabaseAuthRoutes:
 
         @app.post("/logout", name="logout", response_class=HTMLResponse)
         def supabase_logout_view(request: Request):
-            # TODO Implement logging out from supabase
+            response = get_supabase_client().auth.sign_out()
             return RedirectResponse(url="/logout", status_code=status.HTTP_200_OK)
 
         @app.get("/logout", name="logout", response_class=HTMLResponse)

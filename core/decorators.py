@@ -21,6 +21,11 @@ def supabase_login_required(request: Request):
     try:
         profile = get_supabase_client().auth.get_user()
 
+        if not profile:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+            )
+
         if not profile.user.aud:
             logger.error(f"No profile found for user_id: {user_id}")
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")

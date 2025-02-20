@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import Request, Depends, Form, status, FastAPI
+from fastapi import Request, Depends, status, FastAPI, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from postgrest import APIError
 from starlette.templating import Jinja2Templates
@@ -8,7 +8,7 @@ from starlette.templating import Jinja2Templates
 from auth_service import sign_up_user, sign_in_user
 from core.supabase_client import get_supabase_client
 from decorators import supabase_login_required
-from forms import ProfileUpdateForm
+from forms import ProfileUpdateForm  # Using WTForms
 
 
 class SupabaseAuthRoutes:
@@ -16,10 +16,11 @@ class SupabaseAuthRoutes:
         logger = logging.getLogger(__name__)
 
         @app.post("/signup", name="signup", response_class=HTMLResponse)
-        def supabase_signup_view(request):
-            email = request.POST.get("email")
-            password = request.POST.get("password")
-            username = request.POST.get("username", email)
+        async def supabase_signup_view(request: Request):
+            form_data = await request.form()
+            email = form_data.get("email")
+            password = form_data.get("password")
+            username = form_data.get("username", email)
             try:
                 result = sign_up_user(email, password)
                 if result and hasattr(result, "user"):
@@ -53,8 +54,8 @@ class SupabaseAuthRoutes:
                 )
 
         @app.get("/signup", name="signup", response_class=HTMLResponse)
-        def supabase_signup_view():
-            return RedirectResponse(url="/signup", status_code=status.HTTP_200_OK)
+        async def get_supabase_signup_view(request: Request):
+            return templates.TemplateResponse("signup.html", {"request": request})
 
         @app.post("/login", name="login", response_class=HTMLResponse)
         async def supabase_login_view(
@@ -77,7 +78,6 @@ class SupabaseAuthRoutes:
                     response = RedirectResponse(
                         url="/dashboard", status_code=status.HTTP_303_SEE_OTHER
                     )
-                    # The session middleware will automatically handle saving the session
                     response.headers["Location"] = "/dashboard"
                     return response
                 else:
@@ -106,12 +106,21 @@ class SupabaseAuthRoutes:
             return RedirectResponse(url="/logout", status_code=status.HTTP_200_OK)
 
         @app.get("/logout", name="logout", response_class=HTMLResponse)
-        def supabase_logout_view(request: Request):
+        def get_supabase_logout_view(request: Request):
             return templates.TemplateResponse("logout.html", {"request": request})
 
+        @app.get("/profile/update", name="update_profile", response_class=HTMLResponse)
+        def update_profile_get(request: Request, user=Depends(supabase_login_required)):
+            form_data = {"display_name": "", "bio": ""}
+            return templates.TemplateResponse(
+                "update_profile.html", {"request": request, "form": form_data}
+            )
+
         @app.post("/profile/update", name="update_profile", response_class=HTMLResponse)
-        async def update_profile(
-            profile_updates: ProfileUpdateForm, user=Depends(supabase_login_required)
+        async def update_profile_post(
+            request: Request,
+            user=Depends(supabase_login_required),
+            form: ProfileUpdateForm = Depends(ProfileUpdateForm.as_form),  # Use as_form here
         ):
             try:
                 # Check if profile exists
@@ -128,9 +137,8 @@ class SupabaseAuthRoutes:
                         status_code=status.HTTP_404_NOT_FOUND,
                     )
 
-                # Update profile using Supabase
-                get_supabase_client().from_("profiles").update(
-                    {"display_name": profile_updates.display_name, "bio": profile_updates.bio}
+                get_supabase_client().schema("public").table("profiles").update(
+                    {"display_name": form.display_name, "bio": form.bio}
                 ).eq("user_id", user.id).execute()
 
             except APIError as e:
@@ -146,4 +154,4 @@ class SupabaseAuthRoutes:
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
 
-            return RedirectResponse(url="/dashboard", status_code=status.HTTP_200_OK)
+            return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)

@@ -87,7 +87,8 @@ class MedicationRoutes:
                 ).data
 
                 response = templates.TemplateResponse(
-                    "dashboard.html", {"request": request, "medications": medications, "user": user}
+                    "dashboard.html",
+                    {"request": request, "medications": medications, "user": profile},
                 )
                 return response
 

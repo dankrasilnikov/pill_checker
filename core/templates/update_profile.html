@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-    <!-- 1. Include a Google Font (Roboto) -->
+    <title>Update Profile</title>
+    <!-- 1. Google Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    >
     <style>
-        /* 2. CSS Variables for easy theming */
         :root {
             --primary-color: #007bff;
             --primary-hover-color: #0056b3;
@@ -16,10 +17,8 @@
             --background-color: #f4f4f4;
             --card-background: #fff;
             --border-color: #ddd;
-
             --font-family-base: 'Roboto', sans-serif;
 
-            /* Spacing scale */
             --spacing-xs: 4px;
             --spacing-sm: 8px;
             --spacing-md: 16px;
@@ -27,7 +26,6 @@
             --spacing-xl: 32px;
         }
 
-        /* 3. Global resets & base styles */
         * {
             margin: 0;
             padding: 0;
@@ -40,21 +38,20 @@
             line-height: 1.5;
         }
 
-        /* 4. Container styling */
         .container {
             width: 90%;
-            max-width: 400px;
+            max-width: 600px;
             margin: var(--spacing-lg) auto;
-            padding: var(--spacing-md);
+            padding: var(--spacing-lg);
             background-color: var(--card-background);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-        }
-        h2 {
-            margin-bottom: var(--spacing-md);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* 5. Form elements */
+        h2 {
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
         form {
             display: flex;
             flex-direction: column;
@@ -64,7 +61,7 @@
             color: #666;
             font-size: 0.95rem;
         }
-        input {
+        input, select, textarea {
             margin-bottom: var(--spacing-md);
             padding: var(--spacing-sm) var(--spacing-md);
             border: 1px solid var(--border-color);
@@ -72,72 +69,66 @@
             font-size: 1rem;
         }
 
-        /* 6. Button styling */
-        button {
+        .button {
             padding: var(--spacing-sm) var(--spacing-md);
             background-color: var(--primary-color);
             color: #fff;
             border: none;
             border-radius: 4px;
-            font-size: 1rem;
             cursor: pointer;
+            font-size: 1rem;
             transition: background-color 0.2s ease, transform 0.2s ease;
         }
-        button:hover {
+        .button:hover {
             background-color: var(--primary-hover-color);
             transform: translateY(-1px);
         }
 
-        /* 7. Typography & links */
-        p {
+        .messages {
             margin: var(--spacing-md) 0;
+            color: red;
+            text-align: center;
+        }
+        p {
+            text-align: center;
             color: #666;
+            margin-top: var(--spacing-md);
         }
         a {
             color: var(--primary-color);
             text-decoration: none;
-            transition: color 0.2s ease;
         }
         a:hover {
-            color: var(--primary-hover-color);
             text-decoration: underline;
-        }
-
-        /* 8. Message area */
-        .messages {
-            margin: var(--spacing-md) 0;
-            color: red;
-        }
-        .messages p {
-            margin-bottom: var(--spacing-xs);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <label for="id_email">Email:</label>
-            <input type="email" name="email" id="id_email" required>
+  <div class="container">
+    <h2>Update Your Profile</h2>
+    <form method="POST" action="{{ url_for('update_profile') }}">
+      <div class="form-group">
+        <label for="display_name">Display Name</label>
+        <input type="text" id="display_name" name="display_name" value="{{ form.display_name }}">
+      </div>
+      <div class="form-group">
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio">{{ form.bio }}</textarea>
+      </div>
+      <button type="submit">Update</button>
+    </form>
 
-            <label for="id_password">Password:</label>
-            <input type="password" name="password" id="id_password" required>
+    {% if errors %}
+      <div class="error-messages">
+        <ul>
+          {% for error in errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
 
-            <button type="submit">Login</button>
-        </form>
-
-        <p>Don’t have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
-
-        <div class="messages">
-            {% if user.is_authenticated %}
-                <p>Successfully logged in!</p>
-            {% else %}
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
+    <p><a href="{{ url_for('dashboard') }}">Back to Dashboard</a></p>
+  </div>
 </body>
 </html>

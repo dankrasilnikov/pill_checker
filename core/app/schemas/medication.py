@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, Dict, Any
-from pydantic import Field, HttpUrl
+from pydantic import Field, HttpUrl, conint
 
 from .base import BaseSchema
 
@@ -16,7 +16,7 @@ class MedicationBase(BaseSchema):
 
 class MedicationCreate(MedicationBase):
     """Schema for creating a medication."""
-    profile_id: int
+    profile_id: conint(gt=0)  # Must be a positive integer
 
 
 class MedicationUpdate(MedicationBase):

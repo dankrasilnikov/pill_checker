@@ -3,10 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from supabase import Client, create_client
 
-from core.app.core.config import settings
-from core.app.core.database import get_db
-from core.app.models.models import Medication
-from core.app.services.ocr_service import recognise
+from app.core.config import settings
+from app.core.database import get_db
+from app.models.medication import Medication
+from app.services.ocr_service import process_image
 
 router = APIRouter()
 
@@ -33,7 +33,7 @@ async def upload_medication(
         public_url = f"{settings.storage_url}/{file_path}"
 
         # Process image with OCR
-        medication_text = await recognise(file_content)
+        medication_text = await process_image(file_content)
 
         # Create medication record
         medication = Medication(

@@ -1,5 +1,5 @@
-from typing import Optional, List, UUID
-from pydantic import Field
+from typing import Optional, List
+from uuid import UUID
 
 from .base import TimestampedSchema
 from .medication import MedicationResponse
@@ -30,7 +30,7 @@ class ProfileInDB(ProfileBase):
 
 class ProfileResponse(ProfileInDB):
     """Schema for profile response."""
-    medications: Optional[List[MedicationResponse]] = Field(default_factory=list)
+    medications: Optional[List[MedicationResponse]] = []
 
 
 class ProfileWithStats(ProfileResponse):

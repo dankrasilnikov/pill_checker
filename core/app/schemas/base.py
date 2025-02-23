@@ -10,5 +10,5 @@ class BaseSchema(BaseModel):
 
 class TimestampedSchema(BaseSchema):
     """Base schema with timestamp fields."""
-    created_at: datetime
+    created_at: datetime = datetime.utcnow()
     updated_at: Optional[datetime] = None 

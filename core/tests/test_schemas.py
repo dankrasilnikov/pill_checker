@@ -1,15 +1,15 @@
 """Tests for Pydantic schema validation and conversion."""
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
 
-from app.schemas import (
+from core.app.schemas import (
     ProfileCreate, ProfileUpdate, ProfileResponse, ProfileWithStats,
-    MedicationCreate, MedicationUpdate, MedicationResponse,
-    UploadedImageCreate, UploadedImageUpdate, UploadedImageResponse
+    MedicationCreate, MedicationUpdate, UploadedImageCreate, UploadedImageUpdate
 )
+
 
 class TestProfileSchemas:
     """Test suite for Profile-related schemas."""

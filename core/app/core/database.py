@@ -1,32 +1,85 @@
-from sqlalchemy import NullPool, create_engine
-from sqlalchemy.orm import sessionmaker
-from typing import Generator
-from dotenv import load_dotenv
-import os
+"""Database configuration and session management."""
+from contextlib import contextmanager
+from typing import AsyncGenerator, Generator
 
-# Load environment variables from .env
-load_dotenv()
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import QueuePool
 
-# Fetch variables
-USER = os.getenv("DATABASE_USER")
-PASSWORD = os.getenv("DATABASE_PASSWORD")
-HOST = os.getenv("DATABASE_HOST")
-PORT = os.getenv("DATABASE_PORT")
-DBNAME = os.getenv("DATABASE_NAME")
+from .config import settings
+from .logging_config import logger
 
-# Construct the SQLAlchemy connection string
-DATABASE_URL = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}?sslmode=require"
+# Create async engine for the application
+async_engine = create_async_engine(
+    settings.SQLALCHEMY_DATABASE_URI.replace("postgresql+psycopg2", "postgresql+asyncpg"),
+    pool_pre_ping=True,  # Enable connection health checks
+    pool_size=5,  # Maximum number of connections in the pool
+    max_overflow=10,  # Maximum number of connections that can be created beyond pool_size
+    pool_timeout=30,  # Timeout for getting a connection from the pool
+    pool_recycle=1800,  # Recycle connections after 30 minutes
+    echo=settings.DEBUG,  # Log SQL statements in debug mode
+)
 
-# Create SQLAlchemy engine
-engine = create_engine(DATABASE_URL, poolclass=NullPool)
+# Create sync engine for migrations and testing
+sync_engine = create_engine(
+    settings.SQLALCHEMY_DATABASE_URI,
+    poolclass=QueuePool,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800,
+    echo=settings.DEBUG,
+)
 
-# Create SessionLocal class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Create session factories
+AsyncSessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=async_engine,
+    class_=AsyncSession,
+)
 
-# Dependency to get DB session
-def get_db() -> Generator:
-    db = SessionLocal()
+SyncSessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=sync_engine,
+)
+
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    """Get an async database session."""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        except Exception as e:
+            logger.error(f"Database session error: {e}")
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+@contextmanager
+def get_sync_session() -> Generator[Session, None, None]:
+    """Get a synchronous database session."""
+    session = SyncSessionLocal()
     try:
-        yield db
+        yield session
+    except Exception as e:
+        logger.error(f"Database session error: {e}")
+        session.rollback()
+        raise
     finally:
-        db.close()
+        session.close()
+
+# Dependency for FastAPI
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency for getting a database session."""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        except Exception as e:
+            logger.error(f"Database session error: {e}")
+            await session.rollback()
+            raise
+        finally:
+            await session.close()

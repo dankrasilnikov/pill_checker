@@ -4,14 +4,14 @@ from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
-from sqlalchemy.exc import IntegrityError
 
-from app.models import Profile, Medication, UploadedImage
-from app.schemas import (
+from core.app.models import Profile, Medication, UploadedImage
+from core.app.schemas import (
     ProfileCreate, ProfileResponse,
     MedicationCreate, MedicationResponse,
     UploadedImageCreate, UploadedImageResponse
 )
+
 
 class TestProfileModel:
     """Test suite for Profile model and schemas."""

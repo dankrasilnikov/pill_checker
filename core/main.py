@@ -28,16 +28,19 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 setup_security(app)
 setup_events(app)
 
+
 # Basic routes
 @app.get("/")
 async def home(request: Request):
     """Render the home page."""
     return templates.TemplateResponse("base.html", {"request": request, "user": None})
 
+
 @app.get("/favicon.ico")
 async def favicon():
     """Serve the favicon."""
     return FileResponse(static_dir / "img/favicon.svg", media_type="image/svg+xml")
+
 
 # Auth routes
 @app.get("/login")
@@ -45,10 +48,12 @@ async def login_page(request: Request):
     """Render the login page."""
     return templates.TemplateResponse("login.html", {"request": request, "user": None})
 
+
 @app.get("/register")
 async def register_page(request: Request):
     """Render the registration page."""
     return templates.TemplateResponse("register.html", {"request": request, "user": None})
+
 
 @app.get("/dashboard")
 async def dashboard_page(request: Request):
@@ -63,17 +68,12 @@ async def dashboard_page(request: Request):
         },
     )
 
+
 # Include API routers
-app.include_router(
-    auth.router,
-    prefix=f"{settings.API_V1_STR}/auth",
-    tags=["auth"]
-)
+app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 
 app.include_router(
-    medications.router,
-    prefix=f"{settings.API_V1_STR}/medications",
-    tags=["medications"]
+    medications.router, prefix=f"{settings.API_V1_STR}/medications", tags=["medications"]
 )
 
 if __name__ == "__main__":

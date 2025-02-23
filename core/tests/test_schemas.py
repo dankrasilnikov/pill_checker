@@ -1,4 +1,5 @@
 """Tests for Pydantic schema validation and conversion."""
+
 import uuid
 from datetime import datetime
 
@@ -6,8 +7,14 @@ import pytest
 from pydantic import ValidationError
 
 from core.app.schemas import (
-    ProfileCreate, ProfileUpdate, ProfileResponse, ProfileWithStats,
-    MedicationCreate, MedicationUpdate, UploadedImageCreate, UploadedImageUpdate
+    ProfileCreate,
+    ProfileUpdate,
+    ProfileResponse,
+    ProfileWithStats,
+    MedicationCreate,
+    MedicationUpdate,
+    UploadedImageCreate,
+    UploadedImageUpdate,
 )
 
 
@@ -55,7 +62,7 @@ class TestProfileSchemas:
             "display_name": sample_profile_data["display_name"],
             "bio": sample_profile_data["bio"],
             "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "updated_at": datetime.utcnow(),
         }
         response = ProfileResponse(**data)
         assert response.id == data["id"]
@@ -65,6 +72,7 @@ class TestProfileSchemas:
         assert response.bio == data["bio"]
         assert isinstance(response.created_at, datetime)
         assert isinstance(response.updated_at, datetime)
+
 
 class TestMedicationSchemas:
     """Test suite for Medication-related schemas."""
@@ -98,6 +106,7 @@ class TestMedicationSchemas:
         assert medication.title == sample_medication_data["title"]
         assert medication.active_ingredients == sample_medication_data["active_ingredients"]
 
+
 class TestUploadedImageSchemas:
     """Test suite for UploadedImage-related schemas."""
 
@@ -125,6 +134,7 @@ class TestUploadedImageSchemas:
         assert image.image == sample_uploaded_image_data["image"]
         assert image.file_path == sample_uploaded_image_data["file_path"]
 
+
 def test_schema_inheritance():
     """Test schema inheritance and base functionality."""
     # Test ProfileWithStats
@@ -137,9 +147,9 @@ def test_schema_inheritance():
         "updated_at": datetime.utcnow(),
         "total_medications": 5,
         "active_medications": 3,
-        "last_scan_date": "2024-02-23"
+        "last_scan_date": "2024-02-23",
     }
     profile_stats = ProfileWithStats(**stats_data)
     assert profile_stats.total_medications == 5
     assert profile_stats.active_medications == 3
-    assert profile_stats.last_scan_date == "2024-02-23" 
+    assert profile_stats.last_scan_date == "2024-02-23"

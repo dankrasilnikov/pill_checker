@@ -1,4 +1,5 @@
 """Tests for session management."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -12,12 +13,9 @@ TEST_TOKEN = "test_token"
 TEST_USER_DATA = {
     "id": "123",
     "email": "test@example.com",
-    "profile": {
-        "id": 1,
-        "display_name": "Test User",
-        "bio": "Test bio"
-    }
+    "profile": {"id": 1, "display_name": "Test User", "bio": "Test bio"},
 }
+
 
 @pytest.fixture
 def mock_supabase_service():
@@ -28,6 +26,7 @@ def mock_supabase_service():
         mock.return_value = service
         yield service
 
+
 @pytest.fixture
 def test_app(mock_supabase_service):
     """Create test FastAPI application with test routes."""
@@ -35,23 +34,25 @@ def test_app(mock_supabase_service):
     setup_security(app)
 
     @app.get("/test/protected")
-    async def protected_route(user = Depends(get_current_user)):
+    async def protected_route(user=Depends(get_current_user)):
         return {"user": user}
 
     @app.get("/test/optional")
-    async def optional_auth_route(user = Depends(get_optional_user)):
+    async def optional_auth_route(user=Depends(get_optional_user)):
         return {"user": user}
 
     @app.get("/test/profile-required")
-    async def profile_required_route(user = Depends(require_profile)):
+    async def profile_required_route(user=Depends(require_profile)):
         return {"user": user}
 
     return app
+
 
 @pytest.fixture
 def test_client(test_app):
     """Create test client."""
     return TestClient(test_app)
+
 
 class TestSessionManagement:
     """Test suite for session management."""
@@ -62,8 +63,7 @@ class TestSessionManagement:
         mock_supabase_service.verify_token.return_value = TEST_USER_DATA
 
         response = test_client.get(
-            "/test/protected",
-            headers={"Authorization": f"Bearer {TEST_TOKEN}"}
+            "/test/protected", headers={"Authorization": f"Bearer {TEST_TOKEN}"}
         )
 
         assert response.status_code == 200
@@ -82,8 +82,7 @@ class TestSessionManagement:
         mock_supabase_service.verify_token.return_value = None
 
         response = test_client.get(
-            "/test/protected",
-            headers={"Authorization": f"Bearer {TEST_TOKEN}"}
+            "/test/protected", headers={"Authorization": f"Bearer {TEST_TOKEN}"}
         )
 
         assert response.status_code == 401
@@ -95,8 +94,7 @@ class TestSessionManagement:
         mock_supabase_service.verify_token.return_value = TEST_USER_DATA
 
         response = test_client.get(
-            "/test/optional",
-            headers={"Authorization": f"Bearer {TEST_TOKEN}"}
+            "/test/optional", headers={"Authorization": f"Bearer {TEST_TOKEN}"}
         )
 
         assert response.status_code == 200
@@ -114,8 +112,7 @@ class TestSessionManagement:
         mock_supabase_service.verify_token.return_value = TEST_USER_DATA
 
         response = test_client.get(
-            "/test/profile-required",
-            headers={"Authorization": f"Bearer {TEST_TOKEN}"}
+            "/test/profile-required", headers={"Authorization": f"Bearer {TEST_TOKEN}"}
         )
 
         assert response.status_code == 200
@@ -128,9 +125,8 @@ class TestSessionManagement:
         mock_supabase_service.verify_token.return_value = user_data_without_profile
 
         response = test_client.get(
-            "/test/profile-required",
-            headers={"Authorization": f"Bearer {TEST_TOKEN}"}
+            "/test/profile-required", headers={"Authorization": f"Bearer {TEST_TOKEN}"}
         )
 
         assert response.status_code == 400
-        assert "User profile not found" in response.json()["detail"] 
+        assert "User profile not found" in response.json()["detail"]

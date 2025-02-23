@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     fileInput.value = '';
                     return;
                 }
-                
+
                 // Validate file size (max 5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     alert('File size should not exceed 5MB');
@@ -45,15 +45,15 @@ function showAlert(message, type = 'info') {
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
-    
+
     const container = document.querySelector('main .container');
     if (container) {
         container.insertBefore(alertDiv, container.firstChild);
-        
+
         // Auto-dismiss after 5 seconds
         setTimeout(() => {
             alertDiv.classList.remove('show');
             setTimeout(() => alertDiv.remove(), 150);
         }, 5000);
     }
-} 
+}

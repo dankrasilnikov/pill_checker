@@ -1,4 +1,5 @@
 """Database configuration and session management."""
+
 from contextlib import contextmanager
 from typing import AsyncGenerator, Generator
 
@@ -46,6 +47,7 @@ SyncSessionLocal = sessionmaker(
     bind=sync_engine,
 )
 
+
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     """Get an async database session."""
     async with AsyncSessionLocal() as session:
@@ -57,6 +59,7 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
             raise
         finally:
             await session.close()
+
 
 @contextmanager
 def get_sync_session() -> Generator[Session, None, None]:
@@ -70,6 +73,7 @@ def get_sync_session() -> Generator[Session, None, None]:
         raise
     finally:
         session.close()
+
 
 # Dependency for FastAPI
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

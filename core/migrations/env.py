@@ -21,9 +21,11 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
+
 def get_url():
     """Get database URL from settings."""
     return str(settings.SQLALCHEMY_DATABASE_URI)
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -58,7 +60,7 @@ def run_migrations_online() -> None:
     """
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
-    
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",

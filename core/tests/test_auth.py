@@ -1,4 +1,5 @@
 """Tests for authentication service and endpoints."""
+
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -15,6 +16,7 @@ TEST_USER_EMAIL = "test@example.com"
 TEST_USER_PASSWORD = "testpassword123"
 TEST_USER_ID = str(uuid.uuid4())
 TEST_DISPLAY_NAME = "Test User"
+
 
 @pytest.fixture
 def mock_supabase_service():
@@ -33,6 +35,7 @@ def mock_supabase_service():
         mock.return_value = service
         yield service
 
+
 @pytest.fixture
 def test_app(mock_supabase_service):
     """Create test FastAPI application."""
@@ -41,10 +44,12 @@ def test_app(mock_supabase_service):
     app.include_router(auth_router, prefix="/api/v1/auth")
     return app
 
+
 @pytest.fixture
 def test_client(test_app):
     """Create test client."""
     return TestClient(test_app)
+
 
 class TestAuthEndpoints:
     """Test suite for authentication endpoints."""
@@ -54,7 +59,7 @@ class TestAuthEndpoints:
         # Mock successful user creation
         mock_supabase_service.create_user_with_profile.return_value = (
             True,
-            {"user_id": TEST_USER_ID}
+            {"user_id": TEST_USER_ID},
         )
 
         response = test_client.post(
@@ -63,16 +68,14 @@ class TestAuthEndpoints:
                 "email": TEST_USER_EMAIL,
                 "password": TEST_USER_PASSWORD,
                 "password_confirm": TEST_USER_PASSWORD,
-                "display_name": TEST_DISPLAY_NAME
-            }
+                "display_name": TEST_DISPLAY_NAME,
+            },
         )
 
         assert response.status_code == 201
         assert response.json()["user_id"] == TEST_USER_ID
         mock_supabase_service.create_user_with_profile.assert_called_once_with(
-            email=TEST_USER_EMAIL,
-            password=TEST_USER_PASSWORD,
-            display_name=TEST_DISPLAY_NAME
+            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD, display_name=TEST_DISPLAY_NAME
         )
 
     def test_register_password_mismatch(self, test_client):
@@ -83,8 +86,8 @@ class TestAuthEndpoints:
                 "email": TEST_USER_EMAIL,
                 "password": TEST_USER_PASSWORD,
                 "password_confirm": "different_password",
-                "display_name": TEST_DISPLAY_NAME
-            }
+                "display_name": TEST_DISPLAY_NAME,
+            },
         )
 
         assert response.status_code == 400
@@ -95,26 +98,18 @@ class TestAuthEndpoints:
         # Mock successful authentication
         mock_supabase_service.authenticate_user.return_value = (
             True,
-            {
-                "access_token": "test_access_token",
-                "refresh_token": "test_refresh_token"
-            }
+            {"access_token": "test_access_token", "refresh_token": "test_refresh_token"},
         )
 
         response = test_client.post(
-            "/api/v1/auth/login",
-            data={
-                "username": TEST_USER_EMAIL,
-                "password": TEST_USER_PASSWORD
-            }
+            "/api/v1/auth/login", data={"username": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD}
         )
 
         assert response.status_code == 200
         assert response.json()["access_token"] == "test_access_token"
         assert response.json()["refresh_token"] == "test_refresh_token"
         mock_supabase_service.authenticate_user.assert_called_once_with(
-            email=TEST_USER_EMAIL,
-            password=TEST_USER_PASSWORD
+            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD
         )
 
     def test_login_failure(self, test_client, mock_supabase_service):
@@ -123,11 +118,7 @@ class TestAuthEndpoints:
         mock_supabase_service.authenticate_user.return_value = (False, None)
 
         response = test_client.post(
-            "/api/v1/auth/login",
-            data={
-                "username": TEST_USER_EMAIL,
-                "password": "wrong_password"
-            }
+            "/api/v1/auth/login", data={"username": TEST_USER_EMAIL, "password": "wrong_password"}
         )
 
         assert response.status_code == 401
@@ -145,15 +136,11 @@ class TestAuthEndpoints:
         """Test successful token refresh."""
         # Mock successful token refresh
         mock_supabase_service.client.auth.refresh_session.return_value = MagicMock(
-            session=MagicMock(
-                access_token="new_access_token",
-                refresh_token="new_refresh_token"
-            )
+            session=MagicMock(access_token="new_access_token", refresh_token="new_refresh_token")
         )
 
         response = test_client.post(
-            "/api/v1/auth/refresh-token",
-            json={"refresh_token": "old_refresh_token"}
+            "/api/v1/auth/refresh-token", json={"refresh_token": "old_refresh_token"}
         )
 
         assert response.status_code == 200
@@ -166,8 +153,7 @@ class TestAuthEndpoints:
         mock_supabase_service.client.auth.refresh_session.return_value = None
 
         response = test_client.post(
-            "/api/v1/auth/refresh-token",
-            json={"refresh_token": "invalid_token"}
+            "/api/v1/auth/refresh-token", json={"refresh_token": "invalid_token"}
         )
 
         assert response.status_code == 401
@@ -176,8 +162,7 @@ class TestAuthEndpoints:
     def test_password_reset_request(self, test_client, mock_supabase_service):
         """Test password reset request."""
         response = test_client.post(
-            "/api/v1/auth/password-reset/request",
-            json={"email": TEST_USER_EMAIL}
+            "/api/v1/auth/password-reset/request", json={"email": TEST_USER_EMAIL}
         )
 
         assert response.status_code == 200
@@ -191,14 +176,10 @@ class TestAuthEndpoints:
         # Mock successful verification
         mock_supabase_service.client.auth.verify_otp.return_value = True
 
-        response = test_client.get(
-            "/api/v1/auth/verify-email",
-            params={"token": "test_token"}
-        )
+        response = test_client.get("/api/v1/auth/verify-email", params={"token": "test_token"})
 
         assert response.status_code == 200
         assert "successfully verified" in response.json()["message"].lower()
         mock_supabase_service.client.auth.verify_otp.assert_called_once_with(
-            "test_token",
-            type_="email"
-        ) 
+            "test_token", type_="email"
+        )

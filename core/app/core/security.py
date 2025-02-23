@@ -1,5 +1,4 @@
 """Security configuration and middleware for the application."""
-from typing import List, Optional
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,17 +19,19 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login
 # Rate limiting configuration
 limiter = Limiter(key_func=get_remote_address)
 
+
 async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> Response:
     """Handle rate limit exceeded errors."""
     return Response(
         status_code=429,
         content="Too many requests. Please try again later.",
-        media_type="text/plain"
+        media_type="text/plain",
     )
+
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware to add security headers to responses."""
-    
+
     def __init__(
         self,
         app: ASGIApp,
@@ -45,15 +46,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        
+
         # Security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = self.xfo
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
-        response.headers["Permissions-Policy"] = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
-        
+        response.headers["Permissions-Policy"] = (
+            "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+        )
+
         # Content Security Policy
         csp_directives = [
             "default-src 'self'",
@@ -65,19 +68,22 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "base-uri 'self'",
             "form-action 'self'",
             "upgrade-insecure-requests",
-            "block-all-mixed-content"
+            "block-all-mixed-content",
         ]
         response.headers["Content-Security-Policy"] = "; ".join(csp_directives)
-        
+
         # HSTS (only in production)
         if self.hsts and not settings.DEBUG:
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
-        
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains; preload"
+            )
+
         return response
+
 
 def setup_security(app: FastAPI) -> None:
     """Configure security middleware and CORS."""
-    
+
     # CORS configuration
     app.add_middleware(
         CORSMiddleware,
@@ -88,7 +94,7 @@ def setup_security(app: FastAPI) -> None:
         expose_headers=["Content-Range", "Range"],
         max_age=3600,
     )
-    
+
     # Session middleware
     app.add_middleware(
         SessionMiddleware,
@@ -98,14 +104,14 @@ def setup_security(app: FastAPI) -> None:
         same_site="lax",
         path="/",  # Cookie path
     )
-    
+
     # Security headers middleware
     app.add_middleware(
         SecurityHeadersMiddleware,
         hsts=not settings.DEBUG,
         include_dev_headers=settings.DEBUG,
     )
-    
+
     # Trusted hosts middleware (only in production)
     if not settings.DEBUG:
         app.add_middleware(
@@ -115,4 +121,4 @@ def setup_security(app: FastAPI) -> None:
 
     # Rate limiting
     app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler) 
+    app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)

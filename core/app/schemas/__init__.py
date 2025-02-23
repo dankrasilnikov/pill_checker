@@ -44,4 +44,4 @@ __all__ = [
     "MedicationUpdate",
     "MedicationInDB",
     "MedicationResponse",
-] 
+]

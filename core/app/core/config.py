@@ -8,35 +8,36 @@ from pydantic.v1 import BaseSettings, validator
 # Load environment variables
 load_dotenv()
 
+
 class Settings(BaseSettings):
     # Environment
     APP_ENV: str = "development"
     DEBUG: bool = True
-    
+
     # API Settings
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "PillChecker"
-    
+
     # Security
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 11520
-    
+
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = []
-    
+
     # Supabase Settings
     SUPABASE_URL: str
     SUPABASE_KEY: str
     SUPABASE_JWT_SECRET: str
     SUPABASE_STORAGE_BUCKET: str = "pill-images"
-    
+
     # Database - The actual values will be set based on APP_ENV
     DATABASE_USER: str = None
     DATABASE_PASSWORD: str = None
     DATABASE_HOST: str = None
     DATABASE_PORT: str = None
     DATABASE_NAME: str = None
-    
+
     # Storage
     STORAGE_URL: Optional[str] = None
 
@@ -58,20 +59,26 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             try:
                 import json
+
                 return json.loads(v)
             except json.JSONDecodeError:
                 return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
 
-    @validator("DATABASE_USER", "DATABASE_PASSWORD", "DATABASE_HOST", "DATABASE_PORT", "DATABASE_NAME", pre=True)
+    @validator(
+        "DATABASE_USER",
+        "DATABASE_PASSWORD",
+        "DATABASE_HOST",
+        "DATABASE_PORT",
+        "DATABASE_NAME",
+        pre=True,
+    )
     def set_db_credentials(cls, v, values, field):
         """Set database credentials based on environment."""
-        env_prefix = {
-            "development": "DEV_",
-            "testing": "TEST_",
-            "production": "PROD_"
-        }.get(values.get("APP_ENV", "development"), "DEV_")
-        
+        env_prefix = {"development": "DEV_", "testing": "TEST_", "production": "PROD_"}.get(
+            values.get("APP_ENV", "development"), "DEV_"
+        )
+
         env_var = f"{env_prefix}{field.name}"
         value = os.getenv(env_var)
         if not value and field.name != "DATABASE_PASSWORD":  # Allow empty password
@@ -109,9 +116,11 @@ class Settings(BaseSettings):
         case_sensitive = True
         env_file = ".env"
 
+
 @lru_cache()
 def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings()
 
-settings = get_settings() 
+
+settings = get_settings()

@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from .config import settings
 
+
 def setup_logging() -> logging.Logger:
     """
     Configure logging for the application.
@@ -11,18 +12,14 @@ def setup_logging() -> logging.Logger:
     # Create logs directory if it doesn't exist
     log_dir = Path("logs")
     log_dir.mkdir(exist_ok=True)
-    
+
     # Create logger
     logger = logging.getLogger("pillchecker")
     logger.setLevel(getattr(logging, settings.LOG_LEVEL))
 
     # Create formatters
-    console_format = logging.Formatter(
-        "%(levelname)s - %(message)s"
-    )
-    file_format = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    console_format = logging.Formatter("%(levelname)s - %(message)s")
+    file_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
@@ -36,7 +33,7 @@ def setup_logging() -> logging.Logger:
 
     # Remove existing handlers to avoid duplicates
     logger.handlers.clear()
-    
+
     # Add handlers
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
@@ -45,6 +42,7 @@ def setup_logging() -> logging.Logger:
     logger.propagate = False
 
     return logger
+
 
 # Create and export logger instance
 logger = setup_logging()

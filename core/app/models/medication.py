@@ -7,8 +7,9 @@ from .base import Base
 
 class Medication(Base):
     """Model for storing medication information."""
+
     __tablename__ = "medication"  # Match Supabase table name exactly
-    
+
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     profile_id = Column(BigInteger, ForeignKey("profile.id"), nullable=False)
     title = Column(String(length=255), nullable=True)
@@ -22,4 +23,4 @@ class Medication(Base):
     profile = relationship("Profile", back_populates="medications")
 
     def __repr__(self):
-        return f"<Medication id={self.id} title='{self.title}'>" 
+        return f"<Medication id={self.id} title='{self.title}'>"

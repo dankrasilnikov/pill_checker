@@ -7,6 +7,7 @@ from .base import BaseSchema
 
 class MedicationBase(BaseSchema):
     """Base schema for medication."""
+
     title: Optional[str] = None
     active_ingredients: Optional[str] = None
     scanned_text: Optional[str] = None
@@ -16,11 +17,13 @@ class MedicationBase(BaseSchema):
 
 class MedicationCreate(MedicationBase):
     """Schema for creating a medication."""
+
     profile_id: conint(gt=0)  # Must be a positive integer
 
 
 class MedicationUpdate(MedicationBase):
     """Schema for updating a medication."""
+
     title: Optional[str] = None
     active_ingredients: Optional[str] = None
     dosage: Optional[str] = None
@@ -29,6 +32,7 @@ class MedicationUpdate(MedicationBase):
 
 class MedicationInDB(MedicationBase):
     """Schema for medication in database."""
+
     id: int
     profile_id: int
     scan_date: datetime
@@ -36,11 +40,14 @@ class MedicationInDB(MedicationBase):
 
 class MedicationResponse(MedicationInDB):
     """Schema for medication response."""
+
     image_url: Optional[HttpUrl] = None
     status: str = "pending"
-    status_color: str = "warning"  # Bootstrap color classes: primary, secondary, success, danger, warning, info
+    status_color: str = (
+        "warning"  # Bootstrap color classes: primary, secondary, success, danger, warning, info
+    )
 
     @property
     def formatted_scan_date(self) -> str:
         """Return formatted scan date."""
-        return self.scan_date.strftime("%Y-%m-%d %H:%M") 
+        return self.scan_date.strftime("%Y-%m-%d %H:%M")

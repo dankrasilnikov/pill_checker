@@ -11,7 +11,7 @@
                 Upload New Medication Image
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('upload_medication') }}" enctype="multipart/form-data">
+                <form id="uploadForm" onsubmit="handleUpload(event)">
                     <div class="mb-3">
                         <label for="image" class="form-label">Select Image</label>
                         <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
@@ -26,39 +26,9 @@
                 Your Recent Medications
             </div>
             <div class="card-body">
-                {% if medications %}
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Medication Name</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for med in medications %}
-                                <tr>
-                                    <td>{{ med.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td>{{ med.name }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ med.status_color }}">
-                                            {{ med.status }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('medication_detail', id=med.id) }}"
-                                           class="btn btn-sm btn-info">View</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-center">No medications found. Upload your first medication image above!</p>
-                {% endif %}
+                <div id="medicationsTable">
+                    <!-- Table will be populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>
@@ -67,9 +37,159 @@
 
 {% block scripts %}
 <script>
-    // Add any dashboard-specific JavaScript here
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize any dashboard components
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    loadMedications();
+});
+
+async function handleUpload(event) {
+    event.preventDefault();
+    
+    const formData = new FormData();
+    const imageFile = document.getElementById('image').files[0];
+    formData.append('image', imageFile);
+
+    try {
+        const response = await fetch('/api/v1/medications/upload', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.detail || 'Upload failed');
+        }
+
+        alert('Medication uploaded and analyzed successfully!');
+        loadMedications(); // Refresh the medications list
+    } catch (error) {
+        alert(error.message);
+        if (error.message.includes('401')) {
+            // Token might be expired
+            window.location.href = '/login';
+        }
+    }
+}
+
+async function loadMedications() {
+    try {
+        const response = await fetch('/api/v1/medications/recent', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load medications');
+        }
+
+        const medications = await response.json();
+        displayMedications(medications);
+    } catch (error) {
+        console.error('Error loading medications:', error);
+        if (error.message.includes('401')) {
+            window.location.href = '/login';
+        }
+    }
+}
+
+function displayMedications(medications) {
+    const container = document.getElementById('medicationsTable');
+    
+    if (!medications || medications.length === 0) {
+        container.innerHTML = '<p class="text-center">No medications found. Upload your first medication image above!</p>';
+        return;
+    }
+
+    const table = `
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Medication Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${medications.map(med => `
+                        <tr>
+                            <td>${new Date(med.created_at).toLocaleString()}</td>
+                            <td>${med.name}</td>
+                            <td>
+                                <span class="badge bg-${med.status_color}">
+                                    ${med.status}
+                                </span>
+                            </td>
+                            <td>
+                                <button onclick="viewMedication('${med.id}')" 
+                                        class="btn btn-sm btn-info">View</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    container.innerHTML = table;
+}
+
+async function viewMedication(id) {
+    try {
+        const response = await fetch(`/api/v1/medications/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load medication details');
+        }
+
+        const medication = await response.json();
+        // Navigate to medication detail page
+        window.location.href = `/medications/${id}`;
+    } catch (error) {
+        alert(error.message);
+        if (error.message.includes('401')) {
+            window.location.href = '/login';
+        }
+    }
+}
+
+// Token refresh logic
+async function refreshToken() {
+    const refresh_token = localStorage.getItem('refresh_token');
+    if (!refresh_token) {
+        window.location.href = '/login';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/v1/auth/refresh-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refresh_token: refresh_token })
+        });
+
+        if (!response.ok) {
+            throw new Error('Token refresh failed');
+        }
+
+        const data = await response.json();
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+    } catch (error) {
+        console.error('Error refreshing token:', error);
+        window.location.href = '/login';
+    }
+}
 </script>
 {% endblock %}

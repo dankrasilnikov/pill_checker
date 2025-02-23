@@ -22,7 +22,7 @@ ssl_mode = query_params.get('sslmode', ['disable'])[0]
 async_url = db_url.replace("postgresql+psycopg2", "postgresql+asyncpg").split('?')[0]
 
 # Configure SSL for asyncpg
-ssl_config = {"ssl": True} if ssl_mode == "require" else {}
+connect_args = {"ssl": "require"} if ssl_mode == "require" else {}
 
 # Create async engine for the application
 async_engine = create_async_engine(
@@ -33,7 +33,7 @@ async_engine = create_async_engine(
     pool_timeout=30,  # Timeout for getting a connection from the pool
     pool_recycle=1800,  # Recycle connections after 30 minutes
     echo=settings.DEBUG,  # Log SQL statements in debug mode
-    **ssl_config,  # Apply SSL configuration
+    connect_args=connect_args,  # Apply SSL configuration
 )
 
 # Create sync engine for migrations and testing

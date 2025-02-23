@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import Optional, Tuple, Dict, Any
 from uuid import UUID
+from datetime import datetime
 
 from fastapi import HTTPException, status
 from supabase import create_client
@@ -36,9 +37,9 @@ class SupabaseService:
             logger.error(f"Failed to initialize Supabase client: {e}")
             raise
 
-    async def create_user_with_profile(
+    def create_user_with_profile(
         self, email: str, password: str, display_name: Optional[str] = None
-    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
+    ) -> Optional[ProfileInDB]:
         """
         Create a new user and their profile.
 
@@ -48,54 +49,42 @@ class SupabaseService:
             display_name: Optional display name
 
         Returns:
-            Tuple[bool, dict]: Success status and user data if successful
+            dict: User data and profile data
         """
         try:
             # Create auth user
-            auth_response = await self.client.auth.sign_up(
-                {
-                    "email": email,
-                    "password": password,
-                }
-            )
+            auth_response = self.client.auth.sign_up({
+                "email": email,
+                "password": password
+            })
 
             if not auth_response or not auth_response.user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create user"
                 )
 
-            # Create profile
-            profile_data = ProfileCreate(
-                user_id=auth_response.user.id, display_name=display_name or email.split("@")[0]
-            )
+            # Get the user ID from the response
+            user_id = auth_response.user.id
 
-            profile_response = (
-                await self.client.from_("profiles")
-                .insert(profile_data.model_dump(exclude_unset=True))
-                .execute()
-            )
-
-            if not profile_response.data:
-                # Rollback: delete auth user if profile creation fails
-                await self.client.auth.admin.delete_user(auth_response.user.id)
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to create user profile",
-                )
-
-            return True, {
-                "user_id": auth_response.user.id,
-                "email": auth_response.user.email,
-                "profile": profile_response.data[0],
+            # Create the profile
+            profile_data = {
+                "user_id": str(user_id),  # Convert UUID to string
+                "display_name": display_name or email.split("@")[0],
+                "created_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.utcnow().isoformat()
             }
+
+            self.client.table("profile").insert(profile_data).execute()
+
+            return self.get_user_profile(user_id)
 
         except HTTPException:
             raise
         except Exception as e:
             logger.error(f"Error creating user with profile: {e}")
-            return False, None
+            return None
 
-    async def get_user_profile(self, user_id: UUID) -> Optional[ProfileInDB]:
+    def get_user_profile(self, user_id: UUID) -> Optional[ProfileInDB]:
         """
         Get user profile by user ID.
 
@@ -107,9 +96,9 @@ class SupabaseService:
         """
         try:
             response = (
-                await self.client.from_("profiles")
+                self.client.from_("profile")
                 .select("*")
-                .eq("user_id", user_id)
+                .eq("user_id", str(user_id))
                 .single()
                 .execute()
             )
@@ -118,7 +107,7 @@ class SupabaseService:
             logger.error(f"Error fetching user profile: {e}")
             return None
 
-    async def update_user_profile(
+    def update_user_profile(
         self, user_id: UUID, profile_data: ProfileUpdate
     ) -> Optional[ProfileInDB]:
         """
@@ -133,9 +122,9 @@ class SupabaseService:
         """
         try:
             response = (
-                await self.client.from_("profiles")
-                .update(profile_data.model_dump(exclude_unset=True))
-                .eq("user_id", user_id)
+                self.client.from_("profile")
+                .update(profile_data.model_dump(exclude_unset=True, exclude_none=True))
+                .eq("user_id", str(user_id))
                 .execute()
             )
 
@@ -144,56 +133,48 @@ class SupabaseService:
             logger.error(f"Error updating user profile: {e}")
             return None
 
-    async def delete_user_with_profile(self, user_id: UUID) -> bool:
-        """
-        Delete user and their profile.
-
-        Args:
-            user_id: User's UUID from auth
-
-        Returns:
-            bool: True if deletion was successful
-        """
+    def delete_user_with_profile(self, user_id: UUID) -> bool:
+        """Delete user and their profile."""
         try:
             # Delete profile first (due to foreign key constraint)
-            await self.client.from_("profiles").delete().eq("user_id", user_id).execute()
+            (
+                self.client.from_("profile")
+                .delete()
+                .eq("user_id", str(user_id))
+                .execute()
+            )
 
             # Delete auth user
-            await self.client.auth.admin.delete_user(user_id)
+            self.client.auth.admin.delete_user(str(user_id))
             return True
         except Exception as e:
             logger.error(f"Error deleting user with profile: {e}")
             return False
 
-    async def authenticate_user(
+    def authenticate_user(
         self, email: str, password: str
     ) -> Tuple[bool, Optional[Dict[str, Any]]]:
-        """
-        Authenticate user and return session data.
-
-        Args:
-            email: User's email
-            password: User's password
-
-        Returns:
-            Tuple[bool, dict]: Success status and session data if successful
-        """
+        """Authenticate user and return session data."""
         try:
-            auth_response = await self.client.auth.sign_in_with_password(
-                {"email": email, "password": password}
-            )
+            auth_response = self.client.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
 
             if not auth_response or not auth_response.user:
                 return False, None
 
             # Get user profile
-            profile = await self.get_user_profile(auth_response.user.id)
+            profile = self.get_user_profile(auth_response.user.id)
+
+            # Get session
+            session = self.client.auth.get_session()
 
             return True, {
-                "access_token": auth_response.session.access_token,
-                "refresh_token": auth_response.session.refresh_token,
+                "access_token": session.access_token,
+                "refresh_token": session.refresh_token,
                 "user": {
-                    "id": auth_response.user.id,
+                    "user_id": auth_response.user.id,
                     "email": auth_response.user.email,
                     "profile": profile.model_dump() if profile else None,
                 },
@@ -203,7 +184,7 @@ class SupabaseService:
             logger.error(f"Authentication error: {e}")
             return False, None
 
-    async def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
         """
         Verify JWT token and return user data.
 
@@ -214,19 +195,67 @@ class SupabaseService:
             Optional[dict]: User data if token is valid
         """
         try:
-            user = await self.client.auth.get_user(token)
+            user = self.client.auth.get_user(token)
             if not user:
                 return None
 
-            profile = await self.get_user_profile(user.id)
+            profile = self.get_user_profile(user.id)
 
             return {
-                "id": user.id,
+                "user_id": user.id,
                 "email": user.email,
                 "profile": profile.model_dump() if profile else None,
             }
         except Exception as e:
             logger.error(f"Token verification error: {e}")
+            return None
+
+    def create_profile_for_existing_user(
+        self, user_id: str, display_name: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
+        """Create a profile for an existing user."""
+        try:
+            # First check if profile exists
+            existing_profile = (
+                self.client.from_("profile")
+                .select("*")
+                .eq("user_id", str(user_id))
+                .single()
+                .execute()
+            )
+
+            if existing_profile.data:
+                # Profile exists, return it
+                return existing_profile.data
+
+            # Create new profile if it doesn't exist
+            data = {
+                "user_id": str(user_id),
+                "display_name": display_name or "User",
+                "created_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.utcnow().isoformat()
+            }
+
+            # Get current session
+            session = self.client.auth.get_session()
+            
+            # Set auth header
+            self.client.postgrest.auth(session.access_token)
+
+            profile_response = (
+                self.client.table("profile")
+                .insert(data)
+                .execute()
+            )
+
+            if not profile_response.data:
+                logger.error("Failed to create profile")
+                return None
+
+            return profile_response.data[0]
+
+        except Exception as e:
+            logger.error(f"Error creating profile: {e}")
             return None
 
 

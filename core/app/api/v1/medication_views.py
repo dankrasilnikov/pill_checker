@@ -34,7 +34,7 @@ class MedicationRoutes:
                 # Store in Supabase
                 profile = (
                     get_supabase_service()
-                    .from_("profiles")
+                    .from_("profile")
                     .select("*")
                     .eq("user_id", user.id)
                     .execute()
@@ -73,7 +73,7 @@ class MedicationRoutes:
 
                 profile = (
                     get_supabase_service()
-                    .from_("profiles")
+                    .from_("profile")
                     .select("*")
                     .eq("user_id", user.id)
                     .execute()

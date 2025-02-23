@@ -59,18 +59,18 @@ async def register(user_data: UserCreate):
 
     try:
         supabase = get_supabase_service()
-        success, result = await supabase.create_user_with_profile(
+        result = supabase.create_user_with_profile(
             email=user_data.email, password=user_data.password, display_name=user_data.display_name
         )
 
-        if not success or not result:
+        if not result:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Registration failed"
             )
 
         return {
             "message": "Registration successful. Please check your email for verification.",
-            "user_id": result["user_id"],
+            "user_id": result.user_id,
         }
     except HTTPException:
         raise
@@ -87,7 +87,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """Login user and return access token."""
     try:
         supabase = get_supabase_service()
-        success, result = await supabase.authenticate_user(
+        success, result = supabase.authenticate_user(
             email=form_data.username, password=form_data.password
         )
 
@@ -119,7 +119,7 @@ async def logout(response: Response):
     """Logout current user."""
     try:
         supabase = get_supabase_service()
-        await supabase.client.auth.sign_out()
+        supabase.client.auth.sign_out()
         response.delete_cookie("session")
         return {"message": "Successfully logged out"}
     except Exception as e:
@@ -134,7 +134,7 @@ async def refresh_token(token_data: RefreshToken):
     """Refresh access token using refresh token."""
     try:
         supabase = get_supabase_service()
-        response = await supabase.client.auth.refresh_session(token_data.refresh_token)
+        response = supabase.client.auth.refresh_session(token_data.refresh_token)
 
         if not response or not response.session:
             raise HTTPException(
@@ -165,7 +165,7 @@ async def request_password_reset(email_data: EmailRequest):
     """Request password reset email."""
     try:
         supabase = get_supabase_service()
-        await supabase.client.auth.reset_password_email(email_data.email)
+        supabase.client.auth.reset_password_email(email_data.email)
         return {"message": "Password reset email sent"}
     except Exception as e:
         logger.error(f"Password reset request error: {e}")
@@ -184,7 +184,7 @@ async def reset_password(reset_data: PasswordReset):
     try:
         supabase = get_supabase_service()
         # Verify token
-        response = await supabase.client.auth.verify_otp(reset_data.token, type_="recovery")
+        response = supabase.client.auth.verify_otp(reset_data.token, type_="recovery")
 
         if not response:
             raise HTTPException(
@@ -192,7 +192,7 @@ async def reset_password(reset_data: PasswordReset):
             )
 
         # Update password
-        await supabase.client.auth.update_user({"password": reset_data.new_password})
+        supabase.client.auth.update_user({"password": reset_data.new_password})
         return {"message": "Password successfully reset"}
     except HTTPException:
         raise
@@ -208,7 +208,7 @@ async def verify_email(token: str):
     """Verify email address."""
     try:
         supabase = get_supabase_service()
-        response = await supabase.client.auth.verify_otp(token, type_="email")
+        response = supabase.client.auth.verify_otp(token, type_="email")
         if not response:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification token"
@@ -220,4 +220,48 @@ async def verify_email(token: str):
         logger.error(f"Email verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification token"
+        )
+
+
+@router.post("/create-profile", status_code=status.HTTP_201_CREATED)
+async def create_profile(user_data: UserCreate):
+    """Create a profile for an existing user."""
+    try:
+        supabase = get_supabase_service()
+        
+        # First try to authenticate the user
+        success, auth_result = supabase.authenticate_user(
+            email=user_data.email, password=user_data.password
+        )
+
+        if not success or not auth_result:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+
+        # Create profile for the authenticated user
+        profile = supabase.create_profile_for_existing_user(
+            user_id=auth_result["user"]["id"],
+            display_name=user_data.display_name
+        )
+
+        if not profile:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create profile"
+            )
+
+        return {
+            "message": "Profile created successfully",
+            "profile": profile
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Profile creation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during profile creation"
         )

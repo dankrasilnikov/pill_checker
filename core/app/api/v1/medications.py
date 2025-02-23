@@ -58,9 +58,18 @@ async def list_medications(db: Session = Depends(get_db), skip: int = 0, limit: 
 
 
 @router.get("/{medication_id}", response_model=MedicationResponse)
-async def get_medication(medication_id: str, db: Session = Depends(get_db)):
+async def get_medication(medication_id: int, db: Session = Depends(get_db)):
     """Get a specific medication by ID."""
-    medication = db.query(Medication).filter(Medication.id == medication_id).first()
+    medication = supabase.from_("medication").select("*").eq("id", medication_id).execute()
+    if not medication:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medication not found")
+    return MedicationResponse.from_orm(medication)
+
+
+@router.get("/recent", response_model=MedicationResponse)
+async def get_medication(medication_id: str, db: Session = Depends(get_db)):
+    """Get recent medications"""
+    medication = supabase.from_("medication").select("*").eq("profile_id", str(user_id)).single().execute()
     if not medication:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medication not found")
     return MedicationResponse.from_orm(medication)

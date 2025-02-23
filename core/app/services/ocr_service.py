@@ -1,10 +1,10 @@
+"""OCR service for processing medication images."""
 import io
-
 import easyocr
 from PIL import Image
 
-from core.app.services.biomed_ner_client import MedicalNERClient
-from core.app.models.models import Medication
+from app.services.biomed_ner_client import MedicalNERClient
+from app.models.medication import Medication
 
 
 def recognise(request):
@@ -22,6 +22,21 @@ def recognise(request):
     )
 
     return list(dict.fromkeys(active_ingredients))
+
+
+async def process_image(image_content: bytes) -> str:
+    """Process image content and extract text."""
+    image = Image.open(io.BytesIO(image_content))
+    if image.mode in ("RGBA", "P"):
+        image = image.convert("RGB")
+
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format="JPEG")
+    image_bytes.seek(0)
+
+    reader = easyocr.Reader(["en"], gpu=False)  # Set gpu=False for compatibility
+    results = reader.readtext(image_bytes.read(), detail=0)
+    return " ".join(results)
 
 
 def extract_text_with_easyocr(image):

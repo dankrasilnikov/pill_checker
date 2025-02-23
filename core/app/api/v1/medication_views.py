@@ -1,3 +1,4 @@
+"""Medication view handlers."""
 import logging
 from datetime import datetime
 
@@ -6,9 +7,9 @@ from fastapi import Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 
-from core.app.utils.decorators import supabase_login_required
-from core.app.services.ocr_service import recognise
-from core.app.services.supabase_client import get_supabase_client
+from app.utils.decorators import login_required
+from app.services.ocr_service import recognise
+from app.services.supabase import get_supabase_service
 
 
 class MedicationRoutes:
@@ -17,7 +18,7 @@ class MedicationRoutes:
 
         @app.post("/upload-image", name="upload")
         async def upload_image(
-            request: Request, image: UploadFile = File(...), user=Depends(supabase_login_required)
+            request: Request, image: UploadFile = File(...), user=Depends(login_required)
         ):
             try:
                 if not image.content_type.startswith("image/"):
@@ -32,7 +33,7 @@ class MedicationRoutes:
 
                 # Store in Supabase
                 profile = (
-                    get_supabase_client()
+                    get_supabase_service()
                     .from_("profiles")
                     .select("*")
                     .eq("user_id", user.id)
@@ -40,7 +41,7 @@ class MedicationRoutes:
                 ).data[0]
 
                 # Save medication record
-                get_supabase_client().from_("medication").insert(
+                get_supabase_service().from_("medication").insert(
                     {
                         "profile_id": profile["id"],
                         "active_ingredients": active_ingredients,
@@ -66,12 +67,12 @@ class MedicationRoutes:
             return templates.TemplateResponse("upload.html", {"request": request})
 
         @app.get("/dashboard", name="dashboard", response_class=HTMLResponse)
-        async def user_dashboard(request: Request, user=Depends(supabase_login_required)):
+        async def user_dashboard(request: Request, user=Depends(login_required)):
             logger.info(f"Accessing dashboard with user: {user.id}")
             try:
 
                 profile = (
-                    get_supabase_client()
+                    get_supabase_service()
                     .from_("profiles")
                     .select("*")
                     .eq("user_id", user.id)
@@ -79,7 +80,7 @@ class MedicationRoutes:
                 ).data[0]
 
                 medications = (
-                    get_supabase_client()
+                    get_supabase_service()
                     .from_("medication")
                     .select("*")
                     .eq("profile_id", profile["id"])

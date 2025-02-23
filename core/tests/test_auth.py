@@ -7,9 +7,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from core.app.api.v1.auth import router as auth_router
-from core.app.core.security import setup_security
-from core.app.services.supabase import SupabaseService
+from app.api.v1.auth import router as auth_router
+from app.core.security import setup_security
+from app.services.supabase import SupabaseService
 
 # Test data
 TEST_USER_EMAIL = "test@example.com"

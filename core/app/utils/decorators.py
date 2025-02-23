@@ -1,8 +1,10 @@
+"""Utility decorators for the application."""
+from functools import wraps
 from fastapi import HTTPException, status, Request
 from postgrest import APIError
 import logging
 
-from core.app.services.supabase_client import get_supabase_client
+from app.services.supabase import get_supabase_service
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ def supabase_login_required(request: Request):
         )
 
     try:
-        profile = get_supabase_client().auth.get_user()
+        profile = get_supabase_service().auth.get_user()
 
         if not profile:
             raise HTTPException(

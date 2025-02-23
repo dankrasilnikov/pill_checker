@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 
-from core.app.core.logging_config import logger
-from core.app.services.supabase import get_supabase_service
+from app.core.logging_config import logger
+from app.services.supabase import get_supabase_service
 
 router = APIRouter()
 

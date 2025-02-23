@@ -6,6 +6,7 @@ from supabase import Client, create_client
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.medication import Medication
+from app.schemas.medication import MedicationResponse
 from app.services.ocr_service import process_image
 
 router = APIRouter()
@@ -49,17 +50,17 @@ async def upload_medication(file: UploadFile = File(...), db: Session = Depends(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router.get("/list", response_model=List[Medication])
+@router.get("/list", response_model=List[MedicationResponse])
 async def list_medications(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
     """List all medications for the current user."""
     medications = db.query(Medication).offset(skip).limit(limit).all()
-    return medications
+    return [MedicationResponse.from_orm(med) for med in medications]
 
 
-@router.get("/{medication_id}")
+@router.get("/{medication_id}", response_model=MedicationResponse)
 async def get_medication(medication_id: str, db: Session = Depends(get_db)):
     """Get a specific medication by ID."""
     medication = db.query(Medication).filter(Medication.id == medication_id).first()
     if not medication:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medication not found")
-    return medication
+    return MedicationResponse.from_orm(medication)

@@ -3,10 +3,11 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from core.app.api.v1.dependencies import get_current_user, get_optional_user, require_profile
-from core.app.core.security import setup_security
 from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
+
+from app.api.v1.dependencies import get_current_user, get_optional_user, require_profile
+from app.core.security import setup_security
 
 # Test data
 TEST_TOKEN = "test_token"

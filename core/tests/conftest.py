@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from core.app.core.config import Settings
-from core.app.models import Base
+from app.core.config import Settings
+from app.models import Base
 
 # Override environment to use test database
 os.environ["APP_ENV"] = "testing"

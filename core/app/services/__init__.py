@@ -1,1 +1,1 @@
-"""Services package for PillChecker.""" 
+"""Services package for PillChecker."""

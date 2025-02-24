@@ -1,5 +1,5 @@
 """Utility decorators for the application."""
-from functools import wraps
+
 from fastapi import HTTPException, status, Request
 from postgrest import APIError
 import logging

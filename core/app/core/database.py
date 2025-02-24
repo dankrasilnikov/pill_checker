@@ -16,10 +16,10 @@ from .logging_config import logger
 db_url = settings.SQLALCHEMY_DATABASE_URI
 parsed = urlparse(db_url)
 query_params = parse_qs(parsed.query)
-ssl_mode = query_params.get('sslmode', ['disable'])[0]
+ssl_mode = query_params.get("sslmode", ["disable"])[0]
 
 # Create the base async URL without SSL mode
-async_url = db_url.replace("postgresql+psycopg2", "postgresql+asyncpg").split('?')[0]
+async_url = db_url.replace("postgresql+psycopg2", "postgresql+asyncpg").split("?")[0]
 
 # Configure SSL for asyncpg
 connect_args = {"ssl": "require"} if ssl_mode == "require" else {}

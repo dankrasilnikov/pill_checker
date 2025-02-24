@@ -81,7 +81,7 @@ function displayMedicationDetails(medication) {
     document.getElementById('medicationStatus').className = `badge bg-${medication.status_color}`;
     document.getElementById('medicationDate').textContent = new Date(medication.created_at).toLocaleString();
     document.getElementById('medicationOCR').textContent = medication.ocr_text || 'No OCR text available';
-    
+
     if (medication.image_url) {
         const img = document.getElementById('medicationImage');
         img.src = medication.image_url;

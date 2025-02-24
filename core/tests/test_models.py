@@ -75,7 +75,7 @@ class TestMedicationModel:
         test_db_session.commit()
 
         # Remove image_url from model data as it's only required for schema
-        model_data = {k: v for k, v in sample_medication_data.items() if k != 'image_url'}
+        model_data = {k: v for k, v in sample_medication_data.items() if k != "image_url"}
         medication = Medication(profile_id=profile.id, **model_data)
         test_db_session.add(medication)
         test_db_session.commit()
@@ -116,7 +116,7 @@ class TestMedicationModel:
         test_db_session.commit()
 
         # Remove image_url from model data as it's only required for schema
-        model_data = {k: v for k, v in sample_medication_data.items() if k != 'image_url'}
+        model_data = {k: v for k, v in sample_medication_data.items() if k != "image_url"}
         medication = Medication(profile_id=profile.id, **model_data)
         test_db_session.add(medication)
         test_db_session.commit()
@@ -174,7 +174,7 @@ def test_model_relationships(test_db_session, sample_profile_data, sample_medica
 
     # Create medication linked to profile
     # Remove image_url from model data as it's only required for schema
-    model_data = {k: v for k, v in sample_medication_data.items() if k != 'image_url'}
+    model_data = {k: v for k, v in sample_medication_data.items() if k != "image_url"}
     medication = Medication(profile_id=profile.id, **model_data)
     test_db_session.add(medication)
     test_db_session.commit()

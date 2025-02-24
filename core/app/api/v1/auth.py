@@ -36,7 +36,7 @@ class UserCreate(BaseModel):
         min_length=8,
         max_length=72,
         description="Password must be between 8 and 72 characters and contain at least one letter and one number",
-        pattern="^[A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*$|^[A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*$"
+        pattern="^[A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*$|^[A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*$",
     )
     password_confirm: str = Field(..., description="Must match password field")
     display_name: Optional[constr(min_length=2, max_length=50)] = Field(
@@ -61,7 +61,7 @@ class PasswordReset(BaseModel):
         min_length=8,
         max_length=72,
         description="Password must be between 8 and 72 characters and contain at least one letter and one number",
-        pattern="^[A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*$|^[A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*$"
+        pattern="^[A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*$|^[A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*$",
     )
     new_password_confirm: str = Field(..., description="Must match new_password field")
 
@@ -256,8 +256,7 @@ async def verify_email(token: str):
 
 @router.post("/create-profile", status_code=status.HTTP_201_CREATED)
 async def create_profile(
-    profile_data: ProfileCreate,
-    current_user: dict = Depends(get_current_user)
+    profile_data: ProfileCreate, current_user: dict = Depends(get_current_user)
 ):
     """Create a profile for the authenticated user."""
     try:
@@ -265,20 +264,15 @@ async def create_profile(
 
         # Create profile for the authenticated user
         profile = await supabase.create_profile_for_existing_user(
-            user_id=current_user["id"],
-            display_name=profile_data.display_name
+            user_id=current_user["id"], display_name=profile_data.display_name
         )
 
         if not profile:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create profile"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create profile"
             )
 
-        return {
-            "message": "Profile created successfully",
-            "profile": profile
-        }
+        return {"message": "Profile created successfully", "profile": profile}
 
     except HTTPException:
         raise
@@ -286,5 +280,5 @@ async def create_profile(
         logger.error(f"Profile creation error: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during profile creation"
+            detail="Internal server error during profile creation",
         )

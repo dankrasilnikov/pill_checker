@@ -11,7 +11,7 @@ from supabase.lib.client_options import ClientOptions
 
 from app.core.config import settings
 from app.core.logging_config import logger
-from app.schemas.profile import ProfileCreate, ProfileUpdate, ProfileInDB
+from app.schemas.profile import ProfileUpdate, ProfileInDB
 
 
 class SupabaseService:
@@ -53,10 +53,7 @@ class SupabaseService:
         """
         try:
             # Create auth user
-            auth_response = self.client.auth.sign_up({
-                "email": email,
-                "password": password
-            })
+            auth_response = self.client.auth.sign_up({"email": email, "password": password})
 
             if not auth_response or not auth_response.user:
                 raise HTTPException(
@@ -71,7 +68,7 @@ class SupabaseService:
                 "user_id": str(user_id),  # Convert UUID to string
                 "display_name": display_name or email.split("@")[0],
                 "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat()
+                "updated_at": datetime.utcnow().isoformat(),
             }
 
             self.client.table("profile").insert(profile_data).execute()
@@ -137,12 +134,7 @@ class SupabaseService:
         """Delete user and their profile."""
         try:
             # Delete profile first (due to foreign key constraint)
-            (
-                self.client.from_("profile")
-                .delete()
-                .eq("user_id", str(user_id))
-                .execute()
-            )
+            (self.client.from_("profile").delete().eq("user_id", str(user_id)).execute())
 
             # Delete auth user
             self.client.auth.admin.delete_user(str(user_id))
@@ -151,15 +143,12 @@ class SupabaseService:
             logger.error(f"Error deleting user with profile: {e}")
             return False
 
-    def authenticate_user(
-        self, email: str, password: str
-    ) -> Tuple[bool, Optional[Dict[str, Any]]]:
+    def authenticate_user(self, email: str, password: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
         """Authenticate user and return session data."""
         try:
-            auth_response = self.client.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
+            auth_response = self.client.auth.sign_in_with_password(
+                {"email": email, "password": password}
+            )
 
             if not auth_response or not auth_response.user:
                 return False, None
@@ -233,20 +222,16 @@ class SupabaseService:
                 "user_id": str(user_id),
                 "display_name": display_name or "User",
                 "created_at": datetime.utcnow().isoformat(),
-                "updated_at": datetime.utcnow().isoformat()
+                "updated_at": datetime.utcnow().isoformat(),
             }
 
             # Get current session
             session = self.client.auth.get_session()
-            
+
             # Set auth header
             self.client.postgrest.auth(session.access_token)
 
-            profile_response = (
-                self.client.table("profile")
-                .insert(data)
-                .execute()
-            )
+            profile_response = self.client.table("profile").insert(data).execute()
 
             if not profile_response.data:
                 logger.error("Failed to create profile")

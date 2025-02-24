@@ -102,7 +102,7 @@ class TestAuthEndpoints:
         # Mock successful authentication
         mock_supabase_service.authenticate_user.return_value = {
             "access_token": "test_access_token",
-            "refresh_token": "test_refresh_token"
+            "refresh_token": "test_refresh_token",
         }
 
         response = test_client.post(

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Any, Optional, Union
+from typing import TYPE_CHECKING, Dict, Any, Optional
 from sqlalchemy import Column, BigInteger, String, Text, ForeignKey, JSON, DateTime, Index
 from sqlalchemy.orm import relationship, Mapped
 
@@ -32,45 +32,31 @@ class Medication(Base):
 
     id: Mapped[int] = Column(BigInteger, primary_key=True, autoincrement=True)
     profile_id: Mapped[int] = Column(
-        BigInteger, 
-        ForeignKey("profiles.id"), 
+        BigInteger,
+        ForeignKey("profiles.id"),
         nullable=False,
-        comment="ID of the profile this medication belongs to"
+        comment="ID of the profile this medication belongs to",
     )
     title: Mapped[Optional[str]] = Column(
-        String(length=255), 
-        nullable=True,
-        comment="Name or title of the medication"
+        String(length=255), nullable=True, comment="Name or title of the medication"
     )
     scan_date: Mapped[datetime] = Column(
-        DateTime, 
-        default=datetime.utcnow,
-        comment="Date when the medication was scanned"
+        DateTime, default=datetime.utcnow, comment="Date when the medication was scanned"
     )
     active_ingredients: Mapped[Optional[str]] = Column(
-        Text, 
-        nullable=True,
-        comment="List of active ingredients in text format"
+        Text, nullable=True, comment="List of active ingredients in text format"
     )
     scanned_text: Mapped[Optional[str]] = Column(
-        Text, 
-        nullable=True,
-        comment="Raw text extracted from the medication scan"
+        Text, nullable=True, comment="Raw text extracted from the medication scan"
     )
     dosage: Mapped[Optional[str]] = Column(
-        String(length=255), 
-        nullable=True,
-        comment="Dosage information"
+        String(length=255), nullable=True, comment="Dosage information"
     )
     prescription_details: Mapped[Optional[Dict[str, Any]]] = Column(
-        JSON, 
-        nullable=True,
-        comment="Additional prescription details in JSON format"
+        JSON, nullable=True, comment="Additional prescription details in JSON format"
     )
     image_url: Mapped[Optional[str]] = Column(
-        String(length=2048), 
-        nullable=True,
-        comment="URL of the uploaded medication image"
+        String(length=2048), nullable=True, comment="URL of the uploaded medication image"
     )
 
     # Relationships
@@ -78,9 +64,9 @@ class Medication(Base):
 
     # Indexes
     __table_args__ = (
-        Index('idx_medication_profile_id', 'profile_id'),  # Add index for profile_id queries
-        Index('idx_medication_scan_date', 'scan_date'),    # Add index for date-based queries
-        Index('idx_medication_title', 'title'),            # Add index for title searches
+        Index("idx_medication_profile_id", "profile_id"),  # Add index for profile_id queries
+        Index("idx_medication_scan_date", "scan_date"),  # Add index for date-based queries
+        Index("idx_medication_title", "title"),  # Add index for title searches
     )
 
     def __repr__(self) -> str:

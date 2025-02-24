@@ -23,24 +23,18 @@ class ScannedImage(Base):
 
     id: Mapped[int] = Column(BigInteger, primary_key=True, autoincrement=True)
     image: Mapped[str] = Column(
-        String(length=255), 
-        nullable=False,
-        comment="Name or identifier of the uploaded image"
+        String(length=255), nullable=False, comment="Name or identifier of the uploaded image"
     )
     uploaded_at: Mapped[datetime] = Column(
-        DateTime, 
-        default=datetime.utcnow,
-        comment="Timestamp when the image was uploaded"
+        DateTime, default=datetime.utcnow, comment="Timestamp when the image was uploaded"
     )
     file_path: Mapped[Optional[str]] = Column(
-        Text, 
-        nullable=True,
-        comment="Path where the image is stored in the system"
+        Text, nullable=True, comment="Path where the image is stored in the system"
     )
 
     # Indexes
     __table_args__ = (
-        Index('idx_scanned_images_uploaded_at', 'uploaded_at'),  # Add index for timestamp queries
+        Index("idx_scanned_images_uploaded_at", "uploaded_at"),  # Add index for timestamp queries
     )
 
     def __repr__(self) -> str:

@@ -26,24 +26,28 @@ class Profile(Base):
 
     id: Mapped[int] = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id: Mapped[uuid.UUID] = Column(
-        UUID(as_uuid=True), nullable=False, unique=True, index=True, default=uuid.uuid4,
-        comment="UUID of the associated Supabase user"
+        UUID(as_uuid=True),
+        nullable=False,
+        unique=True,
+        index=True,
+        default=uuid.uuid4,
+        comment="UUID of the associated Supabase user",
     )
-    display_name: Mapped[Optional[str]] = Column(Text, nullable=True, 
-        comment="Display name of the user")
-    bio: Mapped[Optional[str]] = Column(Text, nullable=True,
-        comment="User's biography or description")
+    display_name: Mapped[Optional[str]] = Column(
+        Text, nullable=True, comment="Display name of the user"
+    )
+    bio: Mapped[Optional[str]] = Column(
+        Text, nullable=True, comment="User's biography or description"
+    )
 
     # Relationships
     medications: Mapped[List["Medication"]] = relationship(
-        "Medication", 
-        back_populates="profile", 
-        cascade="all, delete-orphan"
+        "Medication", back_populates="profile", cascade="all, delete-orphan"
     )
 
     # Indexes
     __table_args__ = (
-        Index('idx_profile_display_name', 'display_name'),  # Add index for display_name searches
+        Index("idx_profile_display_name", "display_name"),  # Add index for display_name searches
     )
 
     def __repr__(self) -> str:

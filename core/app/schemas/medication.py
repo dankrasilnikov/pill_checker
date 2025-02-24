@@ -8,6 +8,7 @@ from .base import BaseSchema
 
 class MedicationStatus(str, Enum):
     """Medication status enum."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -23,15 +24,12 @@ class MedicationBase(BaseSchema):
     active_ingredients: Optional[constr(min_length=1, max_length=500)] = Field(
         None, description="Active ingredients list"
     )
-    ocr_text: Optional[constr(min_length=1)] = Field(
-        None, description="Text extracted from image"
-    )
+    ocr_text: Optional[constr(min_length=1)] = Field(None, description="Text extracted from image")
     dosage: Optional[constr(min_length=1, max_length=100)] = Field(
         None, description="Medication dosage"
     )
     prescription_details: Optional[Dict[str, Any]] = Field(
-        default_factory=dict,
-        description="Additional prescription details"
+        default_factory=dict, description="Additional prescription details"
     )
 
 
@@ -64,13 +62,12 @@ class MedicationResponse(MedicationInDB):
 
     image_url: Optional[HttpUrl] = Field(None, description="URL of the medication image")
     status: MedicationStatus = Field(
-        default=MedicationStatus.PENDING,
-        description="Current status of the medication"
+        default=MedicationStatus.PENDING, description="Current status of the medication"
     )
     status_color: str = Field(
         "warning",
         pattern="^(primary|secondary|success|danger|warning|info)$",
-        description="Bootstrap color class for status"
+        description="Bootstrap color class for status",
     )
 
     @property

@@ -22,4 +22,4 @@ setup(
         "aiofiles>=0.7.0",
     ],
     python_requires=">=3.9",
-) 
+)

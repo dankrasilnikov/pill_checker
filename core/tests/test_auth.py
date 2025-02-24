@@ -7,9 +7,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from core.app.api.v1.auth import router as auth_router
-from core.app.core.security import setup_security
-from core.app.services.supabase import SupabaseService
+from app.api.v1.auth import router as auth_router
+from app.core.security import setup_security
+from app.services.supabase import SupabaseService
 
 # Test data
 TEST_USER_EMAIL = "test@example.com"
@@ -22,16 +22,23 @@ TEST_DISPLAY_NAME = "Test User"
 def mock_supabase_service():
     """Mock Supabase service."""
     with patch("app.api.v1.auth.get_supabase_service") as mock:
-        service = MagicMock(spec=SupabaseService)
+        service = AsyncMock(spec=SupabaseService)
         service.create_user_with_profile = AsyncMock()
         service.authenticate_user = AsyncMock()
-        service.client = MagicMock()
-        service.client.auth = MagicMock()
-        service.client.auth.sign_out = AsyncMock()
-        service.client.auth.refresh_session = AsyncMock()
-        service.client.auth.reset_password_email = AsyncMock()
-        service.client.auth.verify_otp = AsyncMock()
-        service.client.auth.update_user = AsyncMock()
+
+        # Mock auth client
+        auth = AsyncMock()
+        auth.sign_out = AsyncMock()
+        auth.refresh_session = AsyncMock()
+        auth.reset_password_email = AsyncMock()
+        auth.verify_otp = AsyncMock()
+        auth.update_user = AsyncMock()
+
+        # Mock client
+        client = AsyncMock()
+        client.auth = auth
+        service.client = client
+
         mock.return_value = service
         yield service
 
@@ -57,10 +64,7 @@ class TestAuthEndpoints:
     def test_register_success(self, test_client, mock_supabase_service):
         """Test successful user registration."""
         # Mock successful user creation
-        mock_supabase_service.create_user_with_profile.return_value = (
-            True,
-            {"user_id": TEST_USER_ID},
-        )
+        mock_supabase_service.create_user_with_profile.return_value = {"user_id": TEST_USER_ID}
 
         response = test_client.post(
             "/api/v1/auth/register",
@@ -96,10 +100,10 @@ class TestAuthEndpoints:
     def test_login_success(self, test_client, mock_supabase_service):
         """Test successful login."""
         # Mock successful authentication
-        mock_supabase_service.authenticate_user.return_value = (
-            True,
-            {"access_token": "test_access_token", "refresh_token": "test_refresh_token"},
-        )
+        mock_supabase_service.authenticate_user.return_value = {
+            "access_token": "test_access_token",
+            "refresh_token": "test_refresh_token",
+        }
 
         response = test_client.post(
             "/api/v1/auth/login", data={"username": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD}
@@ -115,7 +119,7 @@ class TestAuthEndpoints:
     def test_login_failure(self, test_client, mock_supabase_service):
         """Test login with invalid credentials."""
         # Mock failed authentication
-        mock_supabase_service.authenticate_user.return_value = (False, None)
+        mock_supabase_service.authenticate_user.side_effect = Exception("Invalid credentials")
 
         response = test_client.post(
             "/api/v1/auth/login", data={"username": TEST_USER_EMAIL, "password": "wrong_password"}
@@ -135,9 +139,12 @@ class TestAuthEndpoints:
     def test_refresh_token_success(self, test_client, mock_supabase_service):
         """Test successful token refresh."""
         # Mock successful token refresh
-        mock_supabase_service.client.auth.refresh_session.return_value = MagicMock(
-            session=MagicMock(access_token="new_access_token", refresh_token="new_refresh_token")
-        )
+        mock_session = MagicMock()
+        mock_session.access_token = "new_access_token"
+        mock_session.refresh_token = "new_refresh_token"
+        mock_response = AsyncMock()
+        mock_response.session = mock_session
+        mock_supabase_service.client.auth.refresh_session.return_value = mock_response
 
         response = test_client.post(
             "/api/v1/auth/refresh-token", json={"refresh_token": "old_refresh_token"}

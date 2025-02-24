@@ -6,14 +6,14 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from core.app.models import Profile, Medication, UploadedImage
-from core.app.schemas import (
+from app.models import Profile, Medication, ScannedImage
+from app.schemas import (
     ProfileCreate,
     ProfileResponse,
     MedicationCreate,
     MedicationResponse,
-    UploadedImageCreate,
-    UploadedImageResponse,
+    ScannedImageCreate,
+    ScannedImageResponse,
 )
 
 
@@ -74,16 +74,19 @@ class TestMedicationModel:
         test_db_session.add(profile)
         test_db_session.commit()
 
-        medication = Medication(profile_id=profile.id, **sample_medication_data)
+        # Remove image_url from model data as it's only required for schema
+        model_data = {k: v for k, v in sample_medication_data.items() if k != "image_url"}
+        medication = Medication(profile_id=profile.id, **model_data)
         test_db_session.add(medication)
         test_db_session.commit()
 
         assert medication.id is not None
         assert medication.profile_id == profile.id
-        assert medication.title == sample_medication_data["title"]
-        assert medication.active_ingredients == sample_medication_data["active_ingredients"]
-        assert medication.prescription_details == sample_medication_data["prescription_details"]
+        assert medication.title == model_data["title"]
+        assert medication.active_ingredients == model_data["active_ingredients"]
+        assert medication.prescription_details == model_data["prescription_details"]
         assert isinstance(medication.scan_date, datetime)
+        assert medication.image_url is None  # image_url should be None by default
 
     def test_medication_schema_validation(
         self, test_db_session, sample_profile_data, sample_medication_data
@@ -112,7 +115,9 @@ class TestMedicationModel:
         test_db_session.add(profile)
         test_db_session.commit()
 
-        medication = Medication(profile_id=profile.id, **sample_medication_data)
+        # Remove image_url from model data as it's only required for schema
+        model_data = {k: v for k, v in sample_medication_data.items() if k != "image_url"}
+        medication = Medication(profile_id=profile.id, **model_data)
         test_db_session.add(medication)
         test_db_session.commit()
 
@@ -121,39 +126,40 @@ class TestMedicationModel:
         assert medication_response.profile_id == medication.profile_id
         assert medication_response.title == medication.title
         assert medication_response.prescription_details == medication.prescription_details
+        assert medication_response.image_url is None  # image_url should be None in response
 
 
-class TestUploadedImageModel:
-    """Test suite for UploadedImage model and schemas."""
+class TestScannedImageModel:
+    """Test suite for ScannedImage model and schemas."""
 
-    def test_uploaded_image_model_create(self, test_db_session, sample_uploaded_image_data):
-        """Test creating an UploadedImage model instance."""
-        image = UploadedImage(**sample_uploaded_image_data)
+    def test_scanned_image_model_create(self, test_db_session, sample_scanned_image_data):
+        """Test creating a ScannedImage model instance."""
+        image = ScannedImage(**sample_scanned_image_data)
         test_db_session.add(image)
         test_db_session.commit()
 
         assert image.id is not None
-        assert image.image == sample_uploaded_image_data["image"]
-        assert image.file_path == sample_uploaded_image_data["file_path"]
+        assert image.image == sample_scanned_image_data["image"]
+        assert image.file_path == sample_scanned_image_data["file_path"]
         assert isinstance(image.uploaded_at, datetime)
 
-    def test_uploaded_image_schema_validation(self, sample_uploaded_image_data):
-        """Test Pydantic schema validation for UploadedImage."""
+    def test_scanned_image_schema_validation(self, sample_scanned_image_data):
+        """Test Pydantic schema validation for ScannedImage."""
         # Test successful validation
-        image_create = UploadedImageCreate(**sample_uploaded_image_data)
-        assert image_create.image == sample_uploaded_image_data["image"]
+        image_create = ScannedImageCreate(**sample_scanned_image_data)
+        assert image_create.image == sample_scanned_image_data["image"]
 
         # Test validation error for missing required field
         with pytest.raises(ValidationError):
-            UploadedImageCreate(file_path=sample_uploaded_image_data["file_path"])
+            ScannedImageCreate(file_path=sample_scanned_image_data["file_path"])
 
-    def test_uploaded_image_schema_from_model(self, test_db_session, sample_uploaded_image_data):
-        """Test converting UploadedImage model to Pydantic schema."""
-        image = UploadedImage(**sample_uploaded_image_data)
+    def test_scanned_image_schema_from_model(self, test_db_session, sample_scanned_image_data):
+        """Test converting ScannedImage model to Pydantic schema."""
+        image = ScannedImage(**sample_scanned_image_data)
         test_db_session.add(image)
         test_db_session.commit()
 
-        image_response = UploadedImageResponse.from_orm(image)
+        image_response = ScannedImageResponse.from_orm(image)
         assert image_response.id == image.id
         assert image_response.image == image.image
         assert image_response.file_path == image.file_path
@@ -167,7 +173,9 @@ def test_model_relationships(test_db_session, sample_profile_data, sample_medica
     test_db_session.commit()
 
     # Create medication linked to profile
-    medication = Medication(profile_id=profile.id, **sample_medication_data)
+    # Remove image_url from model data as it's only required for schema
+    model_data = {k: v for k, v in sample_medication_data.items() if k != "image_url"}
+    medication = Medication(profile_id=profile.id, **model_data)
     test_db_session.add(medication)
     test_db_session.commit()
 

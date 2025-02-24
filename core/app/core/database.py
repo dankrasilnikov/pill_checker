@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from typing import AsyncGenerator, Generator
+from urllib.parse import urlparse, parse_qs
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -11,15 +12,28 @@ from sqlalchemy.pool import QueuePool
 from .config import settings
 from .logging_config import logger
 
+# Parse the database URL to handle SSL mode separately for asyncpg
+db_url = settings.SQLALCHEMY_DATABASE_URI
+parsed = urlparse(db_url)
+query_params = parse_qs(parsed.query)
+ssl_mode = query_params.get("sslmode", ["disable"])[0]
+
+# Create the base async URL without SSL mode
+async_url = db_url.replace("postgresql+psycopg2", "postgresql+asyncpg").split("?")[0]
+
+# Configure SSL for asyncpg
+connect_args = {"ssl": "require"} if ssl_mode == "require" else {}
+
 # Create async engine for the application
 async_engine = create_async_engine(
-    settings.SQLALCHEMY_DATABASE_URI.replace("postgresql+psycopg2", "postgresql+asyncpg"),
+    async_url,
     pool_pre_ping=True,  # Enable connection health checks
     pool_size=5,  # Maximum number of connections in the pool
     max_overflow=10,  # Maximum number of connections that can be created beyond pool_size
     pool_timeout=30,  # Timeout for getting a connection from the pool
     pool_recycle=1800,  # Recycle connections after 30 minutes
     echo=settings.DEBUG,  # Log SQL statements in debug mode
+    connect_args=connect_args,  # Apply SSL configuration
 )
 
 # Create sync engine for migrations and testing

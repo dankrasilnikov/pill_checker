@@ -1,11 +1,11 @@
 from .base import Base
-from .uploaded_image import UploadedImage
+from .scanned_image import ScannedImage
 from .profile import Profile
 from .medication import Medication
 
 __all__ = [
     "Base",
-    "UploadedImage",
+    "ScannedImage",
     "Profile",
     "Medication",
 ]

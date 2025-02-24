@@ -5,8 +5,8 @@ from fastapi import FastAPI, Response, status
 from sqlalchemy import text
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from .database import engine
-from .logging_config import logger
+from app.core.database import async_engine as engine
+from app.core.logging_config import logger
 
 
 def create_start_app_handler(app: FastAPI) -> Callable:

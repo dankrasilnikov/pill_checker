@@ -3,10 +3,11 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, constr
 
-from core.app.core.logging_config import logger
-from core.app.services.supabase import get_supabase_service
+from app.core.logging_config import logger
+from app.services.supabase import get_supabase_service
+from app.api.v1.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -16,31 +17,53 @@ class Token(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
-    expires_in: int
+    expires_in: int = Field(gt=0, description="Token expiration time in seconds")
     refresh_token: Optional[str] = None
 
 
 class RefreshToken(BaseModel):
     """Refresh token request model."""
 
-    refresh_token: str
+    refresh_token: str = Field(..., min_length=1, description="Valid refresh token")
 
 
 class UserCreate(BaseModel):
     """User registration model."""
 
     email: EmailStr
-    password: str
-    password_confirm: str
-    display_name: Optional[str] = None
+    password: str = Field(
+        ...,
+        min_length=8,
+        max_length=72,
+        description="Password must be between 8 and 72 characters and contain at least one letter and one number",
+        pattern="^[A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*$|^[A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*$",
+    )
+    password_confirm: str = Field(..., description="Must match password field")
+    display_name: Optional[constr(min_length=2, max_length=50)] = Field(
+        None, description="Display name between 2 and 50 characters"
+    )
+
+
+class ProfileCreate(BaseModel):
+    """Profile creation model."""
+
+    display_name: constr(min_length=2, max_length=50) = Field(
+        ..., description="Display name between 2 and 50 characters"
+    )
 
 
 class PasswordReset(BaseModel):
     """Password reset model."""
 
-    token: str
-    new_password: str
-    new_password_confirm: str
+    token: str = Field(..., min_length=1, description="Valid reset token")
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=72,
+        description="Password must be between 8 and 72 characters and contain at least one letter and one number",
+        pattern="^[A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*$|^[A-Za-z0-9@$!%*#?&]*[0-9][A-Za-z0-9@$!%*#?&]*[A-Za-z][A-Za-z0-9@$!%*#?&]*$",
+    )
+    new_password_confirm: str = Field(..., description="Must match new_password field")
 
 
 class EmailRequest(BaseModel):
@@ -59,11 +82,11 @@ async def register(user_data: UserCreate):
 
     try:
         supabase = get_supabase_service()
-        success, result = await supabase.create_user_with_profile(
+        result = await supabase.create_user_with_profile(
             email=user_data.email, password=user_data.password, display_name=user_data.display_name
         )
 
-        if not success or not result:
+        if not result:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Registration failed"
             )
@@ -87,23 +110,31 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """Login user and return access token."""
     try:
         supabase = get_supabase_service()
-        success, result = await supabase.authenticate_user(
-            email=form_data.username, password=form_data.password
-        )
+        try:
+            result = await supabase.authenticate_user(
+                email=form_data.username, password=form_data.password
+            )
 
-        if not success or not result:
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Incorrect email or password",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+
+            return {
+                "access_token": result["access_token"],
+                "token_type": "bearer",
+                "expires_in": 3600,  # 1 hour
+                "refresh_token": result["refresh_token"],
+            }
+        except Exception as auth_error:
+            logger.error(f"Login error: {auth_error}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-
-        return {
-            "access_token": result["access_token"],
-            "token_type": "bearer",
-            "expires_in": 3600,  # 1 hour
-            "refresh_token": result["refresh_token"],
-        }
     except HTTPException:
         raise
     except Exception as e:
@@ -220,4 +251,34 @@ async def verify_email(token: str):
         logger.error(f"Email verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification token"
+        )
+
+
+@router.post("/create-profile", status_code=status.HTTP_201_CREATED)
+async def create_profile(
+    profile_data: ProfileCreate, current_user: dict = Depends(get_current_user)
+):
+    """Create a profile for the authenticated user."""
+    try:
+        supabase = get_supabase_service()
+
+        # Create profile for the authenticated user
+        profile = await supabase.create_profile_for_existing_user(
+            user_id=current_user["id"], display_name=profile_data.display_name
+        )
+
+        if not profile:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create profile"
+            )
+
+        return {"message": "Profile created successfully", "profile": profile}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Profile creation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error during profile creation",
         )

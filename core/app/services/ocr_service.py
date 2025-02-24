@@ -1,27 +1,16 @@
-import io
+"""OCR service for processing medication images."""
 
+import io
 import easyocr
 from PIL import Image
 
-from core.app.services.biomed_ner_client import MedicalNERClient
-from core.app.models.models import Medication
 
-
-def recognise(request):
-    uploaded_file = request.file
-    image = Image.open(io.BytesIO(uploaded_file.read()))
+def recognise(uploaded_file):
+    image = Image.open(io.BytesIO(uploaded_file))
     if image.mode in ("RGBA", "P"):
         image = image.convert("RGB")
     extracted_text = extract_text_with_easyocr(image)
-    active_ingredients = MedicalNERClient().find_active_ingredients(extracted_text)
-
-    Medication.objects.create(
-        profile=request.auth_user,
-        active_ingredients=", ".join(active_ingredients),
-        scanned_text=extracted_text,
-    )
-
-    return list(dict.fromkeys(active_ingredients))
+    return extracted_text
 
 
 def extract_text_with_easyocr(image):

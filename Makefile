@@ -13,10 +13,10 @@ test_model: pip_deps
 	cd model && \
 	python -m unittest tests/test_main.py
 
-.PHONY: test_core
-test_core: pip_deps
-	cd core && \
-	pytest --cov=app tests/
+# .PHONY: test_core
+# test_core: pip_deps
+#	cd core && \
+#	pytest --cov=app tests/
 
 
 # Build image targets

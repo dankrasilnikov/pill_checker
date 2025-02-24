@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function handleUpload(event) {
     event.preventDefault();
-    
+
     const formData = new FormData();
     const imageFile = document.getElementById('image').files[0];
     formData.append('image', imageFile);
@@ -58,7 +58,7 @@ async function handleUpload(event) {
         });
 
         const data = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(data.detail || 'Upload failed');
         }
@@ -98,7 +98,7 @@ async function loadMedications() {
 
 function displayMedications(medications) {
     const container = document.getElementById('medicationsTable');
-    
+
     if (!medications || medications.length === 0) {
         container.innerHTML = '<p class="text-center">No medications found. Upload your first medication image above!</p>';
         return;
@@ -135,7 +135,7 @@ function displayMedications(medications) {
             </table>
         </div>
     `;
-    
+
     container.innerHTML = table;
 }
 
@@ -153,7 +153,7 @@ async function viewMedication(id) {
 
         const medication = await response.json();
         // Navigate to medication detail page
-        window.location.href = `/medications/${id}`;
+        window.location.href = `/medication/${id}`;
     } catch (error) {
         alert(error.message);
         if (error.message.includes('401')) {

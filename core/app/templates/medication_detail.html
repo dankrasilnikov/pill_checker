@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Medication Details - PillChecker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Medication Details</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title" id="medicationName">Loading...</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="medicationImage" src="" alt="Medication Image" class="img-fluid mb-3">
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Details</h4>
+                            <dl class="row">
+                                <dt class="col-sm-4">Status</dt>
+                                <dd class="col-sm-8"><span id="medicationStatus" class="badge"></span></dd>
+
+                                <dt class="col-sm-4">Scan Date</dt>
+                                <dd class="col-sm-8" id="medicationDate"></dd>
+
+                                <dt class="col-sm-4">OCR Text</dt>
+                                <dd class="col-sm-8" id="medicationOCR"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParts = window.location.pathname.split('/');
+    const medicationId = urlParts[urlParts.length - 1];
+    loadMedicationDetails(medicationId);
+});
+
+async function loadMedicationDetails(id) {
+    try {
+        const response = await fetch(`/api/v1/medications/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load medication details');
+        }
+
+        const medication = await response.json();
+        displayMedicationDetails(medication);
+    } catch (error) {
+        console.error('Error:', error);
+        if (error.message.includes('401')) {
+            window.location.href = '/login';
+        } else {
+            alert('Error loading medication details');
+        }
+    }
+}
+
+function displayMedicationDetails(medication) {
+    document.getElementById('medicationName').textContent = medication.name || 'Unnamed Medication';
+    document.getElementById('medicationStatus').textContent = medication.status;
+    document.getElementById('medicationStatus').className = `badge bg-${medication.status_color}`;
+    document.getElementById('medicationDate').textContent = new Date(medication.created_at).toLocaleString();
+    document.getElementById('medicationOCR').textContent = medication.ocr_text || 'No OCR text available';
+    
+    if (medication.image_url) {
+        const img = document.getElementById('medicationImage');
+        img.src = medication.image_url;
+        img.alt = medication.name || 'Medication Image';
+    }
+}
+</script>
+{% endblock %}

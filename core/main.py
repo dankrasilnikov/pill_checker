@@ -69,6 +69,20 @@ async def dashboard_page(request: Request):
     )
 
 
+@app.get("/medication/{medication_id}")
+async def medication_detail_page(request: Request, medication_id: int):
+    """Render the medication detail page."""
+    # TODO: Add authentication middleware
+    return templates.TemplateResponse(
+        "medication_detail.html",
+        {
+            "request": request,
+            "user": {"email": "test@example.com"},  # Placeholder user data
+            "medication_id": medication_id,
+        },
+    )
+
+
 # Include API routers
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 

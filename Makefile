@@ -14,10 +14,10 @@ test_model: pip_deps
 	python -m unittest tests/main_test.py
 
 .PHONY: test_core
-test_service: pip_deps
-	export DJANGO_SETTINGS_MODULE=MedsRecognition.settings && \
+test_core: pip_deps
 	cd core && \
-	python manage.py test
+	pytest --cov=app tests/ && \
+	coverage report --show-missing > coverage_report.txt
 
 
 # Build image targets

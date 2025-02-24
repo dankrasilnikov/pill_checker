@@ -87,10 +87,11 @@ def sample_medication_data():
         "scanned_text": "Test scan text",
         "dosage": "10mg",
         "prescription_details": {"frequency": "daily"},
+        "image_url": "https://example.com/test_image.jpg",
     }
 
 
 @pytest.fixture
-def sample_uploaded_image_data():
-    """Sample uploaded image data for testing."""
+def sample_scanned_image_data():
+    """Sample scanned medication image data for testing."""
     return {"image": "test_image.jpg", "file_path": "/path/to/test_image.jpg"}

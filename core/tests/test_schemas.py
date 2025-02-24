@@ -6,15 +6,15 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from core.app.schemas import (
+from app.schemas import (
     ProfileCreate,
     ProfileUpdate,
     ProfileResponse,
     ProfileWithStats,
     MedicationCreate,
     MedicationUpdate,
-    UploadedImageCreate,
-    UploadedImageUpdate,
+    ScannedImageCreate,
+    ScannedImageUpdate,
 )
 
 
@@ -86,12 +86,11 @@ class TestMedicationSchemas:
         assert medication.title == data["title"]
         assert medication.active_ingredients == data["active_ingredients"]
         assert medication.prescription_details == data["prescription_details"]
+        assert str(medication.image_url) == data["image_url"]
 
-        # Test optional fields
-        medication = MedicationCreate(profile_id=1)
-        assert medication.title is None
-        assert medication.active_ingredients is None
-        assert medication.prescription_details == {}
+        # Test validation error for missing required field
+        with pytest.raises(ValidationError):
+            MedicationCreate(profile_id=1, title="Test")
 
     def test_medication_update_schema(self, sample_medication_data):
         """Test MedicationUpdate schema validation."""
@@ -107,32 +106,32 @@ class TestMedicationSchemas:
         assert medication.active_ingredients == sample_medication_data["active_ingredients"]
 
 
-class TestUploadedImageSchemas:
-    """Test suite for UploadedImage-related schemas."""
+class TestScannedImageSchemas:
+    """Test suite for ScannedImage-related schemas."""
 
-    def test_uploaded_image_create_schema(self, sample_uploaded_image_data):
-        """Test UploadedImageCreate schema validation."""
+    def test_scanned_image_create_schema(self, sample_scanned_image_data):
+        """Test ScannedImageCreate schema validation."""
         # Test valid data
-        image = UploadedImageCreate(**sample_uploaded_image_data)
-        assert image.image == sample_uploaded_image_data["image"]
-        assert image.file_path == sample_uploaded_image_data["file_path"]
+        image = ScannedImageCreate(**sample_scanned_image_data)
+        assert image.image == sample_scanned_image_data["image"]
+        assert image.file_path == sample_scanned_image_data["file_path"]
 
         # Test required fields
         with pytest.raises(ValidationError):
-            UploadedImageCreate()
+            ScannedImageCreate()
 
-    def test_uploaded_image_update_schema(self, sample_uploaded_image_data):
-        """Test UploadedImageUpdate schema validation."""
+    def test_scanned_image_update_schema(self, sample_scanned_image_data):
+        """Test ScannedImageUpdate schema validation."""
         # Test partial update
         update_data = {"file_path": "/new/path/to/image.jpg"}
-        image = UploadedImageUpdate(**update_data)
+        image = ScannedImageUpdate(**update_data)
         assert image.file_path == update_data["file_path"]
         assert image.image is None
 
         # Test full update
-        image = UploadedImageUpdate(**sample_uploaded_image_data)
-        assert image.image == sample_uploaded_image_data["image"]
-        assert image.file_path == sample_uploaded_image_data["file_path"]
+        image = ScannedImageUpdate(**sample_scanned_image_data)
+        assert image.image == sample_scanned_image_data["image"]
+        assert image.file_path == sample_scanned_image_data["file_path"]
 
 
 def test_schema_inheritance():

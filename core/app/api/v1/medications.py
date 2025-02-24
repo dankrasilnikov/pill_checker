@@ -1,14 +1,19 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from supabase import Client, create_client
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.api.v1.dependencies import get_current_user
 from app.models.medication import Medication
-from app.schemas.medication import MedicationResponse
-
-from core.app.services.ocr_service import recognise
+from app.schemas.medication import (
+    MedicationResponse,
+    MedicationCreate,
+    PaginatedResponse,
+    MedicationStatus
+)
+from app.services.ocr_service import recognise
 
 router = APIRouter()
 
@@ -16,12 +21,16 @@ router = APIRouter()
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 
-@router.post("/upload")
-async def upload_medication(file: UploadFile = File(...), db: Session = Depends(get_db)):
+@router.post("/upload", response_model=MedicationResponse)
+async def upload_medication(
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
     """Upload and process a medication image."""
     try:
         # Upload image to Supabase storage
-        file_path = f"medications/{file.filename}"
+        file_path = f"medications/{current_user['id']}/{file.filename}"
         file_content = await file.read()
 
         storage_response = supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET).upload(
@@ -32,45 +41,92 @@ async def upload_medication(file: UploadFile = File(...), db: Session = Depends(
         public_url = f"{settings.storage_url}/{file_path}"
 
         # Process image with OCR
-        medication_text = await recognise(file_content)
+        ocr_text = await recognise(file_content)
 
         # Create medication record
-        medication = Medication(image_url=public_url, ocr_text=medication_text, status="pending")
+        medication_data = MedicationCreate(
+            profile_id=current_user['id'],
+            image_url=public_url,
+            ocr_text=ocr_text,
+            status=MedicationStatus.PENDING
+        )
 
+        medication = Medication(**medication_data.dict())
         db.add(medication)
         db.commit()
         db.refresh(medication)
 
-        return {
-            "message": "Medication uploaded and processed successfully",
-            "medication_id": medication.id,
-            "status": medication.status,
-        }
+        return MedicationResponse.from_orm(medication)
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process medication: {str(e)}"
+        )
 
 
-@router.get("/list", response_model=List[MedicationResponse])
-async def list_medications(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
+@router.get("/list", response_model=PaginatedResponse)
+async def list_medications(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+    page: int = 1,
+    size: int = 10
+):
     """List all medications for the current user."""
-    medications = db.query(Medication).offset(skip).limit(limit).all()
-    return [MedicationResponse.from_orm(med) for med in medications]
+    # Calculate offset
+    offset = (page - 1) * size
+
+    # Get total count
+    total = db.query(Medication).filter(
+        Medication.profile_id == current_user['id']
+    ).count()
+
+    # Get paginated medications
+    medications = db.query(Medication).filter(
+        Medication.profile_id == current_user['id']
+    ).offset(offset).limit(size).all()
+
+    return PaginatedResponse(
+        items=[MedicationResponse.from_orm(med) for med in medications],
+        total=total,
+        page=page,
+        size=size,
+        pages=(total + size - 1) // size
+    )
 
 
 @router.get("/{medication_id}", response_model=MedicationResponse)
-async def get_medication(medication_id: int, db: Session = Depends(get_db)):
+async def get_medication_by_id(
+    medication_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
     """Get a specific medication by ID."""
-    medication = supabase.from_("medication").select("*").eq("id", medication_id).execute()
+    medication = db.query(Medication).filter(
+        Medication.id == medication_id,
+        Medication.profile_id == current_user['id']
+    ).first()
+
     if not medication:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medication not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Medication not found"
+        )
+
     return MedicationResponse.from_orm(medication)
 
 
-@router.get("/recent", response_model=MedicationResponse)
-async def get_medication(medication_id: str, db: Session = Depends(get_db)):
-    """Get recent medications"""
-    medication = supabase.from_("medication").select("*").eq("profile_id", str(user_id)).single().execute()
-    if not medication:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medication not found")
-    return MedicationResponse.from_orm(medication)
+@router.get("/recent", response_model=List[MedicationResponse])
+async def get_recent_medications(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+    limit: int = 5
+):
+    """Get recent medications for the current user."""
+    medications = db.query(Medication).filter(
+        Medication.profile_id == current_user['id']
+    ).order_by(
+        Medication.scan_date.desc()
+    ).limit(limit).all()
+
+    return [MedicationResponse.from_orm(med) for med in medications]

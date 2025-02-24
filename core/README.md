@@ -1,112 +1,189 @@
-# **PillChecker**
+# PillChecker Backend Service Guidelines
 
-## Overview
+## Service Overview
+The backend service is a FastAPI application that provides:
+- OCR-based medication recognition
+- Integration with BiomedNER for ingredient detection
+- User authentication via Supabase
+- RESTful API endpoints for medication management
 
-PillChecker is a Django-based application designed to recognize medications from scanned images. The recognition workflow consists of extracting text via OCR, then leveraging a remote biomedical Named Entity Recognition (NER) service to identify active ingredients within the extracted text.
+## Architecture
 
-
-## Table of Contents
-
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Environment Variables](#environment-variables)
-- [Installing and Running Locally](#installing-and-running-locally)
-- [Docker Usage](#docker-usage)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Features
-
-### 1. **OCR for Medication Recognition**  
-- Converts uploaded images into text.
-- Passes extracted text to a remote biomedical service for active ingredient detection.
-
-### 2. **Biomed Service Integration**  
-- Connects to an external NER API for processing recognized text.  
-- For more information on the NER service, refer to:  
-  [BiomedNER GitHub Repository](https://github.com/SPerekrestova/BiomedNER).
-
-### 3. **Authentication and Profile Management**  
-- Provides user sign-up and sign-in via Supabase integration.  
-- Stores user profiles within the Django application.
-
-### 4. **API Endpoints**  
-- Includes endpoints suitable for mobile or web clients to interact with user and medication data.  
-- Allows scanning (via OCR) and subsequent recognition of medication ingredients.
-
-### 5. **Docker Support**  
-- A Dockerfile is provided for containerizing and deploying the application.
-
-## Project Structure
-
-The project consists of the following key components:
-
-### **biomed_ner_client.py**
-- Contains a client class to call the remote BiomedNER API.
-- Sends scanned text to the external service and processes the returned list of recognized entities.
-- Uses environment variables for configuration:
-  - `BIOMED_HOST` (required)
-  - `BIOMED_SCHEME` (optional, defaults to `http`)
-
-### **ocr_service.py**
-- Integrates the external BiomedNER client after performing OCR.
-- Submits extracted text to the BiomedNER service and retrieves recognized ingredients.
-
----
-
-## Prerequisites
-
-- Python 3  
-- Docker (optional for containerization)  
-
-## Environment Variables
-
-The application relies on the following environment variables:
-
-- `BIOMED_HOST` – Host address for the BiomedNER service.  
-- `BIOMED_SCHEME` – Optional scheme (http/https) for the BiomedNER service.  
-
-Additional Supabase or project-related variables can be configured for authentication and other features.
-
-## Installing and Running Locally
-
-1. **Clone the Repository**  
-   Obtain the source files and navigate into the project directory.
-
-2. **Setup a Virtual Environment (Recommended)**  
-   Install any standard Python environment management tool and activate it.
-
-3. **Install Dependencies**  
-```shell script
-pip install -r requirements.txt
+### Component Structure
+```
+app/
+├── api/            # API endpoints and routes
+├── core/           # Core business logic
+├── models/         # SQLAlchemy models
+├── schemas/        # Pydantic schemas
+├── services/       # Business services
+├── utils/          # Utility functions
+├── static/         # Static assets
+└── templates/      # Jinja2 templates
 ```
 
-4. **Configure Environment Variables**  
-   Make sure to set the BiomedNER service details (BIOMED_HOST and BIOMED_SCHEME).
-
-5. **Run Migrations**  
-```shell script
-python manage.py migrate
+### Architectural Dependency Map
+```
+                                    External Services
+                                   ┌─────────────────┐
+                                   │   Supabase      │
+                                   │   BiomedNER     │
+                                   │   OCR Service   │
+                                   └────────┬────────┘
+                                           │
+                                           ▼
+┌─────────────────┐              ┌─────────────────┐
+│    API Layer    │              │    Services     │
+│  (FastAPI)      │◄────────────►│  Integration    │
+│ - Auth          │              │ - Authentication│
+│ - Medications   │              │ - Storage       │
+└───────┬─────────┘              └────────┬────────┘
+        │                                 │
+        ▼                                 ▼
+┌─────────────────┐              ┌─────────────────┐
+│  Data Models    │◄────────────►│    Schemas      │
+│  (SQLAlchemy)   │              │   (Pydantic)    │
+│ - Medication    │              │ - Validation    │
+│ - Profile       │              │ - Serialization │
+└───────┬─────────┘              └────────┬────────┘
+        │                                 │
+        └─────────────────┐   ┌──────────┘
+                         ▼   ▼
+                   ┌─────────────────┐
+                   │    Database     │
+                   │   (PostgreSQL)  │
+                   └─────────────────┘
 ```
 
-6. **Start the Django Development Server**  
-```shell script
-python manage.py runserver
-```
-   Access the interface or endpoints at: http://127.0.0.1:8000.
+## Setup and Configuration
+1. **Environment Setup**
+   ```bash
+   # Create virtual environment
+   python -m venv .venv
+   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 
-## Docker Usage
+   # Install dependencies
+   pip install -r requirements.txt
+   ```
 
-To build and run the Docker image:
+2. **Environment Variables**
+   ```bash
+   # Copy example environment file
+   cp .env.example .env
 
-1. **Build the Image**  
-```shell script
-docker build -t medsrecognition .
-```
+   # Required variables:
+   - BIOMED_HOST         # BiomedNER service host
+   - BIOMED_SCHEME      # BiomedNER service scheme (http/https)
+   - DATABASE_URL       # Database connection string
+   - SUPABASE_URL      # Supabase project URL
+   - SUPABASE_KEY      # Supabase API key
+   ```
 
-2. **Run the Container**  
-```shell script
-docker run -p 8000:8000 medsrecognition
-```
-   The application will be available at: http://localhost:8000
+## Database Management
+1. **Migrations**
+   ```bash
+   # Create new migration
+   alembic revision --autogenerate -m "description"
+
+   # Apply migrations
+   alembic upgrade head
+   ```
+
+2. **Models**
+   - Define models in `app/models/`
+   - Use SQLAlchemy for model definitions
+   - Follow naming conventions
+
+## Development Guidelines
+1. **Code Organization**
+   - Place API routes in `app/api/v1/`
+   - Keep business logic in services
+   - Use schemas for request/response validation
+
+2. **API Development**
+   - Follow REST principles
+   - Document endpoints with FastAPI docstrings
+   - Use dependency injection for common functionality
+
+3. **Error Handling**
+   - Use custom exceptions from `app/core/exceptions.py`
+   - Implement proper error responses
+   - Log errors appropriately
+
+## Testing
+1. **Running Tests**
+   ```bash
+   # Run all tests
+   pytest
+
+   # Run specific test file
+   pytest tests/test_file.py
+
+   # Run with coverage
+   pytest --cov=app tests/
+
+   # Generate detailed coverage report
+   pytest --cov=app tests/ && coverage report --show-missing > coverage_report.txt
+   ```
+
+   The coverage report will show:
+   - Coverage percentage for each module
+   - Number of statements and missed statements
+   - List of missing lines for each file
+   - Overall project coverage
+
+2. **Writing Tests**
+   - Place tests in `tests/` directory
+   - Follow test naming conventions
+   - Use fixtures for common setup
+   - Mock external services
+
+## API Documentation
+- Swagger UI: `/docs`
+- ReDoc: `/redoc`
+- OpenAPI JSON: `/openapi.json`
+
+## Common Tasks
+1. **Adding New Endpoint**
+   - Create route in appropriate API module
+   - Define request/response schemas
+   - Implement service logic
+   - Add tests
+
+2. **Database Changes**
+   - Update models
+   - Generate migration
+   - Test migration
+   - Update related schemas
+
+3. **External Service Integration**
+   - Add service client in `app/services/`
+   - Use environment variables for configuration
+   - Implement retry logic
+   - Add error handling
+
+## Deployment
+1. **Docker Build**
+   ```bash
+   docker build -t pill-checker-core .
+   ```
+
+2. **Docker Run**
+   ```bash
+   docker run -p 8000:8000 \
+     --env-file .env \
+     pill-checker-core
+   ```
+
+## Troubleshooting
+1. **Common Issues**
+   - Check environment variables
+   - Verify database connection
+   - Ensure BiomedNER service is accessible
+   - Check logs in `logs/` directory
+
+2. **Debugging**
+   - Use FastAPI debug mode
+   - Check application logs
+   - Verify database migrations
+   - Test external service connections

@@ -7,7 +7,8 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.models.medication import Medication
 from app.schemas.medication import MedicationResponse
-from app.services.ocr_service import process_image
+
+from core.app.services.ocr_service import recognise
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ async def upload_medication(file: UploadFile = File(...), db: Session = Depends(
         public_url = f"{settings.storage_url}/{file_path}"
 
         # Process image with OCR
-        medication_text = await process_image(file_content)
+        medication_text = await recognise(file_content)
 
         # Create medication record
         medication = Medication(image_url=public_url, ocr_text=medication_text, status="pending")

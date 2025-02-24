@@ -14,4 +14,4 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - run: PUSH=1 make image-ui
+      - run: PUSH=1 make image

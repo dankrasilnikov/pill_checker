@@ -11,13 +11,12 @@ pip_deps:
 .PHONY: test_model
 test_model: pip_deps
 	cd model && \
-	python -m unittest tests/main_test.py
+	python -m unittest tests/test_main.py
 
 .PHONY: test_core
-test_service: pip_deps
-	export DJANGO_SETTINGS_MODULE=MedsRecognition.settings && \
+test_core: pip_deps
 	cd core && \
-	python manage.py test
+	pytest --cov=app tests/
 
 
 # Build image targets

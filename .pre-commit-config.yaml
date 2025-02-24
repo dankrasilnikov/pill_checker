@@ -39,7 +39,6 @@ repos:
     hooks:
     - id: make-test
       name: make-test
-      # Skip pip_deps during pre-commit checks
-      entry: sh -c "pip install 'pytest==7.4.0' 'pytest-asyncio==0.21.1' && cd core && pytest --cov=app tests/"
+      entry: sh -c "make test"
       language: system
       require_serial: true

@@ -118,44 +118,7 @@ services:
     env_file:
       - .env
       - .env.app
-    command: >
-      sh -c '
-        echo "Waiting for all services to be ready..." &&
-        echo "Applying database migrations..." &&
-        python scripts/db_management.py apply_migrations &&
-        echo "Creating storage bucket..." &&
-        python -c "
-        import os
-        import time
-        import requests
-        
-        # Wait a bit for storage to be ready
-        time.sleep(5)
-        
-        # Create the storage bucket
-        headers = {
-            \"apikey\": os.environ.get(\"SUPABASE_KEY\"),
-            \"Authorization\": f\"Bearer {os.environ.get(\"SUPABASE_KEY\")}\"
-        }
-        try:
-            print(\"Attempting to create storage bucket...\")
-            response = requests.post(
-                f\"{os.environ.get(\"SUPABASE_URL\")}/storage/v1/buckets\",
-                headers=headers,
-                json={\"name\": \"scans\", \"public\": True}
-            )
-            if response.status_code == 200 or response.status_code == 201:
-                print(\"Storage bucket created successfully!\")
-            elif response.status_code == 400 and \"already exists\" in response.text:
-                print(\"Storage bucket already exists!\")
-            else:
-                print(f\"Error creating bucket: {response.status_code} - {response.text}\")
-        except Exception as e:
-            print(f\"Exception when creating bucket: {str(e)}\")
-        " &&
-        echo "Starting application..." &&
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      '
+    command: sh -c './scripts/startup.sh'
 
 volumes:
   supabase-db-data: 

@@ -132,6 +132,25 @@ app/
 ```
 
 ## Setup and Configuration
+
+### Quick Start with Self-hosted Supabase (Recommended)
+The quickest way to get started with local development is to use the setup script:
+
+```bash
+# Run the setup script to initialize everything
+./scripts/setup_dev_environment.sh
+```
+
+This will set up:
+- Python virtual environment
+- Required dependencies
+- Local Supabase instance with Docker
+- Database migrations
+- Storage bucket configuration
+
+For detailed instructions on working with the local Supabase setup, see [README-LOCAL-DEVELOPMENT.md](README-LOCAL-DEVELOPMENT.md).
+
+### Manual Setup
 1. **Environment Setup**
    ```bash
    # Create virtual environment
@@ -208,19 +227,34 @@ pytest --cov=app tests/ && coverage report --show-missing > coverage_report.txt
 ```
 
 ## Database Management
-1. **Migrations**
-   ```bash
-   # Create new migration
-   alembic revision --autogenerate -m "description"
 
-   # Apply migrations
-   alembic upgrade head
-   ```
+### Using the Database Management Script
+The project includes a database management script that makes it easy to manage migrations:
 
-2. **Models**
-   - Define models in `app/models/`
-   - Use SQLAlchemy for model definitions
-   - Follow naming conventions
+```bash
+# Generate a new migration after model changes
+python scripts/db_management.py generate_migration "describe your changes"
+
+# Apply pending migrations
+python scripts/db_management.py apply_migrations
+
+# Rollback the last migration
+python scripts/db_management.py rollback
+
+# Export database schema
+python scripts/db_management.py export_schema
+```
+
+See [README-LOCAL-DEVELOPMENT.md](README-LOCAL-DEVELOPMENT.md) for detailed instructions on database management.
+
+### Manual Alembic Commands
+```bash
+# Create new migration
+alembic revision --autogenerate -m "description"
+
+# Apply migrations
+alembic upgrade head
+```
 
 ## Development Guidelines
 1. **Code Organization**
@@ -242,6 +276,18 @@ pytest --cov=app tests/ && coverage report --show-missing > coverage_report.txt
 - Swagger UI: `/docs`
 - ReDoc: `/redoc`
 - OpenAPI JSON: `/openapi.json`
+
+## Working with Supabase
+
+The application uses Supabase for:
+1. **Authentication**: User signup, login, password reset
+2. **Storage**: Storing medication images
+3. **Database**: PostgreSQL database for application data
+
+For local development:
+- Use the self-hosted Supabase setup described in [README-LOCAL-DEVELOPMENT.md](README-LOCAL-DEVELOPMENT.md)
+- Access the Supabase Studio at http://localhost:54323
+- Check email notifications in MailHog at http://localhost:8025
 
 ## Common Tasks
 1. **Adding New Endpoint**

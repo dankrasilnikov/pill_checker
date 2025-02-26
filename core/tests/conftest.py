@@ -86,12 +86,6 @@ def sample_medication_data():
     }
 
 
-@pytest.fixture
-def sample_scanned_image_data():
-    """Sample scanned medication image data for testing."""
-    return {"image": "test_image.jpg", "file_path": "/path/to/test_image.jpg"}
-
-
 class MockOCRClient(OCRClient):
     """Mock OCR client for testing."""
     

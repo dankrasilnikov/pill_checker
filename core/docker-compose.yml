@@ -7,6 +7,10 @@ services:
     restart: unless-stopped
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
     env_file:
       - .env
       - .env.supabase-db
@@ -19,7 +23,7 @@ services:
       retries: 5
 
   supabase-studio:
-    image: supabase/studio:20240524-8f08f29
+    image: supabase/studio:20250224-d10db0f
     restart: unless-stopped
     ports:
       - "54323:3000"
@@ -112,12 +116,14 @@ services:
       supabase-storage:
         condition: service_started
     ports:
-      - "8000:8000"
+      - "8080:8000"
     volumes:
       - ./:/app  # Mount code for development
     env_file:
       - .env
       - .env.app
+    environment:
+      - AUTOMATED_DEPLOYMENT=true
     command: sh -c './scripts/startup.sh'
 
 volumes:

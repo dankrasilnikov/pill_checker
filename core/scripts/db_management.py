@@ -104,20 +104,30 @@ def apply_migrations():
     
     # First, show pending migrations
     print("Checking for pending migrations...")
-    result = run_command("alembic current", capture_output=True)
-    current = result.stdout.strip()
+    result = run_command("alembic current", capture_output=True, check=False)
+    current = result.stdout.strip() if result.stdout else "None"
     
-    result = run_command("alembic heads", capture_output=True)
-    head = result.stdout.strip()
+    result = run_command("alembic heads", capture_output=True, check=False)
+    head = result.stdout.strip() if result.stdout else "None"
     
     if current == head:
         print("Database is already up to date. No migrations to apply.")
         return
     
     print("The following migrations will be applied:")
-    run_command("alembic history -r-0:current")
+    try:
+        # Try to show migration history, but don't fail if it doesn't work
+        run_command("alembic history -r:current", check=False)
+    except Exception as e:
+        print(f"Could not display migration history: {e}")
+        print("Continuing with migration...")
     
-    confirm = input("Do you want to apply these migrations? (y/N): ")
+    # In automated environments, we want to apply migrations without confirmation
+    if os.environ.get("AUTOMATED_DEPLOYMENT") == "true":
+        confirm = "y"
+    else:
+        confirm = input("Do you want to apply these migrations? (y/N): ")
+    
     if confirm.lower() != "y":
         print("Migration aborted.")
         return

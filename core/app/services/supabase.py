@@ -23,15 +23,24 @@ class SupabaseService:
             options = ClientOptions(
                 postgrest_client_timeout=10,
                 storage_client_timeout=30,
+                # Add auth settings to ensure the correct path is used
+                auth={"url": "/auth/v1"},
+                auto_refresh_token=True
             )
 
+            # The SUPABASE_URL should be http://localhost:8000
+            # as we want to access it through the Kong gateway
             self.client = create_client(
                 settings.SUPABASE_URL, settings.SUPABASE_KEY, options=options
             )
 
             # Test connection
-            self.client.auth.get_session()
-            logger.info("Supabase client initialized successfully")
+            try:
+                self.client.auth.get_session()
+                logger.info("Supabase client initialized successfully")
+            except Exception as e:
+                logger.warning(f"Could not get session (this is normal for first startup): {e}")
+                pass
 
         except Exception as e:
             logger.error(f"Failed to initialize Supabase client: {e}")

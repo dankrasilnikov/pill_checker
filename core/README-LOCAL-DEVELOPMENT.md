@@ -243,6 +243,57 @@ When making changes to the data model:
 
 ## Working with Supabase Locally
 
+### Troubleshooting Supabase Auth Issues
+
+Sometimes the Supabase auth service may fail to start properly due to issues with database migrations, particularly related to missing enum types in the `auth` schema. Common errors include:
+
+- `ERROR: type "auth.factor_type" does not exist (SQLSTATE 42704)`
+- `ERROR: schema "auth" does not exist (SQLSTATE 3F000)`
+
+These issues typically occur when the auth service tries to run migrations but cannot find the required schema structures.
+
+#### Fix with Script
+
+We've included a script to automatically fix these issues:
+
+```bash
+# Make sure the script is executable
+chmod +x scripts/fix_supabase_auth.sh
+
+# Run the fix script
+./scripts/fix_supabase_auth.sh
+```
+
+The script performs the following actions:
+1. Stops the auth service
+2. Creates the `auth` schema if it doesn't exist
+3. Creates any missing enum types (`factor_type`, `factor_status`, `aal_level`, etc.)
+4. Restarts the auth service
+
+#### Manual Fix
+
+If you prefer to fix the issue manually:
+
+1. Stop the auth service:
+   ```bash
+   docker compose stop supabase-auth
+   ```
+
+2. Create the auth schema and required enum types:
+   ```bash
+   docker exec core-supabase-db-1 psql -U postgres -c "CREATE SCHEMA IF NOT EXISTS auth;"
+   docker exec core-supabase-db-1 psql -U postgres -c "CREATE TYPE auth.factor_type AS ENUM ('totp', 'webauthn', 'phone');"
+   docker exec core-supabase-db-1 psql -U postgres -c "CREATE TYPE auth.factor_status AS ENUM ('verified', 'unverified');"
+   docker exec core-supabase-db-1 psql -U postgres -c "CREATE TYPE auth.aal_level AS ENUM ('aal1', 'aal2', 'aal3');"
+   docker exec core-supabase-db-1 psql -U postgres -c "CREATE TYPE auth.code_challenge_method AS ENUM ('s256', 'plain');"
+   docker exec core-supabase-db-1 psql -U postgres -c "CREATE TYPE auth.one_time_token_type AS ENUM ('confirmation_token', 'reauthentication_token', 'recovery_token', 'email_change_token_new', 'email_change_token_current', 'phone_change_token');"
+   ```
+
+3. Restart the auth service:
+   ```bash
+   docker compose restart supabase-auth
+   ```
+
 ### Authentication
 
 When working with local Supabase, all authentication emails are captured by MailHog. Check http://localhost:8025 to view and access signup and password reset emails.

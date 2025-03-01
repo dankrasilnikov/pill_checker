@@ -34,8 +34,10 @@ class Settings(BaseSettings):
     # Supabase Settings
     SUPABASE_URL: str
     SUPABASE_KEY: str
-    SUPABASE_JWT_SECRET: str
+    SUPABASE_JWT_SECRET: str = None
     SUPABASE_STORAGE_BUCKET: str = "pill-images"
+    SUPABASE_ANON_KEY: str = None
+    SUPABASE_SERVICE_ROLE_KEY: str = None
 
     # Database - The actual values will be set based on APP_ENV
     DATABASE_USER: str = None
@@ -109,11 +111,19 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY environment variable is not set")
         return v
 
-    @validator("SUPABASE_URL", "SUPABASE_KEY", "SUPABASE_JWT_SECRET", pre=True)
+    @validator("SUPABASE_URL", "SUPABASE_KEY", pre=True)
     def validate_supabase_settings(cls, v, field):
-        """Validate that Supabase settings are set."""
+        """Validate that required Supabase settings are set."""
         if not v:
             raise ValueError(f"{field.name} environment variable is not set")
+        return v
+
+    @validator("SUPABASE_JWT_SECRET", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", pre=True)
+    def validate_optional_supabase_settings(cls, v, field):
+        """Validate optional Supabase settings."""
+        # These are not strictly required for all functionalities
+        if not v:
+            return os.getenv(field.name, None)
         return v
 
     @property

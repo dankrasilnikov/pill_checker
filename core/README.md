@@ -322,14 +322,18 @@ For local development:
    ```
 
 ## Troubleshooting
-1. **Common Issues**
-   - Check environment variables
-   - Verify database connection
-   - Ensure BiomedNER service is accessible
-   - Check logs in `logs/` directory
 
-2. **Debugging**
-   - Use FastAPI debug mode
-   - Check application logs
-   - Verify database migrations
-   - Test external service connections
+### Supabase Auth Migration Issues
+
+When running the local Supabase instance, you might encounter issues with the auth service failing to start due to database migration errors:
+
+- `ERROR: type "auth.factor_type" does not exist (SQLSTATE 42704)`
+- `ERROR: schema "auth" does not exist (SQLSTATE 3F000)`
+
+We've included a fix script to resolve these issues:
+
+```bash
+./scripts/fix_supabase_auth.sh
+```
+
+For detailed information about this issue and alternative manual fixes, see the [Troubleshooting Supabase Auth Issues](README-LOCAL-DEVELOPMENT.md#troubleshooting-supabase-auth-issues) section in the Local Development guide.

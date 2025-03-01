@@ -28,7 +28,7 @@ ruff>=0.9.6
 slowapi>=0.1.4
 sqlalchemy[asyncio]>=1.4.23
 starlette>=0.14.2
-supabase>=1.0.3
+supabase==2.13.0
 tenacity>=8.0.1
 urllib3<2.0.0
 uvicorn[standard]>=0.15.0

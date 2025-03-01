@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Local Supabase stack
   supabase-db:
-    image: supabase/postgres:15.1.0.117
+    image: supabase/postgres:15.1.1.78
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -14,8 +14,6 @@ services:
     env_file:
       - .env
       - .env.supabase-db
-    volumes:
-      - supabase-db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -53,11 +51,13 @@ services:
       - 8.8.4.4
 
   supabase-auth:
-    image: supabase/gotrue:v2.69.0
+    image: supabase/gotrue:v2.158.1
     restart: unless-stopped
     env_file:
       - .env
       - .env.supabase-auth
+    environment:
+      - API_EXTERNAL_URL=http://localhost:9999
     depends_on:
       supabase-db:
         condition: service_healthy
@@ -65,7 +65,7 @@ services:
         condition: service_started
 
   supabase-rest:
-    image: postgrest/postgrest:v11.1.0
+    image: postgrest/postgrest:v12.2.0
     restart: unless-stopped
     env_file:
       - .env
@@ -75,7 +75,7 @@ services:
         condition: service_healthy
 
   supabase-storage:
-    image: supabase/storage-api:v0.40.4
+    image: supabase/storage-api:v1.11.13
     restart: unless-stopped
     env_file:
       - .env
@@ -89,7 +89,7 @@ services:
         condition: service_started
 
   meta:
-    image: supabase/postgres-meta:v0.68.0
+    image: supabase/postgres-meta:v0.83.2
     restart: unless-stopped
     env_file:
       - .env
@@ -132,6 +132,4 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
-
-volumes:
-  supabase-db-data: 
+      

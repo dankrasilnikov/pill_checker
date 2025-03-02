@@ -106,7 +106,7 @@ async def register(user_data: UserCreate):
 
         return {
             "message": "Registration successful. Please check your email for verification.",
-            "user_id": str(result.get("id", "")),
+            "user_id": str(result.id),  # Access the id attribute directly
         }
     except HTTPException:
         raise

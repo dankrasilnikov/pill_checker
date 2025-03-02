@@ -355,6 +355,55 @@ If you encounter migration errors:
    docker-compose exec app alembic stamp <revision_id>
    ```
 
+### Database Search Path Issues
+
+If your application reports errors like `schema "auth" does not exist` while attempting to run migrations or when using Row Level Security (RLS) policies, even though the schema exists, it's likely a search path issue. The database search path determines which schemas are searched when an unqualified object name is used.
+
+#### Fix with Script
+
+We've included a script to automatically fix these issues:
+
+```bash
+# Make sure the script is executable
+chmod +x scripts/fix_db_search_path.sh
+
+# Run the fix script
+./scripts/fix_db_search_path.sh
+```
+
+#### Manual Fix
+
+If you prefer to fix the issue manually:
+
+1. Check the current search path:
+   ```bash
+   docker exec core-supabase-db-1 psql -U postgres -c "SHOW search_path;"
+   ```
+
+2. Update the search path to include the auth schema:
+   ```bash
+   docker exec core-supabase-db-1 psql -U postgres -c "ALTER DATABASE postgres SET search_path TO \"\$user\", public, auth;"
+   docker exec core-supabase-db-1 psql -U postgres -c "ALTER ROLE postgres SET search_path TO \"\$user\", public, auth;"
+   ```
+
+3. Set appropriate permissions:
+   ```bash
+   docker exec core-supabase-db-1 psql -U postgres -c "GRANT USAGE ON SCHEMA auth TO postgres;"
+   docker exec core-supabase-db-1 psql -U postgres -c "GRANT EXECUTE ON FUNCTION auth.uid() TO postgres;"
+   ```
+
+4. Test that the auth schema is accessible:
+   ```bash
+   docker exec core-supabase-db-1 psql -U postgres -c "SELECT auth.uid();"
+   ```
+
+5. Restart the application to apply these changes:
+   ```bash
+   docker compose restart app
+   ```
+
+This fix is particularly important when using Supabase RLS policies that reference the `auth.uid()` function or other objects in the auth schema.
+
 ### Database Connection Issues
 
 If the script can't connect to the database:

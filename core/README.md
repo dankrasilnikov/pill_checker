@@ -337,3 +337,15 @@ We've included a fix script to resolve these issues:
 ```
 
 For detailed information about this issue and alternative manual fixes, see the [Troubleshooting Supabase Auth Issues](README-LOCAL-DEVELOPMENT.md#troubleshooting-supabase-auth-issues) section in the Local Development guide.
+
+### Database Search Path Issues
+
+When your application reports errors about missing schemas (like `schema "auth" does not exist`) during migrations or when using RLS policies, even though the schema exists, it's likely a database search path configuration issue.
+
+We've included a fix script to resolve these issues:
+
+```bash
+./scripts/fix_db_search_path.sh
+```
+
+For detailed instructions on how to fix this issue, see the [Database Search Path Issues](README-LOCAL-DEVELOPMENT.md#database-search-path-issues) section in the Local Development guide.

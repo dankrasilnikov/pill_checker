@@ -106,16 +106,9 @@ class SupabaseService:
                 "updated_at": datetime.utcnow().isoformat(),
             }
 
-            # Use the authenticated role (which comes from the user's JWT)
+            # Use the service role directly for profile creation
             try:
-                # Get session from the successful sign-up response
-                session = auth_response.session
-                if session and session.access_token:
-                    # Set the auth header to use the authenticated role
-                    logger.info("Setting auth header with access token for profile creation")
-                    self.client.postgrest.auth(session.access_token)
-                    
-                logger.info(f"Attempting to create profile for user {user_id}")
+                logger.info(f"Attempting to create profile for user {user_id} using service role")
                 profile_response = self.client.from_("profiles").insert(profile_data).execute()
                 logger.info(f"Profile response received: {profile_response}")
             except Exception as profile_err:
@@ -285,28 +278,26 @@ class SupabaseService:
             return False, None
 
     def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
-        """
-        Verify JWT token and return user data.
-
-        Args:
-            token: JWT token
-
-        Returns:
-            Optional[dict]: User data if token is valid
-        """
+        """Verify JWT token and get user data."""
         if self.client is None:
             logger.error("Supabase client not initialized")
             return None
             
         try:
-            user = self.client.auth.get_user(token)
-            if not user:
+            user_response = self.client.auth.get_user(token)
+            if not user_response or not hasattr(user_response, 'user') or not user_response.user:
                 return None
 
-            profile = self.get_user_profile(user.id)
+            # Extract user correctly from the response
+            user = user_response.user
+            user_id = str(user.id)
 
+            # Get profile for the user
+            profile = self.get_user_profile(user_id)
+
+            # Construct user data response
             return {
-                "user_id": user.id,
+                "id": user_id,
                 "email": user.email,
                 "profile": profile.model_dump() if profile else None,
             }
@@ -344,19 +335,10 @@ class SupabaseService:
                 "updated_at": datetime.utcnow().isoformat(),
             }
 
-            # Try to use any current session token or fall back to service role
-            try:
-                session = self.client.auth.get_session()
-                if session and session.access_token:
-                    logger.info("Using user session token for profile creation")
-                    self.client.postgrest.auth(session.access_token)
-                else:
-                    logger.info("No active session, using service role for profile creation")
-                    # Already using service role key by default
-            except Exception as e:
-                logger.warning(f"Could not get session, using service role: {e}")
-                # Already using service role key by default
-
+            # Use service role key directly for profile creation
+            logger.info("Using service role for profile creation")
+            
+            # Insert the profile data
             profile_response = self.client.from_("profiles").insert(data).execute()
 
             if not profile_response.data:

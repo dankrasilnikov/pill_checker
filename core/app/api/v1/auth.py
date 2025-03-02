@@ -187,7 +187,7 @@ async def refresh_token(token_data: RefreshToken):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Supabase client not initialized",
             )
-            
+
         response_obj = supabase.client.auth.refresh_session(token_data.refresh_token)
 
         if not response_obj or not response_obj.session:
@@ -196,7 +196,7 @@ async def refresh_token(token_data: RefreshToken):
                 detail="Invalid refresh token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Convert session to dict (if necessary) and patch it
         session_obj = response_obj.session
         session_dict = session_obj.dict() if hasattr(session_obj, "dict") else session_obj
@@ -248,7 +248,7 @@ async def reset_password(reset_data: PasswordReset):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Supabase client not initialized",
             )
-            
+
         # Verify token
         response = supabase.client.auth.verify_otp(reset_data.token, type_="recovery")
 
@@ -276,10 +276,10 @@ async def verify_email(token: str):
         supabase = get_supabase_service()
         if not supabase.client:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                detail="Supabase client not initialized"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Supabase client not initialized",
             )
-            
+
         response = supabase.client.auth.verify_otp(token, type_="email")
         if not response:
             raise HTTPException(

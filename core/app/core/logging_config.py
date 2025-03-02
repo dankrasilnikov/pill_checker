@@ -15,9 +15,13 @@ def setup_logging() -> logging.Logger:
 
     # Create logger
     logger = logging.getLogger("pillchecker")
-    
+
     # Parse log level from settings, handling any comments
-    log_level = settings.LOG_LEVEL.split("#")[0].strip() if "#" in settings.LOG_LEVEL else settings.LOG_LEVEL
+    log_level = (
+        settings.LOG_LEVEL.split("#")[0].strip()
+        if "#" in settings.LOG_LEVEL
+        else settings.LOG_LEVEL
+    )
     logger.setLevel(getattr(logging, log_level))
 
     # Create formatters

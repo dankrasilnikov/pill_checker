@@ -95,4 +95,4 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["aut
 
 app.include_router(
     medications.router, prefix=f"{settings.API_V1_STR}/medications", tags=["medications"]
-) 
+)

@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from supabase import Client, create_client
@@ -80,7 +79,11 @@ async def list_medications(
     skip = (page - 1) * size
 
     # Get total count using SQLAlchemy 2.0 async compatible syntax
-    count_stmt = select(func.count()).select_from(Medication).where(Medication.profile_id == current_user["id"])
+    count_stmt = (
+        select(func.count())
+        .select_from(Medication)
+        .where(Medication.profile_id == current_user["id"])
+    )
     count_result = await db.execute(count_stmt)
     total = count_result.scalar_one()
 
@@ -105,7 +108,9 @@ async def list_medications(
 
 @router.get("/recent", response_model=List[MedicationResponse])
 async def get_recent_medications(
-    db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user), limit: int = 5
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+    limit: int = 5,
 ):
     """Get recent medications for the current user."""
     stmt = (
@@ -127,9 +132,8 @@ async def get_medication_by_id(
     current_user: dict = Depends(get_current_user),
 ):
     """Get a specific medication by ID."""
-    stmt = (
-        select(Medication)
-        .where(Medication.id == medication_id, Medication.profile_id == current_user["id"])
+    stmt = select(Medication).where(
+        Medication.id == medication_id, Medication.profile_id == current_user["id"]
     )
     result = await db.execute(stmt)
     medication = result.scalar_one_or_none()

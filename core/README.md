@@ -214,7 +214,7 @@ python -m pytest
 The project includes utilities to generate test images for OCR testing:
 ```bash
 # Generate test images manually
-python tests/create_test_image.py [output_directory] [count]
+python tests/test_utils/create_test_image.py [output_directory] [count]
 ```
 
 ### Test Coverage

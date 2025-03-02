@@ -3,7 +3,6 @@
 import uuid
 from datetime import datetime
 
-import pytest
 from sqlalchemy.sql import select
 
 from app.models import Profile, Medication
@@ -43,7 +42,7 @@ class TestProfileModel:
         """Test ProfileCreate schema validation."""
         # Update sample data to use different username
         sample_data = {**sample_profile_data, "username": "Test User 2"}
-        
+
         # Test valid data
         profile_create = ProfileCreate(**sample_data)
         assert isinstance(profile_create.id, uuid.UUID)

@@ -25,7 +25,9 @@ class MedicationBase(BaseSchema):
     active_ingredients: Optional[constr(min_length=1, max_length=500)] = Field(
         None, description="Active ingredients list"
     )
-    scanned_text: Optional[constr(min_length=1)] = Field(None, description="Text extracted from image")
+    scanned_text: Optional[constr(min_length=1)] = Field(
+        None, description="Text extracted from image"
+    )
     dosage: Optional[constr(min_length=1, max_length=100)] = Field(
         None, description="Medication dosage"
     )

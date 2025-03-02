@@ -45,4 +45,4 @@ echo "✓ Application restarted"
 
 echo "✅ Database search path fix completed."
 echo "ℹ️ If you still see issues, try restarting all services with:"
-echo "    docker compose down && docker compose up -d" 
+echo "    docker compose down && docker compose up -d"

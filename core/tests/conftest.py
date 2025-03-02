@@ -6,8 +6,6 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from datetime import datetime
-from unittest.mock import patch, MagicMock
 
 from app.core.config import Settings
 from app.models import Base
@@ -88,7 +86,7 @@ def sample_medication_data():
 
 class MockOCRClient(OCRClient):
     """Mock OCR client for testing."""
-    
+
     def read_text(self, image_data):
         """Return mock text instead of performing actual OCR."""
         return "Mocked OCR text for testing"
@@ -97,14 +95,11 @@ class MockOCRClient(OCRClient):
 @pytest.fixture(autouse=True)
 def mock_ocr_service():
     """Mock the OCR service using our custom client."""
-    # Save original client to restore after test
-    original_client = MagicMock()
-    
     # Set mock client
     mock_client = MockOCRClient()
     set_ocr_client(mock_client)
-    
+
     yield mock_client
-    
+
     # Reset to default behavior
     set_ocr_client(None)

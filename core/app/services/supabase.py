@@ -22,26 +22,24 @@ class SupabaseService:
         self.client = None
         try:
             # Check if required settings are available
-            if not settings.SUPABASE_URL or not hasattr(settings, 'SUPABASE_KEY') or not settings.SUPABASE_KEY:
+            if (
+                not settings.SUPABASE_URL
+                or not hasattr(settings, "SUPABASE_KEY")
+                or not settings.SUPABASE_KEY
+            ):
                 logger.error("SUPABASE_URL or SUPABASE_KEY not set in environment")
                 return
 
             options = ClientOptions(
-                postgrest_client_timeout=60,
-                storage_client_timeout=120,
-                auto_refresh_token=True
+                postgrest_client_timeout=60, storage_client_timeout=120, auto_refresh_token=True
             )
 
             # Use the SUPABASE_URL from settings which is set to http://kong:8000 in the .env file
             # This allows us to access it through the Kong gateway from inside the container
             supabase_url = settings.SUPABASE_URL
             logger.info(f"Initializing Supabase client with URL: {supabase_url}")
-            
-            self.client = create_client(
-                supabase_url,
-                settings.SUPABASE_KEY,
-                options=options
-            )
+
+            self.client = create_client(supabase_url, settings.SUPABASE_KEY, options=options)
 
             # Test connection
             try:
@@ -82,10 +80,12 @@ class SupabaseService:
             except Exception as auth_err:
                 logger.error(f"Error during user creation with Supabase: {auth_err}")
                 if "timed out" in str(auth_err):
-                    logger.error("Connection to Supabase timed out. Consider increasing client timeout values.")
+                    logger.error(
+                        "Connection to Supabase timed out. Consider increasing client timeout values."
+                    )
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                    detail=f"User creation failed: {str(auth_err)}"
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"User creation failed: {str(auth_err)}",
                 )
 
             if not auth_response or not auth_response.user:
@@ -118,19 +118,21 @@ class SupabaseService:
                     id=user_id,
                     username=username or email.split("@")[0],
                     created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
+                    updated_at=datetime.utcnow(),
                 )
-            
+
             if not profile_response.data:
-                logger.warning(f"Failed to create profile for user {user_id}, will return user only")
+                logger.warning(
+                    f"Failed to create profile for user {user_id}, will return user only"
+                )
                 # Return a basic profile with just the user information
                 return ProfileInDB(
                     id=user_id,
                     username=username or email.split("@")[0],
                     created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
+                    updated_at=datetime.utcnow(),
                 )
-                
+
             logger.info(f"Successfully created user and profile for {email}")
             return self.get_user_profile(user_id)
 
@@ -153,16 +155,12 @@ class SupabaseService:
         if self.client is None:
             logger.error("Supabase client not initialized")
             return None
-            
+
         try:
             # We need to ensure we have the proper permissions to read the profile
             # If we don't have a session token, we'll use the service role key
             response = (
-                self.client.from_("profiles")
-                .select("*")
-                .eq("id", str(user_id))
-                .single()
-                .execute()
+                self.client.from_("profiles").select("*").eq("id", str(user_id)).single().execute()
             )
             return ProfileInDB(**response.data) if response.data else None
         except Exception as e:
@@ -185,7 +183,7 @@ class SupabaseService:
         if self.client is None:
             logger.error("Supabase client not initialized")
             return None
-            
+
         try:
             response = (
                 self.client.from_("profiles")
@@ -204,7 +202,7 @@ class SupabaseService:
         if self.client is None:
             logger.error("Supabase client not initialized")
             return False
-            
+
         try:
             # Delete profile first (due to foreign key constraint)
             (self.client.from_("profiles").delete().eq("id", str(user_id)).execute())
@@ -242,12 +240,16 @@ class SupabaseService:
                 # Use the authenticated role from the session
                 if auth_response.session and auth_response.session.access_token:
                     self.client.postgrest.auth(auth_response.session.access_token)
-                
+
                 profile = self.get_user_profile(auth_response.user.id)
                 # If profile doesn't exist, try to create it
                 if not profile:
-                    logger.warning(f"No profile found for user {auth_response.user.id}, attempting to create one")
-                    profile = self.create_profile_for_existing_user(auth_response.user.id, email.split("@")[0])
+                    logger.warning(
+                        f"No profile found for user {auth_response.user.id}, attempting to create one"
+                    )
+                    profile = self.create_profile_for_existing_user(
+                        auth_response.user.id, email.split("@")[0]
+                    )
             except Exception as profile_err:
                 logger.error(f"Error getting/creating profile: {profile_err}")
                 profile = None
@@ -282,10 +284,10 @@ class SupabaseService:
         if self.client is None:
             logger.error("Supabase client not initialized")
             return None
-            
+
         try:
             user_response = self.client.auth.get_user(token)
-            if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            if not user_response or not hasattr(user_response, "user") or not user_response.user:
                 return None
 
             # Extract user correctly from the response
@@ -312,15 +314,11 @@ class SupabaseService:
         if self.client is None:
             logger.error("Supabase client not initialized")
             return None
-            
+
         try:
             # First check if profile exists
             existing_profile = (
-                self.client.from_("profiles")
-                .select("*")
-                .eq("id", str(user_id))
-                .single()
-                .execute()
+                self.client.from_("profiles").select("*").eq("id", str(user_id)).single().execute()
             )
 
             if existing_profile.data:
@@ -337,7 +335,7 @@ class SupabaseService:
 
             # Use service role key directly for profile creation
             logger.info("Using service role for profile creation")
-            
+
             # Insert the profile data
             profile_response = self.client.from_("profiles").insert(data).execute()
 

@@ -96,7 +96,7 @@ EOL
 cat > .env.supabase-db << EOL
 # Environment variables for the Supabase PostgreSQL database
 
-# These values are already defined in the common .env file, 
+# These values are already defined in the common .env file,
 # but they're included here for clarity
 POSTGRES_USER=\${POSTGRES_USER}
 POSTGRES_PASSWORD=\${POSTGRES_PASSWORD}
@@ -292,4 +292,4 @@ echo -e "- Supabase Studio: ${BLUE}http://localhost:54323${NC}"
 echo -e "- MailHog (Email Testing): ${BLUE}http://localhost:8025${NC}"
 echo -e "${BLUE}=============================================${NC}"
 
-echo -e "\n${GREEN}Happy coding!${NC}" 
+echo -e "\n${GREEN}Happy coding!${NC}"

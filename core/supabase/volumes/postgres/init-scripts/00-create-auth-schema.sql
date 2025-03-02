@@ -8,7 +8,7 @@ GRANT ALL PRIVILEGES ON SCHEMA auth TO postgres;
 DROP TYPE IF EXISTS public.factor_type;
 
 -- Create all enum types that GoTrue needs for its migrations
-DO $$ 
+DO $$
 BEGIN
     -- factor_type enum
     IF NOT EXISTS (SELECT 1 FROM pg_type JOIN pg_namespace ON pg_type.typnamespace = pg_namespace.oid WHERE typname = 'factor_type' AND nspname = 'auth') THEN
@@ -35,4 +35,4 @@ BEGIN
         CREATE TYPE auth.one_time_token_type AS ENUM ('confirmation_token', 'reauthentication_token', 'recovery_token', 'email_change_token_new', 'email_change_token_current', 'phone_change_token');
     END IF;
 END
-$$; 
+$$;

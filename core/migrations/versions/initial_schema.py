@@ -5,6 +5,7 @@ Revises:
 Create Date: 2025-02-25 10:00:00.000000
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -23,25 +24,16 @@ def upgrade() -> None:
     op.create_table(
         "profiles",
         sa.Column(
-            "id", 
-            postgresql.UUID(), 
+            "id",
+            postgresql.UUID(),
             primary_key=True,
             nullable=False,
-            comment="UUID of the associated Supabase user"
+            comment="UUID of the associated Supabase user",
         ),
         sa.Column(
-            "username",
-            sa.Text(),
-            nullable=True,
-            unique=True,
-            comment="Display name of the user"
+            "username", sa.Text(), nullable=True, unique=True, comment="Display name of the user"
         ),
-        sa.Column(
-            "bio",
-            sa.Text(),
-            nullable=True,
-            comment="User's biography or description"
-        ),
+        sa.Column("bio", sa.Text(), nullable=True, comment="User's biography or description"),
         sa.Column("created_at", sa.TIMESTAMP(), nullable=True),
         sa.Column("updated_at", sa.TIMESTAMP(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -59,73 +51,47 @@ def upgrade() -> None:
             "profile_id",
             postgresql.UUID(),
             nullable=False,
-            comment="ID of the profile this medication belongs to"
+            comment="ID of the profile this medication belongs to",
         ),
         sa.Column(
-            "title",
-            sa.String(length=255),
-            nullable=True,
-            comment="Name or title of the medication"
+            "title", sa.String(length=255), nullable=True, comment="Name or title of the medication"
         ),
         sa.Column(
             "scan_date",
             sa.TIMESTAMP(),
             nullable=True,
-            comment="Date when the medication was scanned"
+            comment="Date when the medication was scanned",
         ),
         sa.Column(
             "active_ingredients",
             sa.Text(),
             nullable=True,
-            comment="List of active ingredients in text format"
+            comment="List of active ingredients in text format",
         ),
         sa.Column(
             "scanned_text",
             sa.Text(),
             nullable=True,
-            comment="Raw text extracted from the medication scan"
+            comment="Raw text extracted from the medication scan",
         ),
-        sa.Column(
-            "dosage",
-            sa.String(length=255),
-            nullable=True,
-            comment="Dosage information"
-        ),
+        sa.Column("dosage", sa.String(length=255), nullable=True, comment="Dosage information"),
         sa.Column(
             "prescription_details",
             sa.JSON(),
             nullable=True,
-            comment="Additional prescription details in JSON format"
+            comment="Additional prescription details in JSON format",
         ),
         sa.Column(
-            "scan_url",
-            sa.Text(),
-            nullable=True,
-            comment="URL of the uploaded medication scan"
+            "scan_url", sa.Text(), nullable=True, comment="URL of the uploaded medication scan"
         ),
         sa.Column("created_at", sa.TIMESTAMP(), nullable=True),
         sa.Column("updated_at", sa.TIMESTAMP(), nullable=True),
         sa.ForeignKeyConstraint(["profile_id"], ["profiles.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "idx_medications_profile_id",
-        "medications",
-        ["profile_id"],
-        unique=False
-    )
-    op.create_index(
-        "idx_medications_scan_date",
-        "medications",
-        ["scan_date"],
-        unique=False
-    )
-    op.create_index(
-        "idx_medications_title",
-        "medications",
-        ["title"],
-        unique=False
-    )
+    op.create_index("idx_medications_profile_id", "medications", ["profile_id"], unique=False)
+    op.create_index("idx_medications_scan_date", "medications", ["scan_date"], unique=False)
+    op.create_index("idx_medications_title", "medications", ["title"], unique=False)
 
 
 def downgrade() -> None:

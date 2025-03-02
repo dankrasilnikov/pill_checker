@@ -249,12 +249,157 @@ See [README-LOCAL-DEVELOPMENT.md](README-LOCAL-DEVELOPMENT.md) for detailed inst
 
 ### Manual Alembic Commands
 ```bash
-# Create new migration
-alembic revision --autogenerate -m "description"
+# Create a new migration
+alembic revision --autogenerate -m "description of changes"
 
 # Apply migrations
 alembic upgrade head
+
+# Roll back one migration
+alembic downgrade -1
+
+# View migration history
+alembic history --verbose
 ```
+
+## Supabase Local Development
+
+### Setting Up Local Supabase From Scratch
+
+This project uses Supabase for authentication, database, and storage. Here's how to set up a local Supabase instance:
+
+1. **Install Supabase CLI**
+   ```bash
+   # Install Supabase CLI (macOS)
+   brew install supabase/tap/supabase
+
+   # Install Supabase CLI (Linux/Windows with Homebrew)
+   brew install supabase/tap/supabase
+
+   # Or, install using NPM
+   npm install -g supabase
+   ```
+
+2. **Initialize Supabase Project**
+   ```bash
+   # Navigate to your project directory
+   cd /path/to/project
+
+   # Initialize a new Supabase project
+   supabase init
+   ```
+
+3. **Start Supabase**
+   ```bash
+   # Start all Supabase services
+   supabase start
+   ```
+
+4. **Set Up Database Schema Using Declarative Approach**
+   ```bash
+   # Create schemas directory if it doesn't exist
+   mkdir -p supabase/schemas
+
+   # Create your schema file
+   touch supabase/schemas/00_schema.sql
+
+   # Edit the schema file to define your tables
+   # Edit supabase/config.toml to set schema_paths = ["./schemas/00_schema.sql"]
+   ```
+
+### Creating and Applying Database Migrations
+
+The project uses both Alembic (for migration history) and Supabase's declarative schema approach:
+
+1. **Generate Migrations with Supabase**
+   ```bash
+   # Stop the database before generating migrations
+   supabase stop
+
+   # Generate a migration by diffing your schema against the database
+   supabase db diff -f your_migration_name
+
+   # Start Supabase again
+   supabase start
+   ```
+
+2. **Apply Migrations**
+   ```bash
+   # Reset database and apply schema
+   supabase db reset
+
+   # Apply Alembic migrations to synchronize state
+   export DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+   alembic upgrade head
+   ```
+
+3. **Check Migration Status**
+   ```bash
+   # Check current migration state
+   export DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+   alembic current
+   ```
+
+### Working with the Schema
+
+For this project, we recommend using the following workflow:
+
+1. Make changes to your SQLAlchemy models in `app/models/`
+2. Generate Alembic migrations using `alembic revision --autogenerate -m "description"`
+3. Apply migrations with `alembic upgrade head`
+4. If using the declarative schema approach, update `supabase/schemas/00_schema.sql`
+5. Generate Supabase migrations with `supabase db diff -f migration_name`
+
+### Resetting the Local Database
+
+If you need to reset your local database completely:
+
+```bash
+# Stop Supabase
+supabase stop
+
+# Start with a fresh database
+supabase start
+
+# Apply Alembic migrations
+export DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+alembic upgrade head
+```
+
+### Convenience Scripts
+
+For ease of use, this project includes several convenience scripts:
+
+1. **Set Up Supabase and Migrations**
+   ```bash
+   # Make script executable if needed
+   chmod +x scripts/setup_supabase.sh
+   
+   # Run setup script
+   ./scripts/setup_supabase.sh
+   ```
+   This script:
+   - Checks Supabase CLI installation
+   - Stops any running Supabase instances
+   - Starts Supabase with a fresh database
+   - Sets the DATABASE_URL environment variable
+   - Applies Alembic migrations
+   - Verifies the database setup
+
+2. **Generate New Migrations**
+   ```bash
+   # Make script executable if needed
+   chmod +x scripts/generate_migration.sh
+   
+   # Generate a new migration
+   ./scripts/generate_migration.sh "description_of_changes"
+   ```
+   This script:
+   - Generates an Alembic migration
+   - Optionally generates a Supabase migration (requires stopping the database)
+   - Guides you through the process of applying migrations
+
+These scripts simplify the database management process and ensure that both Alembic and Supabase migrations stay in sync.
 
 ## Development Guidelines
 1. **Code Organization**

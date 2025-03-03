@@ -7,6 +7,7 @@ from alembic import context
 
 from app.core.config import settings
 from app.models import Base
+import os
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,7 +25,10 @@ target_metadata = Base.metadata
 
 def get_url():
     """Get database URL from settings."""
-    return str(settings.SQLALCHEMY_DATABASE_URI)
+    database_url = os.environ.get(
+        "DATABASE_URL", "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+    )
+    return database_url
 
 
 def run_migrations_offline() -> None:

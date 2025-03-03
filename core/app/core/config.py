@@ -10,9 +10,9 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    # Environment
-    APP_ENV: str = "development"
-    DEBUG: bool = True
+    # Environment - Local Development Only
+    APP_ENV: str = "development"  # Fixed to development as per requirements
+    DEBUG: bool = True  # Enabled for local development
 
     # API Settings
     API_V1_STR: str = "/api/v1"
@@ -25,18 +25,26 @@ class Settings(BaseSettings):
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = []
 
+    # Security
+    TRUSTED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
+    RATE_LIMIT_PER_SECOND: int = 10
+    RATE_LIMIT_PER_MINUTE: int = 100
+    RATE_LIMIT_PER_HOUR: int = 1000
+
+    # DB settings
+    POSTGRES_USER: str = os.getenv("POSTGRES_USER")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD")
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
+    POSTGRES_PORT: int = os.getenv("POSTGRES_PORT")
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB")
+
     # Supabase Settings
     SUPABASE_URL: str
     SUPABASE_KEY: str
-    SUPABASE_JWT_SECRET: str
-    SUPABASE_STORAGE_BUCKET: str = "pill-images"
-
-    # Database - The actual values will be set based on APP_ENV
-    DATABASE_USER: str = None
-    DATABASE_PASSWORD: str = None
-    DATABASE_HOST: str = None
-    DATABASE_PORT: str = None
-    DATABASE_NAME: str = None
+    SUPABASE_JWT_SECRET: str = None
+    SUPABASE_BUCKET_NAME: str = "pill-images"
+    SUPABASE_ANON_KEY: str = None
+    SUPABASE_SERVICE_ROLE_KEY: str = None
 
     # Storage
     STORAGE_URL: Optional[str] = None
@@ -53,37 +61,28 @@ class Settings(BaseSettings):
         except (ValueError, TypeError):
             return 11520
 
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def parse_cors_origins(cls, v):
-        """Parse CORS origins from string to list."""
+    @validator("BACKEND_CORS_ORIGINS", "TRUSTED_HOSTS", pre=True)
+    def parse_string_list(cls, v):
+        """Parse comma-separated string to list."""
         if isinstance(v, str):
             try:
                 import json
 
                 return json.loads(v)
             except json.JSONDecodeError:
-                return [origin.strip() for origin in v.split(",") if origin.strip()]
+                return [item.strip() for item in v.split(",") if item.strip()]
         return v
 
-    @validator(
-        "DATABASE_USER",
-        "DATABASE_PASSWORD",
-        "DATABASE_HOST",
-        "DATABASE_PORT",
-        "DATABASE_NAME",
-        pre=True,
-    )
-    def set_db_credentials(cls, v, values, field):
-        """Set database credentials based on environment."""
-        env_prefix = {"development": "DEV_", "testing": "TEST_", "production": "PROD_"}.get(
-            values.get("APP_ENV", "development"), "DEV_"
-        )
-
-        env_var = f"{env_prefix}{field.name}"
-        value = os.getenv(env_var)
-        if not value and field.name != "DATABASE_PASSWORD":  # Allow empty password
-            raise ValueError(f"Database environment variable {env_var} is not set")
-        return value or ""  # Return empty string for empty password
+    @validator("RATE_LIMIT_PER_SECOND", "RATE_LIMIT_PER_MINUTE", "RATE_LIMIT_PER_HOUR", pre=True)
+    def validate_rate_limits(cls, v):
+        """Validate rate limit values."""
+        try:
+            value = int(str(v))
+            if value <= 0:
+                raise ValueError("Rate limit must be positive")
+            return value
+        except (ValueError, TypeError):
+            raise ValueError("Rate limit must be a positive integer")
 
     @validator("SECRET_KEY", pre=True)
     def validate_secret_key(cls, v):
@@ -92,25 +91,32 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY environment variable is not set")
         return v
 
-    @validator("SUPABASE_URL", "SUPABASE_KEY", "SUPABASE_JWT_SECRET", pre=True)
+    @validator("SUPABASE_URL", "SUPABASE_KEY", pre=True)
     def validate_supabase_settings(cls, v, field):
-        """Validate that Supabase settings are set."""
+        """Validate that required Supabase settings are set."""
         if not v:
             raise ValueError(f"{field.name} environment variable is not set")
+        return v
+
+    @validator("SUPABASE_JWT_SECRET", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", pre=True)
+    def validate_optional_supabase_settings(cls, v, field):
+        """Validate optional Supabase settings."""
+        # These are not strictly required for all functionalities
+        if not v:
+            return os.getenv(field.name, None)
         return v
 
     @property
     def storage_url(self) -> str:
         """Get storage URL."""
         if not self.STORAGE_URL:
-            return f"{self.SUPABASE_URL}/storage/v1/object/public/{self.SUPABASE_STORAGE_BUCKET}"
+            return f"{self.SUPABASE_URL}/storage/v1/s3/{self.SUPABASE_BUCKET_NAME}"
         return self.STORAGE_URL
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        """Construct database URI."""
-        sslmode = "require" if self.APP_ENV == "production" else "disable"
-        return f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}?sslmode={sslmode}"
+        database_url = f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@host.docker.internal:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return database_url
 
     class Config:
         case_sensitive = True

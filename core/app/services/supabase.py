@@ -6,7 +6,7 @@ from uuid import UUID
 from datetime import datetime
 
 from fastapi import HTTPException, status
-from supabase import create_client
+from supabase import create_client, Client
 from supabase.lib.client_options import ClientOptions
 
 from app.core.config import settings
@@ -19,39 +19,31 @@ class SupabaseService:
 
     def __init__(self):
         """Initialize Supabase client with proper configuration."""
-        self.client = None
+        self.supabase = None
         try:
             # Check if required settings are available
             if (
                 not settings.SUPABASE_URL
-                or not hasattr(settings, "SUPABASE_KEY")
-                or not settings.SUPABASE_KEY
+                or not hasattr(settings, "SUPABASE_SERVICE_ROLE_KEY")
+                or not settings.SUPABASE_SERVICE_ROLE_KEY
             ):
-                logger.error("SUPABASE_URL or SUPABASE_KEY not set in environment")
+                logger.error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set in environment")
                 return
 
             options = ClientOptions(
                 postgrest_client_timeout=60, storage_client_timeout=120, auto_refresh_token=True
             )
 
-            # Use the SUPABASE_URL from settings which is set to http://kong:8000 in the .env file
-            # This allows us to access it through the Kong gateway from inside the container
             supabase_url = settings.SUPABASE_URL
             logger.info(f"Initializing Supabase client with URL: {supabase_url}")
 
-            self.client = create_client(supabase_url, settings.SUPABASE_KEY, options=options)
-
-            # Test connection
-            try:
-                # We won't test auth session, as it might not be initialized yet
-                logger.info("Supabase client initialized successfully")
-            except Exception as e:
-                logger.warning(f"Could not get session (this is normal for first startup): {e}")
-                pass
+            self.supabase: Client = create_client(
+                supabase_url, settings.SUPABASE_SERVICE_ROLE_KEY, options=options
+            )
 
         except Exception as e:
             logger.error(f"Failed to initialize Supabase client: {e}")
-            self.client = None
+            self.supabase = None
 
     def create_user_with_profile(
         self, email: str, password: str, username: Optional[str] = None
@@ -67,7 +59,7 @@ class SupabaseService:
         Returns:
             Optional[ProfileInDB]: Profile data if successful, None on failure
         """
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return None
 
@@ -75,7 +67,7 @@ class SupabaseService:
             # Create auth user with better error handling
             try:
                 logger.info(f"Attempting to create user with email: {email}")
-                auth_response = self.client.auth.sign_up({"email": email, "password": password})
+                auth_response = self.supabase.auth.sign_up({"email": email, "password": password})
                 logger.info(f"Auth response received: {auth_response}")
             except Exception as auth_err:
                 logger.error(f"Error during user creation with Supabase: {auth_err}")
@@ -109,7 +101,7 @@ class SupabaseService:
             # Use the service role directly for profile creation
             try:
                 logger.info(f"Attempting to create profile for user {user_id} using service role")
-                profile_response = self.client.from_("profiles").insert(profile_data).execute()
+                profile_response = self.supabase.from_("profiles").insert(profile_data).execute()
                 logger.info(f"Profile response received: {profile_response}")
             except Exception as profile_err:
                 logger.error(f"Error during profile creation: {profile_err}")
@@ -152,7 +144,7 @@ class SupabaseService:
         Returns:
             Optional[ProfileInDB]: Profile data if found
         """
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return None
 
@@ -160,7 +152,11 @@ class SupabaseService:
             # We need to ensure we have the proper permissions to read the profile
             # If we don't have a session token, we'll use the service role key
             response = (
-                self.client.from_("profiles").select("*").eq("id", str(user_id)).single().execute()
+                self.supabase.from_("profiles")
+                .select("*")
+                .eq("id", str(user_id))
+                .single()
+                .execute()
             )
             return ProfileInDB(**response.data) if response.data else None
         except Exception as e:
@@ -180,13 +176,13 @@ class SupabaseService:
         Returns:
             Optional[ProfileInDB]: Updated profile data if successful
         """
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return None
 
         try:
             response = (
-                self.client.from_("profiles")
+                self.supabase.from_("profiles")
                 .update(profile_data.model_dump(exclude_unset=True, exclude_none=True))
                 .eq("id", str(user_id))
                 .execute()
@@ -199,16 +195,16 @@ class SupabaseService:
 
     def delete_user_with_profile(self, user_id: UUID) -> bool:
         """Delete user and their profile."""
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return False
 
         try:
             # Delete profile first (due to foreign key constraint)
-            (self.client.from_("profiles").delete().eq("id", str(user_id)).execute())
+            (self.supabase.from_("profiles").delete().eq("id", str(user_id)).execute())
 
             # Delete auth user
-            self.client.auth.admin.delete_user(str(user_id))
+            self.supabase.auth.admin.delete_user(str(user_id))
             return True
         except Exception as e:
             logger.error(f"Error deleting user with profile: {e}")
@@ -216,14 +212,14 @@ class SupabaseService:
 
     def authenticate_user(self, email: str, password: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
         """Authenticate user and return session data."""
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return False, None
 
         try:
             # Better error handling for authentication
             try:
-                auth_response = self.client.auth.sign_in_with_password(
+                auth_response = self.supabase.auth.sign_in_with_password(
                     {"email": email, "password": password}
                 )
             except Exception as auth_err:
@@ -239,7 +235,7 @@ class SupabaseService:
             try:
                 # Use the authenticated role from the session
                 if auth_response.session and auth_response.session.access_token:
-                    self.client.postgrest.auth(auth_response.session.access_token)
+                    self.supabase.postgrest.auth(auth_response.session.access_token)
 
                 profile = self.get_user_profile(auth_response.user.id)
                 # If profile doesn't exist, try to create it
@@ -258,7 +254,7 @@ class SupabaseService:
             try:
                 session = auth_response.session
                 if not session:
-                    session = self.client.auth.get_session()
+                    session = self.supabase.auth.get_session()
             except Exception as session_err:
                 logger.error(f"Error getting session: {session_err}")
                 return False, None
@@ -281,12 +277,12 @@ class SupabaseService:
 
     def verify_token(self, token: str) -> Optional[Dict[str, Any]]:
         """Verify JWT token and get user data."""
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return None
 
         try:
-            user_response = self.client.auth.get_user(token)
+            user_response = self.supabase.auth.get_user(token)
             if not user_response or not hasattr(user_response, "user") or not user_response.user:
                 return None
 
@@ -303,22 +299,26 @@ class SupabaseService:
                 "email": user.email,
                 "profile": profile.model_dump() if profile else None,
             }
-        except Exception as e:
-            logger.error(f"Token verification error: {e}")
+        except Exception:
+            logger.error("Token verification error: %e")
             return None
 
     def create_profile_for_existing_user(
         self, user_id: str, username: Optional[str] = None
     ) -> Optional[ProfileInDB]:
         """Create a profile for an existing user."""
-        if self.client is None:
+        if self.supabase is None:
             logger.error("Supabase client not initialized")
             return None
 
         try:
             # First check if profile exists
             existing_profile = (
-                self.client.from_("profiles").select("*").eq("id", str(user_id)).single().execute()
+                self.supabase.from_("profiles")
+                .select("*")
+                .eq("id", str(user_id))
+                .single()
+                .execute()
             )
 
             if existing_profile.data:
@@ -337,7 +337,7 @@ class SupabaseService:
             logger.info("Using service role for profile creation")
 
             # Insert the profile data
-            profile_response = self.client.from_("profiles").insert(data).execute()
+            profile_response = self.supabase.from_("profiles").insert(data).execute()
 
             if not profile_response.data:
                 logger.error("Failed to create profile")
@@ -348,6 +348,13 @@ class SupabaseService:
         except Exception as e:
             logger.error(f"Error creating profile: {e}")
             return None
+
+    def get_supabase_client(self):
+        """Get supabase client."""
+        if self.supabase is None:
+            logger.error("Supabase client not initialized")
+            return None
+        return self.supabase
 
 
 @lru_cache()

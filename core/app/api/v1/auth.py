@@ -166,8 +166,8 @@ async def logout(response: Response):
     """Logout current user."""
     try:
         supabase = get_supabase_service()
-        if supabase.client:
-            supabase.client.auth.sign_out()
+        if supabase.supabase:
+            supabase.supabase.auth.sign_out()
         response.delete_cookie("session")
         return {"message": "Successfully logged out"}
     except Exception as e:
@@ -182,13 +182,13 @@ async def refresh_token(token_data: RefreshToken):
     """Refresh access token using refresh token."""
     try:
         supabase = get_supabase_service()
-        if not supabase.client:
+        if not supabase.supabase:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Supabase client not initialized",
             )
 
-        response_obj = supabase.client.auth.refresh_session(token_data.refresh_token)
+        response_obj = supabase.supabase.auth.refresh_session(token_data.refresh_token)
 
         if not response_obj or not response_obj.session:
             raise HTTPException(
@@ -224,8 +224,8 @@ async def request_password_reset(email_data: EmailRequest):
     """Request password reset email."""
     try:
         supabase = get_supabase_service()
-        if supabase.client:
-            supabase.client.auth.reset_password_email(email_data.email)
+        if supabase.supabase:
+            supabase.supabase.auth.reset_password_email(email_data.email)
         return {"message": "Password reset email sent"}
     except Exception as e:
         logger.error(f"Password reset request error: {e}")
@@ -243,14 +243,14 @@ async def reset_password(reset_data: PasswordReset):
 
     try:
         supabase = get_supabase_service()
-        if not supabase.client:
+        if not supabase.supabase:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Supabase client not initialized",
             )
 
         # Verify token
-        response = supabase.client.auth.verify_otp(reset_data.token, type_="recovery")
+        response = supabase.supabase.auth.verify_otp(reset_data.token, type_="recovery")
 
         if not response:
             raise HTTPException(
@@ -258,7 +258,7 @@ async def reset_password(reset_data: PasswordReset):
             )
 
         # Update password
-        supabase.client.auth.update_user({"password": reset_data.new_password})
+        supabase.supabase.auth.update_user({"password": reset_data.new_password})
         return {"message": "Password successfully reset"}
     except HTTPException:
         raise
@@ -274,13 +274,13 @@ async def verify_email(token: str):
     """Verify email address."""
     try:
         supabase = get_supabase_service()
-        if not supabase.client:
+        if not supabase.supabase:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Supabase client not initialized",
             )
 
-        response = supabase.client.auth.verify_otp(token, type_="email")
+        response = supabase.supabase.auth.verify_otp(token, type_="email")
         if not response:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification token"
@@ -302,7 +302,7 @@ async def create_profile(
     """Create a profile for the authenticated user."""
     try:
         supabase = get_supabase_service()
-        if not supabase.client:
+        if not supabase.supabase:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Supabase client not initialized",

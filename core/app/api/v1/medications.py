@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from supabase import Client, create_client
 
 from app.core.config import settings
@@ -25,7 +25,7 @@ supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 @router.post("/upload", response_model=MedicationResponse)
 async def upload_medication(
     image: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Upload and process a medication image."""
@@ -35,8 +35,8 @@ async def upload_medication(
         file_content = await image.read()
 
         # Upload to storage and check response
-        await supabase.storage.from_(settings.SUPABASE_STORAGE_BUCKET).upload(
-            file_path, file_content
+        await supabase.storage.from_(settings.SUPABASE_BUCKET_NAME).upload(
+            file_path, file_content, file_options={"content-type": image.content_type}
         )
 
         # Get public URL
@@ -55,8 +55,8 @@ async def upload_medication(
 
         medication = Medication(**medication_data.dict())
         db.add(medication)
-        await db.commit()
-        await db.refresh(medication)
+        db.commit()
+        db.refresh(medication)
 
         return MedicationResponse.from_orm(medication)
 
@@ -68,8 +68,8 @@ async def upload_medication(
 
 
 @router.get("/list", response_model=PaginatedResponse)
-async def list_medications(
-    db: AsyncSession = Depends(get_db),
+def list_medications(
+    db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     page: int = 1,
     size: int = 10,
@@ -78,23 +78,23 @@ async def list_medications(
     # Calculate offset
     skip = (page - 1) * size
 
-    # Get total count using SQLAlchemy 2.0 async compatible syntax
+    # Get total count using SQLAlchemy 2.0 syntax
     count_stmt = (
         select(func.count())
         .select_from(Medication)
         .where(Medication.profile_id == current_user["id"])
     )
-    count_result = await db.execute(count_stmt)
+    count_result = db.execute(count_stmt)
     total = count_result.scalar_one()
 
-    # Get paginated medications using SQLAlchemy 2.0 async compatible syntax
+    # Get paginated medications using SQLAlchemy 2.0 syntax
     stmt = (
         select(Medication)
         .where(Medication.profile_id == current_user["id"])
         .offset(skip)
         .limit(size)
     )
-    result = await db.execute(stmt)
+    result = db.execute(stmt)
     medications = result.scalars().all()
 
     return PaginatedResponse(
@@ -107,8 +107,8 @@ async def list_medications(
 
 
 @router.get("/recent", response_model=List[MedicationResponse])
-async def get_recent_medications(
-    db: AsyncSession = Depends(get_db),
+def get_recent_medications(
+    db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
     limit: int = 5,
 ):
@@ -119,23 +119,23 @@ async def get_recent_medications(
         .order_by(Medication.scan_date.desc())
         .limit(limit)
     )
-    result = await db.execute(stmt)
+    result = db.execute(stmt)
     medications = result.scalars().all()
 
     return [MedicationResponse.from_orm(med) for med in medications]
 
 
 @router.get("/{medication_id}", response_model=MedicationResponse)
-async def get_medication_by_id(
+def get_medication_by_id(
     medication_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Get a specific medication by ID."""
     stmt = select(Medication).where(
         Medication.id == medication_id, Medication.profile_id == current_user["id"]
     )
-    result = await db.execute(stmt)
+    result = db.execute(stmt)
     medication = result.scalar_one_or_none()
 
     if not medication:

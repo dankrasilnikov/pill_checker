@@ -6,22 +6,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      supabase-db:
-        condition: service_healthy
-      supabase-auth:
-        condition: service_started
-      supabase-storage:
-        condition: service_started
     ports:
-      - "8080:8000"
-    volumes:
-      - ./:/app  # Mount code for development
+      - "8080:8001"
     env_file:
       - .env
-      - .env.app
-    environment:
-      - AUTOMATED_DEPLOYMENT=true
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+    networks:
+      - supabase_network_core
+
+networks:
+  supabase_network_core:
+    external: true

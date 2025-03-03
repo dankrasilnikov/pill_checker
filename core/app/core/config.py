@@ -10,9 +10,9 @@ load_dotenv()
 
 
 class Settings(BaseSettings):
-    # Environment
-    APP_ENV: str = "development"
-    DEBUG: bool = True
+    # Environment - Local Development Only
+    APP_ENV: str = "development"  # Fixed to development as per requirements
+    DEBUG: bool = True  # Enabled for local development
 
     # API Settings
     API_V1_STR: str = "/api/v1"
@@ -31,20 +31,20 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 100
     RATE_LIMIT_PER_HOUR: int = 1000
 
+    # DB settings
+    POSTGRES_USER: str = os.getenv("POSTGRES_USER")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD")
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
+    POSTGRES_PORT: int = os.getenv("POSTGRES_PORT")
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB")
+
     # Supabase Settings
     SUPABASE_URL: str
     SUPABASE_KEY: str
     SUPABASE_JWT_SECRET: str = None
-    SUPABASE_STORAGE_BUCKET: str = "pill-images"
+    SUPABASE_BUCKET_NAME: str = "pill-images"
     SUPABASE_ANON_KEY: str = None
     SUPABASE_SERVICE_ROLE_KEY: str = None
-
-    # Database - The actual values will be set based on APP_ENV
-    DATABASE_USER: str = None
-    DATABASE_PASSWORD: str = None
-    DATABASE_HOST: str = None
-    DATABASE_PORT: str = None
-    DATABASE_NAME: str = None
 
     # Storage
     STORAGE_URL: Optional[str] = None
@@ -84,26 +84,6 @@ class Settings(BaseSettings):
         except (ValueError, TypeError):
             raise ValueError("Rate limit must be a positive integer")
 
-    @validator(
-        "DATABASE_USER",
-        "DATABASE_PASSWORD",
-        "DATABASE_HOST",
-        "DATABASE_PORT",
-        "DATABASE_NAME",
-        pre=True,
-    )
-    def set_db_credentials(cls, v, values, field):
-        """Set database credentials based on environment."""
-        env_prefix = {"development": "DEV_", "testing": "TEST_", "production": "PROD_"}.get(
-            values.get("APP_ENV", "development"), "DEV_"
-        )
-
-        env_var = f"{env_prefix}{field.name}"
-        value = os.getenv(env_var)
-        if not value and field.name != "DATABASE_PASSWORD":  # Allow empty password
-            raise ValueError(f"Database environment variable {env_var} is not set")
-        return value or ""  # Return empty string for empty password
-
     @validator("SECRET_KEY", pre=True)
     def validate_secret_key(cls, v):
         """Validate that SECRET_KEY is set."""
@@ -130,14 +110,13 @@ class Settings(BaseSettings):
     def storage_url(self) -> str:
         """Get storage URL."""
         if not self.STORAGE_URL:
-            return f"{self.SUPABASE_URL}/storage/v1/object/public/{self.SUPABASE_STORAGE_BUCKET}"
+            return f"{self.SUPABASE_URL}/storage/v1/s3/{self.SUPABASE_BUCKET_NAME}"
         return self.STORAGE_URL
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        """Construct database URI."""
-        sslmode = "require" if self.APP_ENV == "production" else "disable"
-        return f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}?sslmode={sslmode}"
+        database_url = f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@host.docker.internal:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return database_url
 
     class Config:
         case_sensitive = True

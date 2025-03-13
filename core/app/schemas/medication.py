@@ -1,19 +1,10 @@
 from datetime import datetime
-from enum import Enum
 from typing import Optional, Dict, Any, List
 from uuid import UUID
-from pydantic import Field, HttpUrl, constr
+
+from pydantic import Field, constr
 
 from .base import BaseSchema
-
-
-class MedicationStatus(str, Enum):
-    """Medication status enum."""
-
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    ERROR = "error"
 
 
 class MedicationBase(BaseSchema):
@@ -40,7 +31,7 @@ class MedicationCreate(MedicationBase):
     """Schema for creating a medication."""
 
     profile_id: UUID = Field(..., description="Profile ID")
-    scan_url: HttpUrl = Field(..., description="URL of the uploaded medication scan")
+    scan_url: str = Field(..., description="URL of the uploaded medication scan")
 
 
 class MedicationUpdate(MedicationBase):
@@ -64,15 +55,7 @@ class MedicationInDB(MedicationBase):
 class MedicationResponse(MedicationInDB):
     """Schema for medication response."""
 
-    scan_url: Optional[HttpUrl] = Field(None, description="URL of the uploaded medication scan")
-    status: MedicationStatus = Field(
-        default=MedicationStatus.PENDING, description="Current status of the medication"
-    )
-    status_color: str = Field(
-        "warning",
-        pattern="^(primary|secondary|success|danger|warning|info)$",
-        description="Bootstrap color class for status",
-    )
+    scan_url: Optional[str] = Field(None, description="URL of the uploaded medication scan")
 
 
 class PaginatedResponse(BaseSchema):

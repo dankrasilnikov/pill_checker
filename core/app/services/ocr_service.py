@@ -1,43 +1,21 @@
 """OCR service for text recognition from images."""
 
 import io
+from typing import Union, BinaryIO
+
 from PIL import Image
-from typing import Optional, Union, BinaryIO
 
 
-# Define an abstract OCR client interface
-class OCRClient:
-    """Base class for OCR clients."""
-
-    def read_text(self, image_data: Union[bytes, BinaryIO]) -> str:
-        """
-        Extract text from image data.
-
-        Args:
-            image_data: Image data as bytes or file-like object
-
-        Returns:
-            Extracted text
-        """
-        raise NotImplementedError("Subclasses must implement read_text")
-
-
-class EasyOCRClient(OCRClient):
+class EasyOCRClient:
     """OCR client using EasyOCR."""
 
     def __init__(self, languages=None):
-        """Initialize EasyOCR client."""
+        """Initialize EasyOCR reader immediately on startup."""
         self.languages = languages or ["en"]
-        self._reader = None
+        import easyocr
 
-    @property
-    def reader(self):
-        """Lazy-load the EasyOCR reader."""
-        if self._reader is None:
-            import easyocr
-
-            self._reader = easyocr.Reader(self.languages, gpu=True)
-        return self._reader
+        self.reader = easyocr.Reader(self.languages)
+        print("EasyOCR initialized and ready")
 
     def read_text(self, image_data: Union[bytes, BinaryIO]) -> str:
         """Extract text using EasyOCR."""
@@ -60,32 +38,15 @@ class EasyOCRClient(OCRClient):
         return " ".join(results)
 
 
-# Global OCR client instance - can be replaced for testing
-_ocr_client: Optional[OCRClient] = None
+_ocr_client = None
 
 
-def get_ocr_client() -> OCRClient:
-    """Get the current OCR client."""
+def get_ocr_client(languages=None):
+    """Get or create the OCR client singleton."""
     global _ocr_client
     if _ocr_client is None:
-        _ocr_client = EasyOCRClient()
+        _ocr_client = EasyOCRClient(languages=languages)
     return _ocr_client
 
 
-def set_ocr_client(client: OCRClient) -> None:
-    """Set a custom OCR client (useful for testing)."""
-    global _ocr_client
-    _ocr_client = client
-
-
-def recognise(uploaded_file) -> str:
-    """
-    Recognize text from an uploaded file.
-
-    Args:
-        uploaded_file: Uploaded file data
-
-    Returns:
-        Extracted text
-    """
-    return get_ocr_client().read_text(uploaded_file)
+get_ocr_client()

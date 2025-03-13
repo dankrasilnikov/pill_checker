@@ -25,9 +25,6 @@
                         <div class="col-md-6">
                             <h4>Details</h4>
                             <dl class="row">
-                                <dt class="col-sm-4">Status</dt>
-                                <dd class="col-sm-8"><span id="medicationStatus" class="badge"></span></dd>
-
                                 <dt class="col-sm-4">Scan Date</dt>
                                 <dd class="col-sm-8" id="medicationDate"></dd>
 
@@ -77,14 +74,12 @@ async function loadMedicationDetails(id) {
 
 function displayMedicationDetails(medication) {
     document.getElementById('medicationName').textContent = medication.name || 'Unnamed Medication';
-    document.getElementById('medicationStatus').textContent = medication.status;
-    document.getElementById('medicationStatus').className = `badge bg-${medication.status_color}`;
     document.getElementById('medicationDate').textContent = new Date(medication.created_at).toLocaleString();
-    document.getElementById('medicationOCR').textContent = medication.ocr_text || 'No OCR text available';
+    document.getElementById('medicationOCR').textContent = medication.scanned_text || 'No OCR text available';
 
-    if (medication.image_url) {
+    if (medication.scan_url) {
         const img = document.getElementById('medicationImage');
-        img.src = medication.image_url;
+        img.src = medication.scan_url;
         img.alt = medication.name || 'Medication Image';
     }
 }

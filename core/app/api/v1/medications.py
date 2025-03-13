@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from supabase import Client, create_client
+from app.core.logging_config import logger
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -11,10 +12,10 @@ from app.schemas.medication import (
     MedicationResponse,
     MedicationCreate,
     PaginatedResponse,
-    MedicationStatus,
 )
-from app.services.ocr_service import recognise
 from app.services.session_service import get_current_user
+
+from app.services.ocr_service import get_ocr_client
 
 router = APIRouter()
 
@@ -27,37 +28,40 @@ async def upload_medication(
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
+    ocr_client=Depends(get_ocr_client),
 ):
     """Upload and process a medication image."""
     try:
         # Upload image to Supabase storage
         file_path = f"medications/{current_user['id']}/{image.filename}"
 
+        file_content = await image.read()
+        logger.info(f"File path: {file_path}")
+
         # Upload to storage and check response
-        await supabase.storage.from_(settings.SUPABASE_BUCKET_NAME).upload(
-            file_path, image, file_options={"content-type": image.content_type}
+        supabase.storage.from_(settings.SUPABASE_BUCKET_NAME).upload(
+            file_path, file_content, file_options={"content-type": image.content_type}
         )
 
         # Get public URL
         public_url = f"{settings.storage_url}/{file_path}"
-        file_content = await image.read()
+
         # Process image with OCR
-        ocr_text = recognise(file_content)
+        ocr_text = ocr_client.read_text(file_content)
 
         # Create medication record
         medication_data = MedicationCreate(
             profile_id=current_user["id"],
             scan_url=public_url,
-            ocr_text=ocr_text,
-            status=MedicationStatus.PENDING,
+            scanned_text=ocr_text,
         )
 
-        medication = Medication(**medication_data.dict())
+        medication = Medication(**medication_data.model_dump())
         db.add(medication)
         db.commit()
         db.refresh(medication)
 
-        return MedicationResponse.from_orm(medication)
+        return MedicationResponse.model_validate(medication)
 
     except Exception as e:
         raise HTTPException(
@@ -77,7 +81,6 @@ def list_medications(
     # Calculate offset
     skip = (page - 1) * size
 
-    # Get total count using SQLAlchemy 2.0 syntax
     count_stmt = (
         select(func.count())
         .select_from(Medication)
@@ -86,7 +89,6 @@ def list_medications(
     count_result = db.execute(count_stmt)
     total = count_result.scalar_one()
 
-    # Get paginated medications using SQLAlchemy 2.0 syntax
     stmt = (
         select(Medication)
         .where(Medication.profile_id == current_user["id"])
@@ -97,7 +99,7 @@ def list_medications(
     medications = result.scalars().all()
 
     return PaginatedResponse(
-        items=[MedicationResponse.from_orm(med) for med in medications],
+        items=[MedicationResponse.model_validate(med) for med in medications],
         total=total,
         page=page,
         size=size,
@@ -121,7 +123,7 @@ def get_recent_medications(
     result = db.execute(stmt)
     medications = result.scalars().all()
 
-    return [MedicationResponse.from_orm(med) for med in medications]
+    return [MedicationResponse.model_validate(med) for med in medications]
 
 
 @router.get("/{medication_id}", response_model=MedicationResponse)
@@ -140,4 +142,4 @@ def get_medication_by_id(
     if not medication:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medication not found")
 
-    return MedicationResponse.from_orm(medication)
+    return MedicationResponse.model_validate(medication)

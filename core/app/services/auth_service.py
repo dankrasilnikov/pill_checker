@@ -171,7 +171,7 @@ class AuthService:
 
             return {
                 "id": str(user_id),
-                "email": profile.email,
+                "email": user_response.user.email,
                 "profile": profile.model_dump() if profile else None,
             }
         except Exception as e:

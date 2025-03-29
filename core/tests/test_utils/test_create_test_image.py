@@ -7,7 +7,9 @@ It can be used standalone or imported by the test suite to generate test data.
 from PIL import Image, ImageDraw, ImageFont
 import os
 import sys
+import pytest
 from pathlib import Path
+import tempfile
 
 
 def create_test_image(
@@ -78,7 +80,7 @@ def create_test_image(
     # Determine output directory
     if output_dir is None:
         # Default to tests/test_images relative to this script
-        output_dir = Path(__file__).parent / "test_images"
+        output_dir = Path(__file__).parent.parent / "test_images"
     else:
         output_dir = Path(output_dir)
 
@@ -133,6 +135,61 @@ def create_multiple_test_images(output_dir=None, count=3):
         created_images.append(path)
 
     return created_images
+
+
+# Actual tests that will be included in the test suite
+
+
+@pytest.fixture
+def temp_dir():
+    """Create a temporary directory for test image output."""
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        yield tmpdirname
+
+
+def test_create_single_image(temp_dir):
+    """Test that a single test image can be created."""
+    image_path = create_test_image(
+        text="Test Image", filename="test_image.png", output_dir=temp_dir
+    )
+
+    # Verify the file exists
+    assert image_path.exists()
+
+    # Verify it's a valid image file
+    img = Image.open(image_path)
+    assert img.size == (800, 400)
+    assert img.mode == "RGB"
+
+
+def test_create_image_without_details(temp_dir):
+    """Test that an image can be created without medication details."""
+    image_path = create_test_image(
+        text="No Details", filename="no_details.png", output_dir=temp_dir, include_details=False
+    )
+
+    # Verify the file exists
+    assert image_path.exists()
+
+    # Verify it's a valid image file
+    img = Image.open(image_path)
+    assert img.size == (800, 400)
+
+
+def test_create_multiple_images(temp_dir):
+    """Test creating multiple test images."""
+    image_paths = create_multiple_test_images(output_dir=temp_dir, count=2)
+
+    # Verify we got exactly 2 images
+    assert len(image_paths) == 2
+
+    # Verify all files exist
+    for path in image_paths:
+        assert path.exists()
+
+        # Verify they're valid images
+        img = Image.open(path)
+        assert img.size == (800, 400)
 
 
 if __name__ == "__main__":

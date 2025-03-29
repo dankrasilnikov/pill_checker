@@ -27,6 +27,11 @@ class RefreshToken(BaseModel):
 
     refresh_token: str = Field(..., min_length=1, description="Valid refresh token")
 
+    @property
+    def token(self):
+        """For backward compatibility."""
+        return self.refresh_token
+
 
 class UserCreate(BaseModel):
     """User registration model."""

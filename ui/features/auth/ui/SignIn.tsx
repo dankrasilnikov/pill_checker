@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Dimensions, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { useUserStore } from '$entities/user';
 import { signUpWithPassword } from '$features/auth/api/authApi';
+import { AgreeCheckbox } from '$features/auth/ui/AgreeCheckbox';
 import { AuthButton } from '$shared/ui/AuthButton';
 import { AuthInput } from '$shared/ui/Authinput';
 
@@ -10,6 +11,7 @@ export const SignIn = () => {
   const [email, onChangeEmail] = useState<string>('');
   const [password, onChangePassword] = useState<string>('');
   const [type, setType] = useState<string>('Sign In');
+  const [agreedTerms, setAgreedTerms] = useState<boolean>(false);
 
   const { signIn } = useUserStore();
 
@@ -19,6 +21,7 @@ export const SignIn = () => {
   };
 
   const onPasswordAuth = async () => {
+    if(!password || email) return false;
     if (type === 'Sign In') return await signIn(email, password);
     return await signUpWithPassword(email, password);
   };
@@ -29,9 +32,14 @@ export const SignIn = () => {
     <View style={styles.container}>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
-          <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>Sign In</Text>
+          <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>
+            Sign In
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]} onPress={() => setType('Sign Up')}>
+        <TouchableOpacity
+          style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]}
+          onPress={() => setType('Sign Up')}
+        >
           <Text style={[styles.select]}>Sign Up</Text>
         </TouchableOpacity>
       </View>
@@ -51,8 +59,15 @@ export const SignIn = () => {
           placeholder={'Enter your password'}
         />
 
-        <AuthButton label={type} onPress={onPasswordAuth} />
+        {type === 'Sign In' ? '' :
+          <View style={styles.checkboxContainer}>
+            <AgreeCheckbox agreedTerms={agreedTerms} setAgreedTerms={setAgreedTerms}/>
+          </View>
+        }
 
+        <View style={{marginTop: type === 'Sign In' ? 16 : 0}}>
+          <AuthButton disabled={type === 'Sign In' ? false : !agreedTerms} label={type} onPress={onPasswordAuth} />
+        </View>
       </View>
     </View>
   );
@@ -72,18 +87,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   button: {
-    width: '50%'
+    width: '50%',
   },
   activeSelect: {
     color: '#2563EB',
     borderBottomWidth: 3,
-    borderBottomColor: '#2563EB'
+    borderBottomColor: '#2563EB',
   },
   buttonsContainer: {
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
-    marginBottom: 16
+    marginBottom: 16,
   },
   logoContainer: {
     paddingVertical: height * 0.07,
@@ -114,5 +129,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingVertical: 5,
     paddingHorizontal: 20,
+  },
+  checkboxContainer: {
+    paddingBottom: 16,
+    paddingTop: 8,
+    paddingHorizontal: 5,
   },
 });

@@ -24,3 +24,20 @@ export const deleteToken = async (): Promise<void> => {
     console.error('Ошибка удаления токена:', error);
   }
 };
+
+export const setMobileStoreItem = async (itemName: string, item: string): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(itemName, item);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export const getMobileStoreItem = async (itemName: string): Promise<string | undefined> => {
+  try {
+    return await AsyncStorage.getItem(itemName);
+  } catch (error) {
+    console.error('Ошибка получения токена:', error);
+    return null;
+  }
+}

@@ -1,5 +1,7 @@
-import { Dimensions, Image, Platform, ScrollView, StyleSheet, View, Text } from 'react-native';
+import { Dimensions, Platform, ScrollView, StyleSheet, View, Text } from 'react-native';
+
 import Pills from '../assets/pills.svg';
+
 import { SignIn } from '$features/auth/ui/SignIn';
 
 export const AuthPage = () => {
@@ -9,8 +11,8 @@ export const AuthPage = () => {
         <View style={styles.logoContainer}>
           <Pills style={styles.logo} width={50} height={50} />
         </View>
-        <Text style={styles.h1}>MediScan AI</Text>
-        <Text style={styles.p}>Your AI-powered medication assistant</Text>
+        <Text style={styles.h1}>Pill Checker</Text>
+        <Text style={styles.p}>Your personal medication assistant</Text>
         <SignIn />
         <Text style={styles.securityMessage}>Your data is kept private and secure</Text>
       </ScrollView>

@@ -1,8 +1,11 @@
-import { Dimensions, Platform, ScrollView, StyleSheet, Text, Animated, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useState, useRef } from 'react';
+import { Dimensions, Platform, ScrollView, StyleSheet, Text, Animated, View } from 'react-native';
+
 import Pills from '../assets/pills.svg';
 import Shield from '../assets/shield.svg';
-import { useEffect, useState, useRef } from 'react';
+
+
 import ProgressBar from '$shared/ui/Progress';
 
 export const GreetingPage = () => {

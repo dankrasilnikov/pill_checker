@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import EducationSlide from '$features/education/ui/EducationSlide';
 
 const { width, height } = Dimensions.get('window');

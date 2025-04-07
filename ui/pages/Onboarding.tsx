@@ -1,5 +1,6 @@
-import { Animated, Dimensions, Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, Platform, StyleSheet, View } from 'react-native';
+
 import EducationSlider from '$features/education/ui/EducationSlider';
 
 export const OnboardingPage = ({ onDone }) => {

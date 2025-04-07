@@ -1,4 +1,5 @@
 const path = require('path');
+
 const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 
 // Get the Sentry/Expo config

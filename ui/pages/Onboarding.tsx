@@ -3,7 +3,11 @@ import { Animated, Dimensions, Platform, StyleSheet, View } from 'react-native';
 
 import EducationSlider from '$features/education/ui/EducationSlider';
 
-export const OnboardingPage = ({ onDone }) => {
+type Props = {
+  onDone: () => void;
+};
+
+export const OnboardingPage = ({ onDone }: Props) => {
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {

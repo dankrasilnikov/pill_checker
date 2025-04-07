@@ -10,12 +10,7 @@ interface Props {
 export const AgreeCheckbox = ({ agreedTerms, setAgreedTerms }: Props) => {
   return (
     <Pressable style={styles.checkboxContainer} onPress={() => setAgreedTerms(!agreedTerms)}>
-      <Checkbox
-        style={styles.checkbox}
-        value={agreedTerms}
-        onValueChange={setAgreedTerms}
-        color='#2563EB'
-      />
+      <Checkbox value={agreedTerms} onValueChange={setAgreedTerms} color='#2563EB' />
       <Text>I Agree With You {agreedTerms ? '👍' : ''}</Text>
     </Pressable>
   );
@@ -27,5 +22,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 5,
   },
-  checkbox: {},
 });

@@ -8,6 +8,7 @@ interface Props {
   onPress: () => void;
   label: string;
   disabled: boolean;
+  borderColor: string;
 }
 
 export const AuthButton = ({

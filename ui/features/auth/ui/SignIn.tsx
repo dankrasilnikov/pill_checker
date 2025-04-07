@@ -37,13 +37,6 @@ export const SignIn = () => {
     return await signUpWithPassword(data['email'], data['password']);
   };
 
-  const switchForm = () => {
-    if (type === 'Sign In') return setType('Sign Up');
-    return setType('Sign In');
-  };
-
-  const onSimpleSignIn = async () => {};
-
   return (
     <SafeAreaView style={styles.container}>
       <View>

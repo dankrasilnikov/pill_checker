@@ -31,7 +31,7 @@ export const setMobileStoreItem = async (itemName: string, item: string): Promis
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 export const getMobileStoreItem = async (itemName: string): Promise<string | undefined> => {
   try {
@@ -40,4 +40,4 @@ export const getMobileStoreItem = async (itemName: string): Promise<string | und
     console.error('Ошибка получения токена:', error);
     return null;
   }
-}
+};

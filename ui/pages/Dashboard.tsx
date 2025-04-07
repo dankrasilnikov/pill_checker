@@ -10,25 +10,14 @@ import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
 import { ScanButton } from '$features/recognition/ui/ScanButton';
+import { ColoredBadge } from '$shared/ui/ColoredBadge';
 
 export const Dashboard = () => {
   const [hasPermission, setHasPermission] = useState(false);
   const [permissionLoading, setPermissionLoading] = useState(true);
-  const [cameraVisible, setCameraVisible] = useState(false);
-  const [recognizedItem, setRecognizedItem] = useState(null);
-  const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
-  const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [itemData, setItemData] = useState(null);
 
   const { medications, getMedications, medicationsLoading } = useMedsStore();
-
-  const { cameraRef, handleMedsScanned, loading } = useScan(
-    (item) => {
-      setRecognizedItem(item);
-      setRecognitionModalVisible(true);
-    },
-    () => setErrorModalVisible(true),
-  );
 
   useEffect(() => {
     (async () => {
@@ -39,43 +28,30 @@ export const Dashboard = () => {
     })();
   }, []);
 
-  const openCamera = () => {
-    if (permissionLoading) {
-      Alert.alert('Permissions', 'Checking camera permissions. Please try again shortly.');
-      return;
-    }
-    if (!hasPermission) {
-      Alert.alert('Permission Denied', 'You need to grant camera permission to use this feature.');
-      return;
-    }
-
-    setCameraVisible(true);
-  };
-
-  const closeCamera = () => {
-    setCameraVisible(false);
-  };
-
   const renderItem = ({ item }: { item: any }) => (
     <MedicationsListItem item={item} setItemData={setItemData} />
   );
 
   return (
     <View style={styles.wrapper}>
-      <CameraModal
-        loading={loading}
-        visible={cameraVisible}
-        onClose={closeCamera}
-        onScan={handleMedsScanned}
-        cameraRef={cameraRef}
+      <View style={styles.greetingContainer}>
+        <Text style={styles.h1}>Welcome Svetlana</Text>
+        <Text style={styles.subheading}>Your today meds review is ready</Text>
+      </View>
+
+      <Text style={styles.medicationsTitle}>Medications</Text>
+
+      <ColoredBadge
+        bgColor={'#FFF7ED'}
+        borderColor={'#FDE2C3'}
+        titleColor={'#EC6921'}
+        title={'2 potential conflicts found'}
+        description={
+          'Increased isk of bleeding when taken together. Consider alternative pain relief options.'
+        }
+        extraTitle={'Ibuprofen + Aspirin'}
       />
-      <RecognitionModal
-        visible={recognitionModalVisible}
-        item={recognizedItem}
-        setModal={setRecognitionModalVisible}
-        closeCamera={closeCamera}
-      />
-      <ErrorModal visible={errorModalVisible} setModal={setErrorModalVisible} />
+
       <MedicationsModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)} />
       {permissionLoading ? (
         <View style={styles.state}>
@@ -102,7 +78,6 @@ export const Dashboard = () => {
           />
         </View>
       )}
-      <ScanButton onPress={openCamera} />
     </View>
   );
 };
@@ -125,5 +100,22 @@ const styles = StyleSheet.create({
   },
   stateMessage: {
     textAlign: 'center',
+  },
+  h1: {
+    fontSize: 32,
+    fontWeight: 'medium',
+  },
+  subheading: {
+    color: '#737D8B',
+    fontSize: 14,
+    fontWeight: 'medium',
+    marginLeft: 5,
+  },
+  greetingContainer: {
+    marginTop: 50,
+  },
+  medicationsTitle: {
+    fontSize: 20,
+    marginVertical: 16,
   },
 });

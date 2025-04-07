@@ -38,8 +38,8 @@ export const SignIn = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View>
+    <SafeAreaView>
+      <View style={styles.container}>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
             <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>

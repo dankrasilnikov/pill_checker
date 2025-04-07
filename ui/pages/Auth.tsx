@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   securityMessage: {
     fontSize: 12,
     color: '#737D8B',
-    marginVertical: 16,
+    marginVertical: 32,
     textAlign: 'center',
   }
 });

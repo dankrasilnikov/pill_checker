@@ -61,26 +61,6 @@ export const SignIn = () => {
 
         <AuthButton label={type} onPress={onPasswordAuth} />
 
-        <Text style={styles.authOptionsLabel}>Or continue with</Text>
-
-        <View style={styles.authOptions}>
-          <AuthButton
-            label={'Google'}
-            onPress={onSimpleSignIn}
-            backgroundColor={'#F9FAFB'}
-            color={'#1F2937'}
-            width={'47%'}
-            borderColor={'#EBEDF0'}
-          />
-          <AuthButton
-            label={'Apple'}
-            onPress={onSimpleSignIn}
-            backgroundColor={'#F9FAFB'}
-            color={'#1F2937'}
-            width={'47%'}
-            borderColor={'#EBEDF0'}
-          />
-        </View>
       </View>
     </View>
   );

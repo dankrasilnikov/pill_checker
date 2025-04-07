@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useForm } from 'react-hook-form';
+import {
+  Dimensions,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { useUserStore } from '$entities/user';
 import { signUpWithPassword } from '$features/auth/api/authApi';
@@ -12,6 +21,18 @@ export const SignIn = () => {
   const [password, onChangePassword] = useState<string>('');
   const [type, setType] = useState<string>('Sign In');
   const [agreedTerms, setAgreedTerms] = useState<boolean>(false);
+  const [submittedData, setSubmittedData] = useState(null);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log('Submitted Data:', data);
+    setSubmittedData(data);
+  };
 
   const { signIn } = useUserStore();
 
@@ -20,62 +41,65 @@ export const SignIn = () => {
     return setType('Sign In');
   };
 
-  const onPasswordAuth = async () => {
-    if (!password || email) return false;
-    if (type === 'Sign In') return await signIn(email, password);
-    return await signUpWithPassword(email, password);
-  };
+  // const onPasswordAuth = async () => {
+  //   if (!password || email) return false;
+  //   if (type === 'Sign In') return await signIn(email, password);
+  //   return await signUpWithPassword(email, password);
+  // };
 
   const onSimpleSignIn = async () => {};
 
   return (
-    <View style={styles.container}>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
-          <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>
-            Sign In
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]}
-          onPress={() => setType('Sign Up')}
-        >
-          <Text style={[styles.select]}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <View>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
+            <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>
+              Sign In
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]}
+            onPress={() => setType('Sign Up')}
+          >
+            <Text style={[styles.select]}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.authContainer}>
-        <AuthInput
-          value={email}
-          onChange={onChangeEmail}
-          label={'Email'}
-          placeholder={'Enter your email'}
-        />
-        <AuthInput
-          type={'password'}
-          value={password}
-          onChange={onChangePassword}
-          label={'Password'}
-          placeholder={'Enter your password'}
-        />
-
-        {type === 'Sign In' ? (
-          ''
-        ) : (
-          <View style={styles.checkboxContainer}>
-            <AgreeCheckbox agreedTerms={agreedTerms} setAgreedTerms={setAgreedTerms} />
-          </View>
-        )}
-
-        <View style={{ marginTop: type === 'Sign In' ? 16 : 0 }}>
-          <AuthButton
-            disabled={type === 'Sign In' ? false : !agreedTerms}
-            label={type}
-            onPress={onPasswordAuth}
+        <View style={styles.authContainer}>
+          <AuthInput
+            errors={errors}
+            control={control}
+            name={'email'}
+            placeholder={'Enter your email'}
+            rules={{ required: 'You must enter your email' }}
           />
+          <AuthInput
+            errors={errors}
+            control={control}
+            name={'password'}
+            placeholder={'Enter your password'}
+            rules={{ required: 'You must enter your password' }}
+          />
+
+          {type === 'Sign In' ? (
+            ''
+          ) : (
+            <View style={styles.checkboxContainer}>
+              <AgreeCheckbox agreedTerms={agreedTerms} setAgreedTerms={setAgreedTerms} />
+            </View>
+          )}
+
+          <View style={{ marginTop: type === 'Sign In' ? 16 : 0 }}>
+            <AuthButton
+              disabled={type === 'Sign In' ? false : !agreedTerms}
+              label={type}
+              onPress={handleSubmit(onSubmit)}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

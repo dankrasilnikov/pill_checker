@@ -1,26 +1,19 @@
-import { Dimensions, Text, TextInput, View } from 'react-native';
+import { Controller } from 'react-hook-form';
+import { Dimensions, SafeAreaView, Text, TextInput } from 'react-native';
 
-interface Props {
-  label: string;
-  placeholder: string;
-  value: string;
-  // eslint-disable-next-line no-unused-vars
-  onChange: (value: string) => void;
-  type?: 'none' | 'password';
-}
-
-export const AuthInput = ({ label, placeholder, value, onChange, type = 'none' }: Props) => {
+export const AuthInput = ({ errors, control, name, placeholder, rules }) => {
   return (
-    <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        onChangeText={onChange}
-        placeholder={placeholder}
-        style={styles.input}
-        value={value}
-        textContentType={type}
+    <SafeAreaView>
+      <Controller
+        control={control}
+        render={({ field }) => (
+          <TextInput {...field} style={styles.input} placeholder={placeholder} />
+        )}
+        name={name}
+        rules={{ required: true }}
       />
-    </View>
+      {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+    </SafeAreaView>
   );
 };
 
@@ -40,5 +33,9 @@ const styles = {
     borderColor: '#E0E0E0',
     borderRadius: 5,
     marginBottom: height * 0.02,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   },
 };

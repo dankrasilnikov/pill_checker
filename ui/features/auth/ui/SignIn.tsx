@@ -27,24 +27,20 @@ export const SignIn = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
+  const { signIn } = useUserStore();
+
+  const onSubmit = async (data) => {
     console.log('Submitted Data:', data);
     setSubmittedData(data);
-    // send query here
-  };
 
-  const { signIn } = useUserStore();
+    if (type === 'Sign In') return await signIn(data['email'], data['password']);
+    return await signUpWithPassword(data['email'], data['password']);
+  };
 
   const switchForm = () => {
     if (type === 'Sign In') return setType('Sign Up');
     return setType('Sign In');
   };
-
-  // const onPasswordAuth = async () => {
-  //   if (!password || email) return false;
-  //   if (type === 'Sign In') return await signIn(email, password);
-  //   return await signUpWithPassword(email, password);
-  // };
 
   const onSimpleSignIn = async () => {};
 
@@ -71,7 +67,11 @@ export const SignIn = () => {
             control={control}
             name={'email'}
             placeholder={'Enter your email'}
-            rules={{ required: 'Please enter your email', pattern: '/^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$/', maxLength: 255}}
+            rules={{
+              required: 'Please enter your email',
+              pattern: '/^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$/',
+              maxLength: 255,
+            }}
           />
           <AuthInput
             errors={errors}

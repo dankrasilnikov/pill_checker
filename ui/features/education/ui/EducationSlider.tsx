@@ -8,7 +8,8 @@ const slides = [
   {
     key: '1',
     title: 'Scan & Identify Medications',
-    description: 'Snap a photo to let our AI instantly recognize your medication and save you time.',
+    description:
+      'Snap a photo to let our AI instantly recognize your medication and save you time.',
     imageSrc: require('../../../assets/education_1.png'),
   },
   {
@@ -24,7 +25,6 @@ const slides = [
     imageSrc: require('../../../assets/education_1.png'),
   },
 ];
-
 
 export default function EducationSlider({ onDone }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,7 +49,7 @@ export default function EducationSlider({ onDone }) {
 
   const skip = () => {
     onDone && onDone();
-    console.log('skip')
+    console.log('skip');
   };
 
   const renderItem = ({ item }) => <EducationSlide item={item} />;

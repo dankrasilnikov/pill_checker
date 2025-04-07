@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
     marginHorizontal: 'auto',
     marginBottom: 0,
-    borderRadius: 12
+    borderRadius: 12,
   },
   logo: {
     aspectRatio: '1/1',
@@ -63,5 +63,5 @@ const styles = StyleSheet.create({
     color: '#737D8B',
     marginVertical: 32,
     textAlign: 'center',
-  }
+  },
 });

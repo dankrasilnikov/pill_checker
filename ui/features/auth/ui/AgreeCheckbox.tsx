@@ -27,7 +27,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 5,
   },
-  checkbox: {
-
-  },
+  checkbox: {},
 });

@@ -21,7 +21,7 @@ export const SignIn = () => {
   };
 
   const onPasswordAuth = async () => {
-    if(!password || email) return false;
+    if (!password || email) return false;
     if (type === 'Sign In') return await signIn(email, password);
     return await signUpWithPassword(email, password);
   };
@@ -59,14 +59,20 @@ export const SignIn = () => {
           placeholder={'Enter your password'}
         />
 
-        {type === 'Sign In' ? '' :
+        {type === 'Sign In' ? (
+          ''
+        ) : (
           <View style={styles.checkboxContainer}>
-            <AgreeCheckbox agreedTerms={agreedTerms} setAgreedTerms={setAgreedTerms}/>
+            <AgreeCheckbox agreedTerms={agreedTerms} setAgreedTerms={setAgreedTerms} />
           </View>
-        }
+        )}
 
-        <View style={{marginTop: type === 'Sign In' ? 16 : 0}}>
-          <AuthButton disabled={type === 'Sign In' ? false : !agreedTerms} label={type} onPress={onPasswordAuth} />
+        <View style={{ marginTop: type === 'Sign In' ? 16 : 0 }}>
+          <AuthButton
+            disabled={type === 'Sign In' ? false : !agreedTerms}
+            label={type}
+            onPress={onPasswordAuth}
+          />
         </View>
       </View>
     </View>

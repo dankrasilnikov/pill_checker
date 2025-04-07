@@ -32,7 +32,7 @@ const styles = {
     fontSize: 12,
     marginBottom: height * 0.01,
     marginLeft: 7,
-    color: '#1F2937'
+    color: '#1F2937',
   },
   input: {
     borderWidth: 1,

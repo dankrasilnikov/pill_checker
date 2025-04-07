@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react';
 import { Animated, View, StyleSheet, Easing } from 'react-native';
 
 const ProgressBar = ({
-                       progress = 0,
-                       barColor = '#fff',
-                       backgroundColor = '#4270D5',
-                       height = 5,
-                       duration = 1700,
-                       style,
-                     }) => {
+  progress = 0,
+  barColor = '#fff',
+  backgroundColor = '#4270D5',
+  height = 5,
+  duration = 1700,
+  style,
+}) => {
   const widthAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -28,10 +28,7 @@ const ProgressBar = ({
   return (
     <View style={[styles.container, { backgroundColor, height }, style]}>
       <Animated.View
-        style={[
-          styles.progress,
-          { width: widthInterpolated, backgroundColor: barColor },
-        ]}
+        style={[styles.progress, { width: widthInterpolated, backgroundColor: barColor }]}
       />
     </View>
   );

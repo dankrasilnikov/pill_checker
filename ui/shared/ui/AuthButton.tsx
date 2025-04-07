@@ -24,7 +24,12 @@ export const AuthButton = ({
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: pressed ? pressedColor : backgroundColor, width, borderColor, borderWidth: borderColor ? 1 : 0 },
+        {
+          backgroundColor: pressed ? pressedColor : backgroundColor,
+          width,
+          borderColor,
+          borderWidth: borderColor ? 1 : 0,
+        },
       ]}
       onPress={onPress}
       disabled={disabled}

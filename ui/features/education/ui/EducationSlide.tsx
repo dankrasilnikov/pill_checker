@@ -2,7 +2,6 @@ import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-
 export default function EducationSlide({ item }) {
   return (
     <View style={[styles.slide]}>
@@ -21,7 +20,7 @@ const styles = StyleSheet.create({
   },
   content: {
     marginTop: '50%',
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   bgImage: {
     width: '100%',
@@ -30,7 +29,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: 0,
-    aspectRatio: '1 / 1'
+    aspectRatio: '1 / 1',
   },
   slide: {
     width,

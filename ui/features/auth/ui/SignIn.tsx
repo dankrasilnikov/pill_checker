@@ -1,88 +1,97 @@
 import { useState } from 'react';
-import { Dimensions, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useForm } from 'react-hook-form';
+import {
+  Dimensions,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { useUserStore } from '$entities/user';
 import { signUpWithPassword } from '$features/auth/api/authApi';
+import { AgreeCheckbox } from '$features/auth/ui/AgreeCheckbox';
 import { AuthButton } from '$shared/ui/AuthButton';
-import { AuthInput } from '$shared/ui/Authinput';
+import { AuthInput } from '$shared/ui/AuthInput';
 
 export const SignIn = () => {
-  const [email, onChangeEmail] = useState<string>('');
-  const [password, onChangePassword] = useState<string>('');
   const [type, setType] = useState<string>('Sign In');
+  const [agreedTerms, setAgreedTerms] = useState<boolean>(false);
+  const [submittedData, setSubmittedData] = useState(null);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   const { signIn } = useUserStore();
 
-  const switchForm = () => {
-    if (type === 'Sign In') return setType('Sign Up');
-    return setType('Sign In');
+  const onSubmit = async (data) => {
+    console.log('Submitted Data:', data);
+    setSubmittedData(data);
+
+    if (type === 'Sign In') return await signIn(data['email'], data['password']);
+    return await signUpWithPassword(data['email'], data['password']);
   };
-
-  const onPasswordAuth = async () => {
-    if (type === 'Sign In') return await signIn(email, password);
-    return await signUpWithPassword(email, password);
-  };
-
-  const onSimpleSignIn = async () => {};
-
-  const handleForgotPassword = () => {};
 
   return (
-    <View style={styles.container}>
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
-          <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>Sign In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]} onPress={() => setType('Sign Up')}>
-          <Text style={[styles.select]}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.authContainer}>
-        <AuthInput
-          value={email}
-          onChange={onChangeEmail}
-          label={'Email'}
-          placeholder={'Enter your email'}
-        />
-        <AuthInput
-          type={'password'}
-          value={password}
-          onChange={onChangePassword}
-          label={'Password'}
-          placeholder={'Enter your password'}
-        />
-
-        <View style={styles.problemsSection}>
-          <Pressable onPress={handleForgotPassword}>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </Pressable>
+    <SafeAreaView style={styles.container}>
+      <View>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.button} onPress={() => setType('Sign In')}>
+            <Text style={[styles.select, type === 'Sign In' ? styles.activeSelect : {}]}>
+              Sign In
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, type === 'Sign Up' ? styles.activeSelect : {}]}
+            onPress={() => setType('Sign Up')}
+          >
+            <Text style={[styles.select]}>Sign Up</Text>
+          </TouchableOpacity>
         </View>
 
-        <AuthButton label={type} onPress={onPasswordAuth} />
-
-        <Text style={styles.authOptionsLabel}>Or continue with</Text>
-
-        <View style={styles.authOptions}>
-          <AuthButton
-            label={'Google'}
-            onPress={onSimpleSignIn}
-            backgroundColor={'#F9FAFB'}
-            color={'#1F2937'}
-            width={'47%'}
-            borderColor={'#EBEDF0'}
+        <View style={styles.authContainer}>
+          <AuthInput
+            errors={errors}
+            control={control}
+            name={'email'}
+            placeholder={'Enter your email'}
+            rules={{
+              required: 'Please enter your email',
+              pattern: '/^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$/',
+              maxLength: 255,
+            }}
           />
-          <AuthButton
-            label={'Apple'}
-            onPress={onSimpleSignIn}
-            backgroundColor={'#F9FAFB'}
-            color={'#1F2937'}
-            width={'47%'}
-            borderColor={'#EBEDF0'}
+          <AuthInput
+            errors={errors}
+            control={control}
+            name={'password'}
+            placeholder={'Enter your password'}
+            rules={{ required: 'Please enter your password', minLength: 8 }}
           />
+
+          {type === 'Sign In' ? (
+            ''
+          ) : (
+            <View style={styles.checkboxContainer}>
+              <AgreeCheckbox agreedTerms={agreedTerms} setAgreedTerms={setAgreedTerms} />
+            </View>
+          )}
+
+          <View style={{ marginTop: type === 'Sign In' ? 16 : 0 }}>
+            <AuthButton
+              disabled={type === 'Sign In' ? false : !agreedTerms}
+              label={type}
+              onPress={handleSubmit(onSubmit)}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -100,18 +109,18 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   button: {
-    width: '50%'
+    width: '50%',
   },
   activeSelect: {
     color: '#2563EB',
     borderBottomWidth: 3,
-    borderBottomColor: '#2563EB'
+    borderBottomColor: '#2563EB',
   },
   buttonsContainer: {
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
-    marginBottom: 16
+    marginBottom: 16,
   },
   logoContainer: {
     paddingVertical: height * 0.07,
@@ -138,18 +147,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  problemsSection: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
-  forgotPassword: {
-    paddingVertical: 16,
-    paddingTop: 8,
-    paddingHorizontal: 5,
-  },
   signUp: {
     fontWeight: 'bold',
     paddingVertical: 5,
     paddingHorizontal: 20,
+  },
+  checkboxContainer: {
+    paddingBottom: 16,
+    paddingTop: 8,
+    paddingHorizontal: 5,
   },
 });

@@ -1,10 +1,13 @@
+import { useEffect, useRef } from 'react';
 import { Animated, Dimensions, Platform, StyleSheet, View } from 'react-native';
-import { useEffect, useRef, useState } from 'react';
+
 import EducationSlider from '$features/education/ui/EducationSlider';
 
-export const OnboardingPage = ({ onDone }) => {
-  const [progress, setProgress] = useState(0);
-  const [value, setValue] = useState(50);
+type Props = {
+  onDone: () => void;
+};
+
+export const OnboardingPage = ({ onDone }: Props) => {
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -13,8 +16,6 @@ export const OnboardingPage = ({ onDone }) => {
       duration: 700,
       useNativeDriver: true,
     }).start();
-
-    setProgress(1);
 
     setTimeout(() => {
       Animated.timing(opacityAnim, {

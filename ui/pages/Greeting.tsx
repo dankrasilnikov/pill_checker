@@ -1,30 +1,27 @@
-import { Dimensions, Platform, ScrollView, StyleSheet, Text, Animated, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useRef } from 'react';
+import { Dimensions, Platform, ScrollView, StyleSheet, Text, Animated, View } from 'react-native';
+
 import Pills from '../assets/pills.svg';
 import Shield from '../assets/shield.svg';
-import { useEffect, useState, useRef } from 'react';
-import ProgressBar from '$shared/ui/Progress';
 
 export const GreetingPage = () => {
-  const [progress, setProgress] = useState(0);
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(opacityAnim, {
       toValue: 1,
-      duration: 700,
+      duration: 300,
       useNativeDriver: true,
     }).start();
-
-    setProgress(1);
 
     setTimeout(() => {
       Animated.timing(opacityAnim, {
         toValue: 0,
-        duration: 700,
+        duration: 400,
         useNativeDriver: true,
       }).start();
-    }, 1500);
+    }, 700);
   }, [opacityAnim]);
 
   return (
@@ -41,7 +38,6 @@ export const GreetingPage = () => {
           </View>
           <Text style={styles.h1}>MediScan AI</Text>
           <Text style={styles.p}>Identify Medications, Stay Safe</Text>
-          <ProgressBar progress={progress} style={styles.progressBar} />
         </ScrollView>
         <Shield style={styles.smallIcon} />
       </Animated.View>
@@ -52,13 +48,6 @@ export const GreetingPage = () => {
 const { height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  progressBar: {
-    width: '20%',
-    marginVertical: 0,
-    marginHorizontal: 'auto',
-    marginTop: 70,
-    height: 5,
-  },
   smallIcon: {
     position: 'absolute',
     bottom: 30,

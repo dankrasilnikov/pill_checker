@@ -7,6 +7,8 @@ interface Props {
   width?: string;
   onPress: () => void;
   label: string;
+  disabled: boolean;
+  borderColor: string;
 }
 
 export const AuthButton = ({
@@ -17,14 +19,21 @@ export const AuthButton = ({
   onPress,
   label,
   width = '100%',
+  disabled = false,
 }: Props) => {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: pressed ? pressedColor : backgroundColor, width, borderColor, borderWidth: borderColor ? 1 : 0 },
+        {
+          backgroundColor: pressed ? pressedColor : backgroundColor,
+          width,
+          borderColor,
+          borderWidth: borderColor ? 1 : 0,
+        },
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       <Text style={[styles.buttonText, { color }]}>{label}</Text>
     </Pressable>

@@ -14,11 +14,9 @@ import { useUserStore } from '$entities/user';
 import { signUpWithPassword } from '$features/auth/api/authApi';
 import { AgreeCheckbox } from '$features/auth/ui/AgreeCheckbox';
 import { AuthButton } from '$shared/ui/AuthButton';
-import { AuthInput } from '$shared/ui/Authinput';
+import { AuthInput } from '$shared/ui/AuthInput';
 
 export const SignIn = () => {
-  const [email, onChangeEmail] = useState<string>('');
-  const [password, onChangePassword] = useState<string>('');
   const [type, setType] = useState<string>('Sign In');
   const [agreedTerms, setAgreedTerms] = useState<boolean>(false);
   const [submittedData, setSubmittedData] = useState(null);
@@ -32,6 +30,7 @@ export const SignIn = () => {
   const onSubmit = (data) => {
     console.log('Submitted Data:', data);
     setSubmittedData(data);
+    // send query here
   };
 
   const { signIn } = useUserStore();
@@ -72,14 +71,14 @@ export const SignIn = () => {
             control={control}
             name={'email'}
             placeholder={'Enter your email'}
-            rules={{ required: 'You must enter your email' }}
+            rules={{ required: 'Please enter your email', pattern: '/^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$/', maxLength: 255}}
           />
           <AuthInput
             errors={errors}
             control={control}
             name={'password'}
             placeholder={'Enter your password'}
-            rules={{ required: 'You must enter your password' }}
+            rules={{ required: 'Please enter your password', minLength: 8 }}
           />
 
           {type === 'Sign In' ? (

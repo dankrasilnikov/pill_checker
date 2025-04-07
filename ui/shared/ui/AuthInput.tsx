@@ -6,13 +6,19 @@ export const AuthInput = ({ errors, control, name, placeholder, rules }) => {
     <SafeAreaView>
       <Controller
         control={control}
-        render={({ field }) => (
-          <TextInput {...field} style={styles.input} placeholder={placeholder} />
+        rules={rules}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            placeholder={placeholder}
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            style={styles.input}
+          />
         )}
         name={name}
-        rules={{ required: true }}
       />
-      {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
+      {errors[name] && <Text style={styles.errorText}>{errors[name].message}</Text>}
     </SafeAreaView>
   );
 };

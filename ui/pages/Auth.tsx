@@ -25,6 +25,7 @@ const { height } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Platform.OS === 'ios' ? 20 : 20,
+    backgroundColor: '#F0ECF5',
   },
   logoContainer: {
     marginVertical: height * 0.08,

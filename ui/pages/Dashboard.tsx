@@ -1,15 +1,10 @@
 import { Camera } from 'expo-camera';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useMedsStore } from '$entities/medications/model/medicationsStore';
 import { MedicationsListItem } from '$entities/medications/ui/MedicationsListItem';
 import { MedicationsModal } from '$entities/medications/ui/MedicationsModal';
-import { useScan } from '$features/recognition/hooks/useScan';
-import { CameraModal } from '$features/recognition/ui/CameraModal';
-import { ErrorModal } from '$features/recognition/ui/ErrorModal';
-import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
-import { ScanButton } from '$features/recognition/ui/ScanButton';
 import { ColoredBadge } from '$shared/ui/ColoredBadge';
 
 export const Dashboard = () => {
@@ -17,13 +12,15 @@ export const Dashboard = () => {
   const [permissionLoading, setPermissionLoading] = useState(true);
   const [itemData, setItemData] = useState(null);
 
-  const { medications, getMedications, medicationsLoading } = useMedsStore();
+  const { medications, getMedications, medicationsLoading, populateTestMedications } =
+    useMedsStore();
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
       setPermissionLoading(false);
+      populateTestMedications();
       await getMedications();
     })();
   }, []);
@@ -33,24 +30,26 @@ export const Dashboard = () => {
   );
 
   return (
-    <View style={styles.wrapper}>
+    <ScrollView style={styles.wrapper}>
       <View style={styles.greetingContainer}>
         <Text style={styles.h1}>Welcome Svetlana</Text>
         <Text style={styles.subheading}>Your today meds review is ready</Text>
       </View>
 
-      <Text style={styles.medicationsTitle}>Medications</Text>
+      <View style={styles.badges}>
+        <ColoredBadge
+          bgColor={'#FFF7ED'}
+          borderColor={'#FDE2C3'}
+          titleColor={'#EC6921'}
+          title={'2 potential conflicts found'}
+          description={
+            'Increased isk of bleeding when taken together. Consider alternative pain relief options.'
+          }
+          extraTitle={'Ibuprofen + Aspirin'}
+        />
+      </View>
 
-      <ColoredBadge
-        bgColor={'#FFF7ED'}
-        borderColor={'#FDE2C3'}
-        titleColor={'#EC6921'}
-        title={'2 potential conflicts found'}
-        description={
-          'Increased isk of bleeding when taken together. Consider alternative pain relief options.'
-        }
-        extraTitle={'Ibuprofen + Aspirin'}
-      />
+      <Text style={styles.medicationsTitle}>Medications</Text>
 
       <MedicationsModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)} />
       {permissionLoading ? (
@@ -64,7 +63,7 @@ export const Dashboard = () => {
         </View>
       ) : !medications || medications.length === 0 ? (
         <View style={styles.state}>
-          <Text style={styles.stateMessage}>Nothing Found :(</Text>
+          <Text style={styles.stateMessage}>No medications found...</Text>
         </View>
       ) : (
         <View style={styles.list}>
@@ -78,19 +77,20 @@ export const Dashboard = () => {
           />
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   list: {
     position: 'relative',
-    marginTop: 10,
+    marginTop: 16,
+    marginBottom: 100
   },
   wrapper: {
     flex: 1,
     position: 'relative',
-    backgroundColor: '#fff',
+    backgroundColor: '#F0ECF5',
     padding: 16,
   },
   state: {
@@ -115,7 +115,10 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   medicationsTitle: {
-    fontSize: 20,
-    marginVertical: 16,
+    fontSize: 24,
+    marginTop: 16,
+  },
+  badges: {
+    marginTop: 16,
   },
 });

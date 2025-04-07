@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   container: {
     height: '100%',
     position: 'relative',
+    backgroundColor: '#F0ECF5',
   },
   logoContainer: {
     paddingVertical: height * 0.02,

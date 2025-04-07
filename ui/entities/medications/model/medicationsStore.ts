@@ -70,6 +70,34 @@ export const useMedsStore = create<IMedsState>((set) => ({
         active_ingredients: ['Ibuprofen'],
         image: 'https://via.placeholder.com/150',
       },
+      {
+        id: '4',
+        title: 'Ibuprofen',
+        description: 'Nonsteroidal anti-inflammatory drug (NSAID).',
+        active_ingredients: ['Ibuprofen'],
+        image: 'https://via.placeholder.com/150',
+      },
+      {
+        id: '5',
+        title: 'Ibuprofen',
+        description: 'Nonsteroidal anti-inflammatory drug (NSAID).',
+        active_ingredients: ['Ibuprofen'],
+        image: 'https://via.placeholder.com/150',
+      },
+      {
+        id: '6',
+        title: 'Ibuprofen',
+        description: 'Nonsteroidal anti-inflammatory drug (NSAID).',
+        active_ingredients: ['Ibuprofen'],
+        image: 'https://via.placeholder.com/150',
+      },
+      {
+        id: '7',
+        title: 'Ibuprofen',
+        description: 'Nonsteroidal anti-inflammatory drug (NSAID).',
+        active_ingredients: ['Ibuprofen'],
+        image: 'https://via.placeholder.com/150',
+      },
     ];
 
     set({ medications: testMedications });

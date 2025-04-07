@@ -5,7 +5,7 @@ interface Props {
   borderColor: string;
   titleColor: string;
   title: string;
-  description: string;
+  description?: string;
   extraTitle?: string;
 }
 
@@ -19,9 +19,10 @@ export const ColoredBadge = ({
 }: Props) => {
   return (
     <View style={[styles.badgeContainer, { backgroundColor: bgColor, borderColor: borderColor }]}>
-      <Text style={[styles.title, { color: titleColor }]}>{title}</Text>
-      <Text style={styles.extraTitle}>{extraTitle}</Text>
-      <Text style={styles.description}>{description}</Text>
+
+      {title ? <Text style={[styles.title, { color: titleColor }]}>{title}</Text> : ''}
+      {extraTitle ? <Text style={styles.extraTitle}>{extraTitle}</Text> : ''}
+      {description ? <Text style={styles.description}>{description}</Text> : ''}
     </View>
   );
 };

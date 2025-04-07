@@ -25,8 +25,6 @@ export const SignIn = () => {
 
   const onSimpleSignIn = async () => {};
 
-  const handleForgotPassword = () => {};
-
   return (
     <View style={styles.container}>
       <View style={styles.buttonsContainer}>
@@ -52,12 +50,6 @@ export const SignIn = () => {
           label={'Password'}
           placeholder={'Enter your password'}
         />
-
-        <View style={styles.problemsSection}>
-          <Pressable onPress={handleForgotPassword}>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </Pressable>
-        </View>
 
         <AuthButton label={type} onPress={onPasswordAuth} />
 
@@ -117,15 +109,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  problemsSection: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
-  forgotPassword: {
-    paddingVertical: 16,
-    paddingTop: 8,
-    paddingHorizontal: 5,
   },
   signUp: {
     fontWeight: 'bold',

@@ -22,7 +22,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 2100);
+    setTimeout(() => setLoading(false), 1000);
   }, []);
 
   useEffect(() => {

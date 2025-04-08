@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { IMedication } from '$entities/medications/types';
 
@@ -11,30 +11,52 @@ export const MedicationsListItem = ({ item, setItemData }: Props) => {
   const activeIngredients = item.active_ingredients.join(', ');
   return (
     <Pressable onPress={() => setItemData(item)} style={styles.item}>
-      <Text style={styles.name}>{activeIngredients}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <View>
+        <Text style={styles.name}>{activeIngredients}</Text>
+        <Text style={styles.description}>{item.description}</Text>
+      </View>
+
+      <Text style={styles.conflict}>Conflict</Text>
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   item: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    borderColor: '#ccc',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    borderRadius: 8,
+    marginBottom: 14,
+    backgroundColor: '#fff',
+    position: 'relative',
   },
   name: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: '#1F2937',
+    fontWeight: '500',
+    marginBottom: 12,
   },
   description: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 12,
+    color: '#737D8B',
     marginVertical: 4,
   },
-  price: {
-    fontSize: 14,
-    color: '#1a8917',
-    fontWeight: 'bold',
+  conflict: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    color: '#F02C34',
+    backgroundColor: '#FEE2E2',
+    borderRadius: 12,
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    fontSize: 12,
   },
 });

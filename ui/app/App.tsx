@@ -16,6 +16,9 @@ import { Dashboard } from '$pages/Dashboard';
 import { GreetingPage } from '$pages/Greeting';
 import { OnboardingPage } from '$pages/Onboarding';
 import { getMobileStoreItem, setMobileStoreItem } from '$shared/store';
+import { Scan } from '$pages/Scan';
+import { Profile } from '$pages/Profile';
+import { Issues } from '$pages/Issues';
 
 Sentry.init({
   dsn: 'https://941f2a103da866b176d8828482979dd4@o4508370469781504.ingest.de.sentry.io/4508370490884176',
@@ -54,9 +57,9 @@ export default function App() {
 
   const renderPage = () => {
     if (page === 'dashboard') return <Dashboard />;
-    if (page === 'issues') return <Dashboard />;
-    if (page === 'profile') return <Dashboard />;
-    if (page === 'scan') return <Dashboard />;
+    if (page === 'issues') return <Issues />;
+    if (page === 'profile') return <Profile />;
+    if (page === 'scan') return <Scan />;
     return <Dashboard />;
   };
 

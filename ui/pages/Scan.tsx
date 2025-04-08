@@ -1,17 +1,28 @@
-import React, { useState } from 'react';
-import { Alert, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { useScan } from '$features/recognition/hooks/useScan';
 import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
 import { ScanButton } from '$features/recognition/ui/ScanButton';
+import { Camera } from 'expo-camera';
 
 export const Scan = () => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
   const [recognizedItem, setRecognizedItem] = useState(null);
   const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [permissionLoading, setPermissionLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+      setPermissionLoading(false);
+    })();
+  }, []);
 
   const openCamera = () => {
     if (permissionLoading) {
@@ -39,7 +50,7 @@ export const Scan = () => {
   );
 
   return (
-    <View>
+    <View style={styles.container}>
       <ErrorModal visible={errorModalVisible} setModal={setErrorModalVisible} />
       <CameraModal
         loading={loading}
@@ -56,6 +67,77 @@ export const Scan = () => {
       />
       ;
       <ScanButton onPress={openCamera} />
+
+      {permissionLoading ? (
+        <View style={styles.state}>
+          <ActivityIndicator size='large' color='#0873bb' />
+          <Text style={styles.stateMessage}>Checking Permissions...</Text>
+        </View>
+      ) : medicationsLoading ? (
+        <View style={styles.state}>
+          <Text style={styles.stateMessage}>Loading...</Text>
+        </View>
+      ) : !medications || medications.length === 0 ? (
+        <View style={styles.state}>
+          <Text style={styles.stateMessage}>No medications found...</Text>
+        </View>
+      ) : (
+        <View style={styles.list}>
+          <FlatList
+            data={medications}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            initialNumToRender={10}
+            maxToRenderPerBatch={20}
+            windowSize={5}
+          />
+        </View>
+      )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  list: {
+    position: 'relative',
+    marginTop: 16,
+    marginBottom: 100,
+  },
+  wrapper: {
+    flex: 1,
+    position: 'relative',
+    backgroundColor: '#F0ECF5',
+    padding: 16,
+  },
+  state: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stateMessage: {
+    textAlign: 'center',
+  },
+  h1: {
+    fontSize: 32,
+    fontWeight: 'medium',
+  },
+  subheading: {
+    color: '#737D8B',
+    fontSize: 14,
+    fontWeight: 'medium',
+    marginLeft: 5,
+  },
+  greetingContainer: {
+    marginTop: 50,
+  },
+  medicationsTitle: {
+    fontSize: 24,
+    marginTop: 16,
+  },
+  badges: {
+    marginTop: 16,
+  },
+})

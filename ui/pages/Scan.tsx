@@ -1,3 +1,4 @@
+import { Camera } from 'expo-camera';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
@@ -6,7 +7,6 @@ import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
 import { ScanButton } from '$features/recognition/ui/ScanButton';
-import { Camera } from 'expo-camera';
 
 export const Scan = () => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -114,4 +114,4 @@ const styles = StyleSheet.create({
   badges: {
     marginTop: 16,
   },
-})
+});

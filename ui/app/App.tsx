@@ -14,11 +14,11 @@ import { useUserStore } from '$entities/user';
 import { AuthPage } from '$pages/Auth';
 import { Dashboard } from '$pages/Dashboard';
 import { GreetingPage } from '$pages/Greeting';
-import { OnboardingPage } from '$pages/Onboarding';
-import { getMobileStoreItem, setMobileStoreItem } from '$shared/store';
-import { Scan } from '$pages/Scan';
-import { Profile } from '$pages/Profile';
 import { Issues } from '$pages/Issues';
+import { OnboardingPage } from '$pages/Onboarding';
+import { Profile } from '$pages/Profile';
+import { Scan } from '$pages/Scan';
+import { getMobileStoreItem, setMobileStoreItem } from '$shared/store';
 
 Sentry.init({
   dsn: 'https://941f2a103da866b176d8828482979dd4@o4508370469781504.ingest.de.sentry.io/4508370490884176',

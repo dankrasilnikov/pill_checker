@@ -25,15 +25,13 @@ export const Dashboard = () => {
     })();
   }, []);
 
-  const renderItem = ({ item }) => (
-    <MedicationsListItem item={item} setItemData={setItemData} />
-  );
+  const renderItem = ({ item }) => <MedicationsListItem item={item} setItemData={setItemData} />;
 
   return (
     <>
       {permissionLoading ? (
         <View style={styles.state}>
-          <ActivityIndicator size="large" color="#0873bb" />
+          <ActivityIndicator size='large' color='#0873bb' />
           <Text style={styles.stateMessage}>Checking Permissions...</Text>
         </View>
       ) : (
@@ -75,7 +73,7 @@ export const Dashboard = () => {
           ListFooterComponent={
             medicationsLoading ? (
               <View style={styles.state}>
-                <ActivityIndicator size="large" color="#0873bb" />
+                <ActivityIndicator size='large' color='#0873bb' />
                 <Text style={styles.stateMessage}>Loading...</Text>
               </View>
             ) : null
@@ -96,7 +94,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 100, // Replaces marginBottom from the list style
+    paddingBottom: 100,
   },
   state: {
     justifyContent: 'center',
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
   medicationsTitle: {
     fontSize: 24,
     marginTop: 16,
-    marginBottom: 16, // Adds spacing before the list
+    marginBottom: 16,
   },
   badges: {
     marginTop: 16,

@@ -58,6 +58,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     right: 16,
-    fontSize: 12
+    fontSize: 12,
   }
 });

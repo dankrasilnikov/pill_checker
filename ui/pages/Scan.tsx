@@ -1,12 +1,16 @@
 import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import CameraIcon from '$assets/cameraIcon.svg';
+import GalleryIconGray from '$assets/galleryIconGray.svg';
+import PillsIconBlue from '$assets/pillsIconBlue.svg';
 import { useScan } from '$features/recognition/hooks/useScan';
 import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
-import { ScanButton } from '$features/recognition/ui/ScanButton';
+import { ColoredBadge } from '$shared/ui/ColoredBadge';
 
 export const Scan = () => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -15,6 +19,23 @@ export const Scan = () => {
   const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [permissionLoading, setPermissionLoading] = useState(true);
+
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -65,8 +86,39 @@ export const Scan = () => {
         setModal={setRecognitionModalVisible}
         closeCamera={closeCamera}
       />
-      ;
-      <ScanButton onPress={openCamera} />
+
+      <View style={styles.pillsIcon}>
+        <PillsIconBlue />
+      </View>
+
+      <Text style={styles.medsTitle}>Add Your Medication</Text>
+      <Text style={styles.medsDescription}>
+        Take a clear photo of your medication label or select from your gallery
+      </Text>
+
+      <Pressable style={() => [styles.button, styles.blueBg]} onPress={openCamera} disabled={false}>
+        <CameraIcon />
+        <Text style={[styles.buttonText, { color: '#ffffff' }]}>Take Photo</Text>
+      </Pressable>
+
+      <Pressable style={() => [styles.button, styles.grayBg]} onPress={pickImage} disabled={false}>
+        <GalleryIconGray />
+        <Text style={[styles.buttonText, { color: '#374151' }]}>Choose from Gallery</Text>
+      </Pressable>
+
+      <View style={styles.badgeContainer}>
+        <ColoredBadge
+          bgColor={'#EFF6FF'}
+          borderColor={'#EFF6FF'}
+          titleColor={'#1F2937'}
+          title={'Tips for best results'}
+          description={
+            '- Ensure good lighting \n' +
+            '- Position Label clearly in frame \n' +
+            '- Keep the camera steady'
+          }
+        />
+      </View>
     </View>
   );
 };
@@ -74,6 +126,12 @@ export const Scan = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    paddingBottom: 100,
   },
   list: {
     position: 'relative',
@@ -113,5 +171,55 @@ const styles = StyleSheet.create({
   },
   badges: {
     marginTop: 16,
+  },
+  button: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    fontSize: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 30,
+    width: '100%',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  medsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginTop: 26,
+  },
+  medsDescription: {
+    fontSize: 14,
+    color: '#737D8B',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  pillsIcon: {
+    backgroundColor: '#EFF6FF',
+    padding: 24,
+    borderRadius: '50%',
+  },
+  blueBg: {
+    backgroundColor: '#2563EB',
+    color: '#FFFFFF',
+  },
+  grayBg: {
+    backgroundColor: '#fff',
+    color: '#374151',
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#C4C4C4',
+  },
+  badgeContainer: {
+    width: '100%',
+    marginTop: 30,
   },
 });

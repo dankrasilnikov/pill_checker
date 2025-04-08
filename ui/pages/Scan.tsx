@@ -67,32 +67,6 @@ export const Scan = () => {
       />
       ;
       <ScanButton onPress={openCamera} />
-
-      {permissionLoading ? (
-        <View style={styles.state}>
-          <ActivityIndicator size='large' color='#0873bb' />
-          <Text style={styles.stateMessage}>Checking Permissions...</Text>
-        </View>
-      ) : medicationsLoading ? (
-        <View style={styles.state}>
-          <Text style={styles.stateMessage}>Loading...</Text>
-        </View>
-      ) : !medications || medications.length === 0 ? (
-        <View style={styles.state}>
-          <Text style={styles.stateMessage}>No medications found...</Text>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          <FlatList
-            data={medications}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            initialNumToRender={10}
-            maxToRenderPerBatch={20}
-            windowSize={5}
-          />
-        </View>
-      )}
     </View>
   );
 };

@@ -1,6 +1,6 @@
 import { Camera } from 'expo-camera';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { useMedsStore } from '$entities/medications/model/medicationsStore';
 import { MedicationsListItem } from '$entities/medications/ui/MedicationsListItem';
@@ -25,81 +25,87 @@ export const Dashboard = () => {
     })();
   }, []);
 
-  const renderItem = ({ item }: { item: any }) => (
+  const renderItem = ({ item }) => (
     <MedicationsListItem item={item} setItemData={setItemData} />
   );
 
   return (
-    <ScrollView style={styles.wrapper}>
-      <View style={styles.greetingContainer}>
-        <Text style={styles.h1}>Welcome Svetlana</Text>
-        <Text style={styles.subheading}>Your today meds review is ready</Text>
-      </View>
-
-      <View style={styles.badges}>
-        <ColoredBadge
-          bgColor={'#FFF7ED'}
-          borderColor={'#FDE2C3'}
-          titleColor={'#EC6921'}
-          title={'2 potential conflicts found'}
-          description={
-            'Increased isk of bleeding when taken together. Consider alternative pain relief options.'
-          }
-          extraTitle={'Ibuprofen + Aspirin'}
-        />
-      </View>
-
-      <Text style={styles.medicationsTitle}>Medications</Text>
-
-      <MedicationsModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)} />
+    <>
       {permissionLoading ? (
         <View style={styles.state}>
-          <ActivityIndicator size='large' color='#0873bb' />
+          <ActivityIndicator size="large" color="#0873bb" />
           <Text style={styles.stateMessage}>Checking Permissions...</Text>
         </View>
-      ) : medicationsLoading ? (
-        <View style={styles.state}>
-          <Text style={styles.stateMessage}>Loading...</Text>
-        </View>
-      ) : !medications || medications.length === 0 ? (
-        <View style={styles.state}>
-          <Text style={styles.stateMessage}>No medications found...</Text>
-        </View>
       ) : (
-        <View style={styles.list}>
-          <FlatList
-            data={medications}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            initialNumToRender={10}
-            maxToRenderPerBatch={20}
-            windowSize={5}
-          />
-        </View>
+        <FlatList
+          data={medications || []}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          initialNumToRender={10}
+          maxToRenderPerBatch={20}
+          windowSize={5}
+          ListHeaderComponent={
+            <View>
+              <View style={styles.greetingContainer}>
+                <Text style={styles.h1}>Welcome Svetlana</Text>
+                <Text style={styles.subheading}>Your today meds review is ready</Text>
+              </View>
+              <View style={styles.badges}>
+                <ColoredBadge
+                  bgColor={'#FFF7ED'}
+                  borderColor={'#FDE2C3'}
+                  titleColor={'#EC6921'}
+                  title={'2 potential conflicts found'}
+                  description={
+                    'Increased risk of bleeding when taken together. Consider alternative pain relief options.'
+                  }
+                  extraTitle={'Ibuprofen + Aspirin'}
+                />
+              </View>
+              <Text style={styles.medicationsTitle}>Medications</Text>
+            </View>
+          }
+          ListEmptyComponent={
+            !medicationsLoading && (!medications || medications.length === 0) ? (
+              <View style={styles.state}>
+                <Text style={styles.stateMessage}>No medications found...</Text>
+              </View>
+            ) : null
+          }
+          ListFooterComponent={
+            medicationsLoading ? (
+              <View style={styles.state}>
+                <ActivityIndicator size="large" color="#0873bb" />
+                <Text style={styles.stateMessage}>Loading...</Text>
+              </View>
+            ) : null
+          }
+          style={styles.wrapper}
+          contentContainerStyle={styles.contentContainer}
+        />
       )}
-    </ScrollView>
+      <MedicationsModal visible={!!itemData} item={itemData} onClose={() => setItemData(null)} />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  list: {
-    position: 'relative',
-    marginTop: 16,
-    marginBottom: 100,
-  },
   wrapper: {
     flex: 1,
-    position: 'relative',
     backgroundColor: '#F0ECF5',
+  },
+  contentContainer: {
     padding: 16,
+    paddingBottom: 100, // Replaces marginBottom from the list style
   },
   state: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 20,
   },
   stateMessage: {
     textAlign: 'center',
+    marginTop: 10,
   },
   h1: {
     fontSize: 32,
@@ -117,6 +123,7 @@ const styles = StyleSheet.create({
   medicationsTitle: {
     fontSize: 24,
     marginTop: 16,
+    marginBottom: 16, // Adds spacing before the list
   },
   badges: {
     marginTop: 16,

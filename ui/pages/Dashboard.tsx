@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   list: {
     position: 'relative',
     marginTop: 16,
-    marginBottom: 100
+    marginBottom: 100,
   },
   wrapper: {
     flex: 1,

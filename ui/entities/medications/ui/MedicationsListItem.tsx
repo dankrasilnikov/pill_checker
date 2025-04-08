@@ -17,7 +17,6 @@ export const MedicationsListItem = ({ item, setItemData }: Props) => {
       </View>
 
       <Text style={styles.conflict}>Conflict</Text>
-
     </Pressable>
   );
 };
@@ -59,5 +58,5 @@ const styles = StyleSheet.create({
     top: 16,
     right: 16,
     fontSize: 12,
-  }
+  },
 });

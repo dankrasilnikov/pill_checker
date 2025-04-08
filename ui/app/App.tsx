@@ -53,34 +53,52 @@ export default function App() {
   }
 
   const renderPage = () => {
-    if(page === 'dashboard') return <Dashboard />;
-    if(page === 'issues') return <Dashboard />;
-    if(page === 'profile') return <Dashboard />;
-    if(page === 'scan') return <Dashboard />;
-    return <Dashboard/>
-  }
+    if (page === 'dashboard') return <Dashboard />;
+    if (page === 'issues') return <Dashboard />;
+    if (page === 'profile') return <Dashboard />;
+    if (page === 'scan') return <Dashboard />;
+    return <Dashboard />;
+  };
 
-  return <View style={styles.container}>
-    {renderPage()}
-    <View style={styles.navigation}>
-      <Pressable style={styles.navButton} onPress={() => setPage('dashboard')}>
-        {page === 'dashboard' ? <HomeIconBlack style={styles.icon} /> : <HomeIcon style={styles.icon} />}
-        <Text style={{color: page === 'dashboard'? '#303030': '#888888'}}>Home</Text>
-      </Pressable>
-      <Pressable style={styles.navButton} onPress={() => setPage('scan')}>
-        {page === 'scan' ? <PillsIconBlack style={styles.icon} /> : <PillsIcon style={styles.icon} />}
-        <Text style={{color: page === 'scan'? '#303030': '#888888'}}>Scan</Text>
-      </Pressable>
-      <Pressable style={styles.navButton} onPress={() => setPage('issues')}>
-        {page === 'issues' ? <WarnIconBlack style={styles.icon} /> : <WarnIcon style={styles.icon} />}
-        <Text style={{color: page === 'issues'? '#303030': '#888888'}}>Issues</Text>
-      </Pressable>
-      <Pressable style={styles.navButton} onPress={() => setPage('profile')}>
-        {page === 'profile' ? <ProfileIconBlack style={styles.icon} /> : <ProfileIcon style={styles.icon} />}
-        <Text style={{color: page === 'profile'? '#303030': '#888888'}}>Profile</Text>
-      </Pressable>
+  return (
+    <View style={styles.container}>
+      {renderPage()}
+      <View style={styles.navigation}>
+        <Pressable style={styles.navButton} onPress={() => setPage('dashboard')}>
+          {page === 'dashboard' ? (
+            <HomeIconBlack style={styles.icon} />
+          ) : (
+            <HomeIcon style={styles.icon} />
+          )}
+          <Text style={{ color: page === 'dashboard' ? '#303030' : '#888888' }}>Home</Text>
+        </Pressable>
+        <Pressable style={styles.navButton} onPress={() => setPage('scan')}>
+          {page === 'scan' ? (
+            <PillsIconBlack style={styles.icon} />
+          ) : (
+            <PillsIcon style={styles.icon} />
+          )}
+          <Text style={{ color: page === 'scan' ? '#303030' : '#888888' }}>Scan</Text>
+        </Pressable>
+        <Pressable style={styles.navButton} onPress={() => setPage('issues')}>
+          {page === 'issues' ? (
+            <WarnIconBlack style={styles.icon} />
+          ) : (
+            <WarnIcon style={styles.icon} />
+          )}
+          <Text style={{ color: page === 'issues' ? '#303030' : '#888888' }}>Issues</Text>
+        </Pressable>
+        <Pressable style={styles.navButton} onPress={() => setPage('profile')}>
+          {page === 'profile' ? (
+            <ProfileIconBlack style={styles.icon} />
+          ) : (
+            <ProfileIcon style={styles.icon} />
+          )}
+          <Text style={{ color: page === 'profile' ? '#303030' : '#888888' }}>Profile</Text>
+        </Pressable>
+      </View>
     </View>
-  </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -94,9 +112,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  icon: {
-
-  },
+  icon: {},
   navigation: {
     position: 'absolute',
     bottom: 0,
@@ -106,6 +122,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-evenly',
     backgroundColor: '#fff',
-    paddingVertical: 6
-  }
-})
+    paddingVertical: 6,
+  },
+});

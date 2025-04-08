@@ -19,7 +19,6 @@ export const ColoredBadge = ({
 }: Props) => {
   return (
     <View style={[styles.badgeContainer, { backgroundColor: bgColor, borderColor: borderColor }]}>
-
       {title ? <Text style={[styles.title, { color: titleColor }]}>{title}</Text> : ''}
       {extraTitle ? <Text style={styles.extraTitle}>{extraTitle}</Text> : ''}
       {description ? <Text style={styles.description}>{description}</Text> : ''}

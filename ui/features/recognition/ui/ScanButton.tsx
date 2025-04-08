@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 100,
     right: 10,
   },
   label: {

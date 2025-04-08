@@ -1,12 +1,16 @@
 import { Camera } from 'expo-camera';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useScan } from '$features/recognition/hooks/useScan';
 import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
-import { ScanButton } from '$features/recognition/ui/ScanButton';
+
+import CameraIcon from '$assets/cameraIcon.svg';
+import PillsIconBlue from '$assets/pillsIconBlue.svg';
+import GalleryIconGray from '$assets/galleryIconGray.svg';
+import { ColoredBadge } from '$shared/ui/ColoredBadge';
 
 export const Scan = () => {
   const [errorModalVisible, setErrorModalVisible] = useState(false);
@@ -65,8 +69,39 @@ export const Scan = () => {
         setModal={setRecognitionModalVisible}
         closeCamera={closeCamera}
       />
-      ;
-      <ScanButton onPress={openCamera} />
+
+      <View style={styles.pillsIcon}>
+        <PillsIconBlue />
+      </View>
+
+      <Text style={styles.medsTitle}>Add Your Medication</Text>
+      <Text style={styles.medsDescription}>
+        Take a clear photo of your medication label or select from your gallery
+      </Text>
+
+      <Pressable style={() => [styles.button, styles.blueBg]} onPress={openCamera} disabled={false}>
+        <CameraIcon />
+        <Text style={[styles.buttonText, { color: '#ffffff' }]}>Take Photo</Text>
+      </Pressable>
+
+      <Pressable style={() => [styles.button, styles.grayBg]} onPress={openCamera} disabled={false}>
+        <GalleryIconGray />
+        <Text style={[styles.buttonText, { color: '#374151' }]}>Choose from Gallery</Text>
+      </Pressable>
+
+      <View style={styles.badgeContainer}>
+        <ColoredBadge
+          bgColor={'#EFF6FF'}
+          borderColor={'#fff'}
+          titleColor={'#1F2937'}
+          title={'Tips for best results'}
+          description={
+            '- Ensure good lighting \n' +
+            '- Position Label clearly in frame \n' +
+            '- Keep the camera steady'
+          }
+        />
+      </View>
     </View>
   );
 };
@@ -74,6 +109,12 @@ export const Scan = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    paddingBottom: 100,
   },
   list: {
     position: 'relative',
@@ -114,4 +155,52 @@ const styles = StyleSheet.create({
   badges: {
     marginTop: 16,
   },
+  button: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    fontSize: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 30,
+    width: '100%',
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  medsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginTop: 26,
+  },
+  medsDescription: {
+    fontSize: 14,
+    color: '#737D8B',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  pillsIcon: {
+    backgroundColor: '#EFF6FF',
+    padding: 24,
+    borderRadius: '50%',
+  },
+  blueBg: {
+    backgroundColor: '#2563EB',
+    color: '#FFFFFF',
+  },
+  grayBg: {
+    backgroundColor: '#F3F4F6',
+    color: '#374151',
+    marginTop: 16,
+  },
+  badgeContainer: {
+    width: '100%',
+    marginTop: 30
+  }
 });

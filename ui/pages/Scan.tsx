@@ -6,6 +6,7 @@ import { useScan } from '$features/recognition/hooks/useScan';
 import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
+import * as ImagePicker from 'expo-image-picker';
 
 import CameraIcon from '$assets/cameraIcon.svg';
 import PillsIconBlue from '$assets/pillsIconBlue.svg';
@@ -19,6 +20,24 @@ export const Scan = () => {
   const [recognitionModalVisible, setRecognitionModalVisible] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [permissionLoading, setPermissionLoading] = useState(true);
+
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -84,7 +103,7 @@ export const Scan = () => {
         <Text style={[styles.buttonText, { color: '#ffffff' }]}>Take Photo</Text>
       </Pressable>
 
-      <Pressable style={() => [styles.button, styles.grayBg]} onPress={openCamera} disabled={false}>
+      <Pressable style={() => [styles.button, styles.grayBg]} onPress={pickImage} disabled={false}>
         <GalleryIconGray />
         <Text style={[styles.buttonText, { color: '#374151' }]}>Choose from Gallery</Text>
       </Pressable>
@@ -92,7 +111,7 @@ export const Scan = () => {
       <View style={styles.badgeContainer}>
         <ColoredBadge
           bgColor={'#EFF6FF'}
-          borderColor={'#fff'}
+          borderColor={'#EFF6FF'}
           titleColor={'#1F2937'}
           title={'Tips for best results'}
           description={
@@ -156,7 +175,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   button: {
-    paddingVertical: 16,
+    paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
     fontSize: 16,
@@ -195,9 +214,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   grayBg: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#fff',
     color: '#374151',
     marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#C4C4C4'
   },
   badgeContainer: {
     width: '100%',

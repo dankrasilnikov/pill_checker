@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: 'relative',
+    backgroundColor: '#F0ECF5',
   },
   navButton: {
     textAlign: 'center',

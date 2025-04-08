@@ -1,16 +1,15 @@
 import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import CameraIcon from '$assets/cameraIcon.svg';
+import GalleryIconGray from '$assets/galleryIconGray.svg';
+import PillsIconBlue from '$assets/pillsIconBlue.svg';
 import { useScan } from '$features/recognition/hooks/useScan';
 import { CameraModal } from '$features/recognition/ui/CameraModal';
 import { ErrorModal } from '$features/recognition/ui/ErrorModal';
 import { RecognitionModal } from '$features/recognition/ui/RecognitionModal';
-import * as ImagePicker from 'expo-image-picker';
-
-import CameraIcon from '$assets/cameraIcon.svg';
-import PillsIconBlue from '$assets/pillsIconBlue.svg';
-import GalleryIconGray from '$assets/galleryIconGray.svg';
 import { ColoredBadge } from '$shared/ui/ColoredBadge';
 
 export const Scan = () => {
@@ -24,8 +23,7 @@ export const Scan = () => {
   const [image, setImage] = useState<string | null>(null);
 
   const pickImage = async () => {
-
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
@@ -218,10 +216,10 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginTop: 16,
     borderWidth: 1,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   badgeContainer: {
     width: '100%',
-    marginTop: 30
-  }
+    marginTop: 30,
+  },
 });
